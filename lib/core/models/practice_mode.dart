@@ -1,0 +1,4 @@
+enum PracticeMode {
+  shadowing,
+  recall,
+}
