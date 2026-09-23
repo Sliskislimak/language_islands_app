@@ -18,6 +18,7 @@ Future<AudioSession> _session() async {
 Future<void> configureAppAudioSession() async {
   final session = await _session();
   await session.configure(_appAudioSessionConfiguration);
+  await session.setActive(true);
 }
 
 /// Keeps the OS audio session active for shadowing loops and recall gaps.

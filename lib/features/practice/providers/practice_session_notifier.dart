@@ -212,7 +212,6 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
           isPlayingContinuous: false,
           currentRep: 0,
         );
-        unawaited(releaseAppAudioSession());
       }
     }
   }
