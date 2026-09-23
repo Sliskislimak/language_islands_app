@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:just_audio/just_audio.dart';
+import 'package:language_islands_app/core/services/audio_session_bootstrap.dart';
 
 /// Thin wrapper around [AudioPlayer] for target-language playback only.
 class AudioPlaybackService {
@@ -13,6 +14,7 @@ class AudioPlaybackService {
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
 
   Future<Duration> playFile(String filePath, {double speed = 1.0}) async {
+    await ensureAppAudioSessionActive();
     await _player.setSpeed(speed.clamp(0.7, 1.5));
     await _player.setFilePath(filePath);
     final duration = _player.duration ?? Duration.zero;
@@ -25,6 +27,7 @@ class AudioPlaybackService {
     String filePath, {
     double speed = 1.0,
   }) async {
+    await ensureAppAudioSessionActive();
     await _player.setSpeed(speed.clamp(0.7, 1.5));
     await _player.setFilePath(filePath);
     final duration = _player.duration ?? Duration.zero;

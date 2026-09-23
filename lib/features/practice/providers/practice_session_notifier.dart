@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/providers/app_providers.dart';
+import 'package:language_islands_app/core/services/audio_session_bootstrap.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
 import 'package:language_islands_app/features/metrics/providers/metrics_controller.dart';
 import 'package:language_islands_app/features/practice/pause_between_reps.dart';
@@ -29,6 +32,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     _loopToken++;
     _isLoopRunning = false;
     ref.read(audioPlaybackServiceProvider).stop();
+    unawaited(releaseAppAudioSession());
   }
 
   void startSession(SentenceCollection collection) {
@@ -196,6 +200,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     );
 
     try {
+      await ensureAppAudioSessionActive();
       await _runContinuousLoop(token, startFromSentenceId);
     } finally {
       _isLoopRunning = false;
@@ -207,6 +212,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
           isPlayingContinuous: false,
           currentRep: 0,
         );
+        unawaited(releaseAppAudioSession());
       }
     }
   }
@@ -215,6 +221,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     _loopToken++;
     _isLoopRunning = false;
     ref.read(audioPlaybackServiceProvider).stop();
+    unawaited(releaseAppAudioSession());
     final current = state;
     if (current == null) return;
     state = current.copyWith(
