@@ -1,20 +1,11 @@
 import 'package:audio_session/audio_session.dart';
 
-/// iOS [UIBackgroundModes] audio + [AVAudioSessionCategory.playback] for lock
+/// iOS [UIBackgroundModes] audio + playback category (via [speech()]) for lock
 /// screen, background continuation, and silent-switch playback.
+/// Do not set [AVAudioSessionCategoryOptions.defaultToSpeaker] with playback —
+/// iOS returns OSStatus -50 (kAudio_ParamError).
 const AudioSessionConfiguration _appAudioSessionConfiguration =
-    AudioSessionConfiguration(
-  avAudioSessionCategory: AVAudioSessionCategory.playback,
-  avAudioSessionCategoryOptions:
-      AVAudioSessionCategoryOptions.defaultToSpeaker,
-  avAudioSessionMode: AVAudioSessionMode.spokenAudio,
-  androidAudioAttributes: AndroidAudioAttributes(
-    contentType: AndroidAudioContentType.speech,
-    usage: AndroidAudioUsage.media,
-  ),
-  androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
-  androidWillPauseWhenDucked: true,
-);
+    AudioSessionConfiguration.speech();
 
 AudioSession? _cachedSession;
 
