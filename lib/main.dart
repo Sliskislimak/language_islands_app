@@ -6,7 +6,16 @@ import 'package:language_islands_app/features/collections/presentation/collectio
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await configureAppAudioSession();
+  
+  try {
+    // Próbujemy zainicjować sesję audio dla trybu w tle
+    await configureAppAudioSession();
+  } catch (e) {
+    // Ignorujemy błędy wtyczki audio podczas startu aplikacji,
+    // aby zapobiec zawieszeniu się UI (White Screen of Death).
+    debugPrint('Błąd inicjalizacji sesji audio: $e');
+  }
+
   runApp(const ProviderScope(child: LanguageIslandsApp()));
 }
 
