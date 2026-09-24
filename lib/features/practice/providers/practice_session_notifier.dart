@@ -201,9 +201,17 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
     try {
       await ensureAppAudioSessionActive();
+      // Cichy keep-alive: start w foreground, przed pierwszym dźwiękiem.
+      await ref.read(audioPlaybackServiceProvider).startBackgroundKeepAlive();
       await _runContinuousLoop(token, startFromSentenceId);
     } finally {
       _isLoopRunning = false;
+      // Tylko gdy pętla zakończyła się sama/wyjątkiem, a nie przez pause/nową pętlę.
+      if (token == _loopToken) {
+        unawaited(
+          ref.read(audioPlaybackServiceProvider).stopBackgroundKeepAlive(),
+        );
+      }
       final after = state;
       if (after != null &&
           after.isPlayingContinuous &&
