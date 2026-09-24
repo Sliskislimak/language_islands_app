@@ -31,7 +31,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
   void _disposePlayback() {
     _loopToken++;
     _isLoopRunning = false;
-    ref.read(audioPlaybackServiceProvider).stop();
+    final playback = ref.read(audioPlaybackServiceProvider);
+    playback.stop();
+    unawaited(playback.stopBackgroundKeepAlive());
     unawaited(releaseAppAudioSession());
   }
 
@@ -227,7 +229,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
   void pauseContinuousPlayback() {
     _loopToken++;
     _isLoopRunning = false;
-    ref.read(audioPlaybackServiceProvider).stop();
+    final playback = ref.read(audioPlaybackServiceProvider);
+    playback.stop();
+    unawaited(playback.stopBackgroundKeepAlive());
     unawaited(releaseAppAudioSession());
     final current = state;
     if (current == null) return;
