@@ -1,28 +1,134 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:just_audio/just_audio.dart';
 import 'package:language_islands_app/core/services/audio_session_bootstrap.dart';
 
-/// Thin wrapper around [AudioPlayer] for target-language playback only.
+/// Serwis odtwarzacza audio dla języka docelowego.
 ///
-/// A second, silent player runs in parallel during continuous practice. iOS
-/// suspends the process when no CoreAudio stream is rendering, which kills the
-/// pauses between reps; the looping silent buffer keeps the stream alive.
+/// Utrzymuje drugi, niesłyszalny odtwarzacz (_keepAlivePlayer), który zapętla
+/// krótki plik WAV w tle. Zapobiega to usypianiu procesu (Process Suspension)
+/// przez system iOS w trakcie przerw między powtórzeniami i zdaniami.
 class AudioPlaybackService {
   AudioPlaybackService({AudioPlayer? player, AudioPlayer? keepAlivePlayer})
       : _player = player ?? AudioPlayer(),
-        _keepAlivePlayer = keepAlivePlayer ?? AudioPlayer();
+        // ignore: prefer_initializing_formals
+        _keepAlivePlayer = keepAlivePlayer;
 
   final AudioPlayer _player;
-  final AudioPlayer _keepAlivePlayer;
+  AudioPlayer? _keepAlivePlayer;
 
-  bool _keepAliveRunning = false;
+  bool _keepAliveWanted = false;
 
   AudioPlayer get player => _player;
 
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
+
+  // ---------------------------------------------------------------------------
+  // Keep-alive (cicha pętla w tle na iOS)
+  // ---------------------------------------------------------------------------
+
+  /// Uruchamia niesłyszalny odtwarzacz podtrzymujący proces w tle.
+  /// Metoda jest bezpieczna i nieblokująca.
+  Future<void> startBackgroundKeepAlive() async {
+    _keepAliveWanted = true;
+    try {
+      await ensureAppAudioSessionActive();
+
+      final keepAlive = _keepAlivePlayer ??= AudioPlayer();
+      if (keepAlive.playing) return;
+
+      final file = File('${Directory.systemTemp.path}/silence_keepalive.wav');
+      if (!await file.exists()) {
+        await file.writeAsBytes(_buildSilentWav(), flush: true);
+      }
+
+      await keepAlive.setFilePath(file.path);
+      await keepAlive.setLoopMode(LoopMode.one);
+      await keepAlive.setVolume(0.05);
+
+      if (!_keepAliveWanted) return;
+
+      // Startujemy bez await, aby nie blokować pętli odtwarzania zdań
+      unawaited(keepAlive.play());
+    } catch (_) {
+      // Keep-alive działa na zasadzie best-effort: błąd nie zatrzymuje nauki
+      _keepAliveWanted = false;
+    }
+  }
+
+  Future<void> stopBackgroundKeepAlive() async {
+    _keepAliveWanted = false;
+    final keepAlive = _keepAlivePlayer;
+    if (keepAlive == null) return;
+    try {
+      await keepAlive.stop();
+    } catch (_) {}
+  }
+
+  /// 2 sekundy PCM 16-bit mono 44.1 kHz z minimalnym ditherem 40 Hz (1 LSB).
+  /// Sygnał jest niesłyszalny dla ludzkiego ucha, lecz informuje CoreAudio o aktywnym strumieniu.
+  static Uint8List _buildSilentWav() {
+    const sampleRate = 44100;
+    const channels = 1;
+    const bitsPerSample = 16;
+    const durationSeconds = 2;
+
+    const frames = sampleRate * durationSeconds;
+    const bytesPerFrame = channels * bitsPerSample ~/ 8;
+    const dataSize = frames * bytesPerFrame;
+    const headerSize = 44;
+
+    final bytes = ByteData(headerSize + dataSize);
+    var offset = 0;
+
+    void writeAscii(String value) {
+      for (final unit in value.codeUnits) {
+        bytes.setUint8(offset++, unit);
+      }
+    }
+
+    void writeUint32(int value) {
+      bytes.setUint32(offset, value, Endian.little);
+      offset += 4;
+    }
+
+    void writeUint16(int value) {
+      bytes.setUint16(offset, value, Endian.little);
+      offset += 2;
+    }
+
+    writeAscii('RIFF');
+    writeUint32(36 + dataSize);
+    writeAscii('WAVE');
+    writeAscii('fmt ');
+    writeUint32(16);
+    writeUint16(1); // PCM
+    writeUint16(channels);
+    writeUint32(sampleRate);
+    writeUint32(sampleRate * bytesPerFrame);
+    writeUint16(bytesPerFrame);
+    writeUint16(bitsPerSample);
+    writeAscii('data');
+    writeUint32(dataSize);
+
+    // Amplituda 1 LSB przy 40 Hz
+    const amplitude = 1;
+    for (var frame = 0; frame < frames; frame++) {
+      final sample =
+          (amplitude * math.sin(2 * math.pi * 40 * frame / sampleRate)).round();
+      bytes.setInt16(offset, sample, Endian.little);
+      offset += 2;
+    }
+
+    return bytes.buffer.asUint8List();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Główne odtwarzanie zdań
+  // ---------------------------------------------------------------------------
 
   Future<Duration> playFile(String filePath, {double speed = 1.0}) async {
     await ensureAppAudioSessionActive();
@@ -33,7 +139,7 @@ class AudioPlaybackService {
     return duration;
   }
 
-  /// Plays [filePath] and completes when playback finishes or the player stops.
+  /// Odtwarza plik i kończy Future dokładnie w momencie zakończenia dźwięku.
   Future<Duration> playFileUntilComplete(
     String filePath, {
     double speed = 1.0,
@@ -68,122 +174,20 @@ class AudioPlaybackService {
 
   Future<void> pause() => _player.pause();
 
-  Future<void> stop() => _player.stop();
+  /// Zatrzymuje główny odtwarzacz ORAZ cichy odtwarzacz keep-alive.
+  Future<void> stop() async {
+    unawaited(stopBackgroundKeepAlive());
+    await _player.stop();
+  }
 
   Future<void> setSpeed(double speed) async {
     await _player.setSpeed(speed.clamp(0.7, 1.5));
   }
 
-  /// Starts the looping inaudible buffer. Must be called from the foreground,
-  /// before the first target sentence plays.
-  Future<void> startBackgroundKeepAlive() async {
-    if (_keepAliveRunning) return;
-    _keepAliveRunning = true;
-    try {
-      await ensureAppAudioSessionActive();
-      await _keepAlivePlayer.setLoopMode(LoopMode.all);
-      await _keepAlivePlayer.setVolume(0.01);
-      await _keepAlivePlayer.setAudioSource(_SilenceAudioSource());
-      await _keepAlivePlayer.play();
-    } on Object {
-      _keepAliveRunning = false;
-      await _keepAlivePlayer.stop();
-    }
-  }
-
-  Future<void> stopBackgroundKeepAlive() async {
-    if (!_keepAliveRunning) return;
-    _keepAliveRunning = false;
-    try {
-      await _keepAlivePlayer.stop();
-    } on Object {
-      return;
-    }
-  }
-
   Future<void> dispose() async {
-    _keepAliveRunning = false;
-    await _keepAlivePlayer.dispose();
+    _keepAliveWanted = false;
+    await _keepAlivePlayer?.dispose();
+    _keepAlivePlayer = null;
     await _player.dispose();
-  }
-}
-
-/// In-memory WAV source: 2 s of 16-bit mono PCM at an amplitude below the
-/// hearing threshold. Dithered rather than pure zeros so encoders and the OS
-/// treat it as an active stream instead of digital silence.
-// ignore_for_file: experimental_member_use
-class _SilenceAudioSource extends StreamAudioSource {
-  _SilenceAudioSource() : _bytes = _buildSilentWav();
-
-  final Uint8List _bytes;
-
-  static const int _sampleRate = 44100;
-  static const int _channels = 1;
-  static const int _bitsPerSample = 16;
-  static const int _durationSeconds = 2;
-
-  static Uint8List _buildSilentWav() {
-    const frames = _sampleRate * _durationSeconds;
-    const bytesPerFrame = _channels * _bitsPerSample ~/ 8;
-    const dataSize = frames * bytesPerFrame;
-    const headerSize = 44;
-
-    final bytes = ByteData(headerSize + dataSize);
-    var offset = 0;
-
-    void writeAscii(String value) {
-      for (final unit in value.codeUnits) {
-        bytes.setUint8(offset++, unit);
-      }
-    }
-
-    void writeUint32(int value) {
-      bytes.setUint32(offset, value, Endian.little);
-      offset += 4;
-    }
-
-    void writeUint16(int value) {
-      bytes.setUint16(offset, value, Endian.little);
-      offset += 2;
-    }
-
-    writeAscii('RIFF');
-    writeUint32(36 + dataSize);
-    writeAscii('WAVE');
-    writeAscii('fmt ');
-    writeUint32(16);
-    writeUint16(1); // PCM
-    writeUint16(_channels);
-    writeUint32(_sampleRate);
-    writeUint32(_sampleRate * bytesPerFrame);
-    writeUint16(bytesPerFrame);
-    writeUint16(_bitsPerSample);
-    writeAscii('data');
-    writeUint32(dataSize);
-
-    // A single LSB at 40 Hz: inaudible, but non-zero PCM data.
-    const amplitude = 1;
-    for (var frame = 0; frame < frames; frame++) {
-      final sample =
-          (amplitude * math.sin(2 * math.pi * 40 * frame / _sampleRate))
-              .round();
-      bytes.setInt16(offset, sample, Endian.little);
-      offset += 2;
-    }
-
-    return bytes.buffer.asUint8List();
-  }
-
-  @override
-  Future<StreamAudioResponse> request([int? start, int? end]) async {
-    final from = start ?? 0;
-    final to = end ?? _bytes.length;
-    return StreamAudioResponse(
-      sourceLength: _bytes.length,
-      contentLength: to - from,
-      offset: from,
-      stream: Stream.value(_bytes.sublist(from, to)),
-      contentType: 'audio/wav',
-    );
   }
 }
