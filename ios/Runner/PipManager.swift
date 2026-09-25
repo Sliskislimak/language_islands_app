@@ -89,20 +89,28 @@ final class PipManager: NSObject {
   private func applyStyle(_ arguments: [String: Any]?) {
     guard let arguments else { return }
 
-    let fontDelta = (arguments["fontDelta"] as? NSNumber)?.doubleValue
-    let translationDelta = (arguments["translationSizeDelta"] as? NSNumber)?.doubleValue
+    var parsedFontDelta: CGFloat? = nil
+    if let num = arguments["fontDelta"] as? NSNumber {
+      parsedFontDelta = CGFloat(truncating: num)
+    }
+
+    var parsedTranslationDelta: CGFloat? = nil
+    if let num = arguments["translationSizeDelta"] as? NSNumber {
+      parsedTranslationDelta = CGFloat(truncating: num)
+    }
+
     let alignRight = arguments["translationAlignRight"] as? Bool
 
     // `updateContent` dzieli obsługę z `setPipStyle`, więc ignorujemy wywołania
     // bez żadnego z kluczy stylu.
-    guard fontDelta != nil || translationDelta != nil || alignRight != nil else {
+    guard parsedFontDelta != nil || parsedTranslationDelta != nil || alignRight != nil else {
       return
     }
 
     DispatchQueue.main.async {
       self.content.updateStyle(
-        fontDelta: fontDelta.map(CGFloat.init),
-        translationSizeDelta: translationDelta.map(CGFloat.init),
+        fontDelta: parsedFontDelta,
+        translationSizeDelta: parsedTranslationDelta,
         translationAlignRight: alignRight
       )
       self.syncPreferredContentSize()
@@ -229,9 +237,9 @@ extension PipManager: AVPictureInPictureControllerDelegate {
 final class PipBarViewController: AVPictureInPictureVideoCallViewController {
   private let hostingController: UIHostingController<PipContentView>
 
-  private static let barWidth: CGFloat = 360
-  private static let baseBarHeight: CGFloat = 86
-  private static let maxBarHeight: CGFloat = 108
+  private static let barWidth: CGFloat = 360.0
+  private static let baseBarHeight: CGFloat = 86.0
+  private static let maxBarHeight: CGFloat = 108.0
 
   init(model: PipContentModel) {
     hostingController = UIHostingController(rootView: PipContentView(model: model))
@@ -241,11 +249,11 @@ final class PipBarViewController: AVPictureInPictureVideoCallViewController {
 
   /// 86 pt dla ustawień standardowych, 96–108 pt gdy któraś czcionka rośnie.
   func applyPreferredContentSize(fontDelta: CGFloat, translationSizeDelta: CGFloat) {
-    let grown = fontDelta > 0 || translationSizeDelta > 0
-    let raw = Self.baseBarHeight + fontDelta * 3 + translationSizeDelta * 2
-    let height = grown
-      ? min(Self.maxBarHeight, max(96, raw))
-      : Self.baseBarHeight
+    let grown: Bool = fontDelta > 0.0 || translationSizeDelta > 0.0
+    let raw: CGFloat = Self.baseBarHeight + (fontDelta * 3.0) + (translationSizeDelta * 2.0)
+    let minHeight: CGFloat = 96.0
+    let clampedHeight: CGFloat = min(Self.maxBarHeight, max(minHeight, raw))
+    let height: CGFloat = grown ? clampedHeight : Self.baseBarHeight
     let size = CGSize(width: Self.barWidth, height: height)
     guard preferredContentSize != size else { return }
     preferredContentSize = size
