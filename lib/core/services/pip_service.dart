@@ -19,6 +19,10 @@ class PipService {
   bool? _supported;
   bool _isActive = false;
 
+  int _fontDelta = 0;
+  int _translationSizeDelta = 0;
+  bool _alignUnderPhonetics = true;
+
   /// Wywoływane, gdy okno PiP zostanie zamknięte poza aplikacją
   /// (przycisk zamknięcia w oknie PiP lub błąd systemowy).
   VoidCallback? onStoppedExternally;
@@ -63,8 +67,29 @@ class PipService {
       'primaryText': primaryText,
       'phoneticText': phoneticText ?? '',
       'translationText': translationText ?? '',
+      ..._stylePayload,
     });
   }
+
+  /// Pushes font sizes and translation alignment to the native bar. Applied
+  /// even while the bar is closed, so the next [start] opens it pre-styled.
+  Future<void> updateStyle({
+    required int fontDelta,
+    required int translationSizeDelta,
+    required bool alignUnderPhonetics,
+  }) async {
+    _fontDelta = fontDelta;
+    _translationSizeDelta = translationSizeDelta;
+    _alignUnderPhonetics = alignUnderPhonetics;
+    if (!await isSupported()) return;
+    await _invoke<void>('setPipStyle', _stylePayload);
+  }
+
+  Map<String, dynamic> get _stylePayload => <String, dynamic>{
+        'fontDelta': _fontDelta,
+        'translationSizeDelta': _translationSizeDelta,
+        'translationAlignRight': _alignUnderPhonetics,
+      };
 
   Future<void> clearContent() async {
     if (!_isActive) return;

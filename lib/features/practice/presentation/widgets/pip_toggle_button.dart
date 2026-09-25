@@ -6,31 +6,13 @@ import 'package:language_islands_app/features/practice/providers/practice_sessio
 
 /// Toggles the native floating Picture-in-Picture bar with the current
 /// sentence. Hidden entirely on platforms without PiP support.
-class PipToggleButton extends ConsumerStatefulWidget {
+class PipToggleButton extends ConsumerWidget {
   const PipToggleButton({super.key});
 
   @override
-  ConsumerState<PipToggleButton> createState() => _PipToggleButtonState();
-}
-
-class _PipToggleButtonState extends ConsumerState<PipToggleButton> {
-  bool _supported = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkSupport();
-  }
-
-  Future<void> _checkSupport() async {
-    final supported = await ref.read(pipServiceProvider).isSupported();
-    if (!mounted || supported == _supported) return;
-    setState(() => _supported = supported);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_supported) return const SizedBox.shrink();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final supported = ref.watch(pipSupportedProvider).value ?? false;
+    if (!supported) return const SizedBox.shrink();
 
     final active = ref.watch(
       practiceSessionProvider.select((s) => s?.isPipActive ?? false),

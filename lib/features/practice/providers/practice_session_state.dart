@@ -1,6 +1,7 @@
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
+import 'package:language_islands_app/features/practice/pip_style.dart';
 
 class PracticeSessionState {
   const PracticeSessionState({
@@ -21,6 +22,9 @@ class PracticeSessionState {
     this.recallThinkingDuration = const Duration(milliseconds: 2500),
     this.filterOnlyWeakSentences = false,
     this.isPipActive = false,
+    this.pipFontSize = PipFontSize.standard,
+    this.pipTranslationSize = PipTranslationSize.small,
+    this.pipTranslationUnderPhonetics = true,
   });
 
   final SentenceCollection collection;
@@ -51,6 +55,17 @@ class PracticeSessionState {
 
   /// When true, the native floating Picture-in-Picture bar is open (iOS only).
   final bool isPipActive;
+
+  /// Overall text size of the PiP bar.
+  final PipFontSize pipFontSize;
+
+  /// Text size of the Polish translation line inside the PiP bar.
+  final PipTranslationSize pipTranslationSize;
+
+  /// When true, the translation sits in the right column under the phonetics —
+  /// easier to read for learners who don't know kana/kanji yet. When false it
+  /// is left-aligned under the target text.
+  final bool pipTranslationUnderPhonetics;
 
   int scoreForActiveMode(Sentence sentence) {
     return switch (mode) {
@@ -98,6 +113,9 @@ class PracticeSessionState {
     Duration? recallThinkingDuration,
     bool? filterOnlyWeakSentences,
     bool? isPipActive,
+    PipFontSize? pipFontSize,
+    PipTranslationSize? pipTranslationSize,
+    bool? pipTranslationUnderPhonetics,
   }) {
     return PracticeSessionState(
       collection: collection ?? this.collection,
@@ -125,6 +143,10 @@ class PracticeSessionState {
       filterOnlyWeakSentences:
           filterOnlyWeakSentences ?? this.filterOnlyWeakSentences,
       isPipActive: isPipActive ?? this.isPipActive,
+      pipFontSize: pipFontSize ?? this.pipFontSize,
+      pipTranslationSize: pipTranslationSize ?? this.pipTranslationSize,
+      pipTranslationUnderPhonetics:
+          pipTranslationUnderPhonetics ?? this.pipTranslationUnderPhonetics,
     );
   }
 }

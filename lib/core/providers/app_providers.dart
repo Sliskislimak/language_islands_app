@@ -30,6 +30,11 @@ final pipServiceProvider = Provider<PipService>((ref) {
   return service;
 });
 
+/// Whether the current platform can host the floating PiP bar (iOS 15+).
+final pipSupportedProvider = FutureProvider<bool>((ref) {
+  return ref.read(pipServiceProvider).isSupported();
+});
+
 final audioPlaybackServiceProvider = Provider<AudioPlaybackService>((ref) {
   final service = AudioPlaybackService();
   ref.onDispose(() async {

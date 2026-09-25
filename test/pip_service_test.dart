@@ -54,6 +54,50 @@ void main() {
         'primaryText': '走ります',
         'phoneticText': 'hashirimasu',
         'translationText': 'biegnę',
+        'fontDelta': 0,
+        'translationSizeDelta': 0,
+        'translationAlignRight': true,
+      });
+    });
+
+    test('updateStyle forwards deltas and alignment', () async {
+      await service.updateStyle(
+        fontDelta: 2,
+        translationSizeDelta: 4,
+        alignUnderPhonetics: false,
+      );
+
+      expect(calls, hasLength(2));
+      expect(calls.first.method, 'isPipSupported');
+      expect(calls.last.method, 'setPipStyle');
+      expect(calls.last.arguments, <String, dynamic>{
+        'fontDelta': 2,
+        'translationSizeDelta': 4,
+        'translationAlignRight': false,
+      });
+    });
+
+    test('updateContent includes the last style after updateStyle', () async {
+      await service.updateStyle(
+        fontDelta: 4,
+        translationSizeDelta: 2,
+        alignUnderPhonetics: true,
+      );
+      await service.start();
+      await service.updateContent(
+        primaryText: '走ります',
+        phoneticText: 'hashirimasu',
+        translationText: 'biegnę',
+      );
+
+      expect(calls.last.method, 'updateContent');
+      expect(calls.last.arguments, <String, dynamic>{
+        'primaryText': '走ります',
+        'phoneticText': 'hashirimasu',
+        'translationText': 'biegnę',
+        'fontDelta': 4,
+        'translationSizeDelta': 2,
+        'translationAlignRight': true,
       });
     });
 

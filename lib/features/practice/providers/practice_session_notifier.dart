@@ -278,6 +278,8 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     state = after.copyWith(isPipActive: started);
     if (!started) return;
 
+    await _publishPipStyle();
+
     final sentence = _activeSentence();
     if (sentence == null) return;
     if (after.mode == PracticeMode.shadowing ||
@@ -286,6 +288,41 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     } else {
       await _publishPipThinking(sentence);
     }
+  }
+
+  void cyclePipFontSize() {
+    final current = state;
+    if (current == null) return;
+    state = current.copyWith(pipFontSize: current.pipFontSize.next);
+    unawaited(_publishPipStyle());
+  }
+
+  void cyclePipTranslationSize() {
+    final current = state;
+    if (current == null) return;
+    state = current.copyWith(
+      pipTranslationSize: current.pipTranslationSize.next,
+    );
+    unawaited(_publishPipStyle());
+  }
+
+  void togglePipTranslationAlignment() {
+    final current = state;
+    if (current == null) return;
+    state = current.copyWith(
+      pipTranslationUnderPhonetics: !current.pipTranslationUnderPhonetics,
+    );
+    unawaited(_publishPipStyle());
+  }
+
+  Future<void> _publishPipStyle() async {
+    final current = state;
+    if (current == null) return;
+    await _pip.updateStyle(
+      fontDelta: current.pipFontSize.delta,
+      translationSizeDelta: current.pipTranslationSize.delta,
+      alignUnderPhonetics: current.pipTranslationUnderPhonetics,
+    );
   }
 
   void _handlePipStoppedExternally() {
