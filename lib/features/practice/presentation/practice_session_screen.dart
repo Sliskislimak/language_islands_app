@@ -7,6 +7,7 @@ import 'package:language_islands_app/features/practice/playback_speed.dart';
 import 'package:language_islands_app/features/practice/presentation/screens/focus_mode_screen.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/focus_mode_launch_button.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/pause_duration_button.dart';
+import 'package:language_islands_app/features/practice/presentation/widgets/pip_toggle_button.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/playback_speed_picker.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/recall_thinking_duration_button.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/sentence_card_widget.dart';
@@ -454,6 +455,8 @@ class _ShadowingSequencerBar extends ConsumerWidget {
                 ),
               ),
             ),
+            const SizedBox(width: 6),
+            const PipToggleButton(),
           ],
         ),
       ),
@@ -519,6 +522,8 @@ class _RecallSequencerBar extends ConsumerWidget {
                 currentSpeed: speed,
               ),
             ),
+            const SizedBox(width: 6),
+            const PipToggleButton(),
           ],
         ),
       ),

@@ -12,5 +12,9 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "PipManager") {
+      PipManager.shared.register(with: registrar.messenger())
+    }
   }
 }

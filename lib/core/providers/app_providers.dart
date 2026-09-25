@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/services/audio_playback_service.dart';
 import 'package:language_islands_app/core/services/azure_tts_service.dart';
+import 'package:language_islands_app/core/services/pip_service.dart';
 import 'package:language_islands_app/data/repositories/collection_repository.dart';
 import 'package:language_islands_app/data/repositories/schedule_repository.dart';
 import 'package:language_islands_app/data/repositories/user_metrics_repository.dart';
@@ -20,6 +21,12 @@ final scheduleRepositoryProvider = Provider<ScheduleRepository>((ref) {
 final azureTtsServiceProvider = Provider<AzureTtsService>((ref) {
   final service = AzureTtsService();
   ref.onDispose(service.dispose);
+  return service;
+});
+
+final pipServiceProvider = Provider<PipService>((ref) {
+  final service = PipService();
+  ref.onDispose(service.stop);
   return service;
 });
 

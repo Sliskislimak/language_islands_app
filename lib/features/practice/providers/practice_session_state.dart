@@ -20,6 +20,7 @@ class PracticeSessionState {
     this.sessionMasteredSentenceIds = const {},
     this.recallThinkingDuration = const Duration(milliseconds: 2500),
     this.filterOnlyWeakSentences = false,
+    this.isPipActive = false,
   });
 
   final SentenceCollection collection;
@@ -47,6 +48,9 @@ class PracticeSessionState {
 
   /// When true, only sentences rated below 4★ in the active mode are shown.
   final bool filterOnlyWeakSentences;
+
+  /// When true, the native floating Picture-in-Picture bar is open (iOS only).
+  final bool isPipActive;
 
   int scoreForActiveMode(Sentence sentence) {
     return switch (mode) {
@@ -93,6 +97,7 @@ class PracticeSessionState {
     Set<String>? sessionMasteredSentenceIds,
     Duration? recallThinkingDuration,
     bool? filterOnlyWeakSentences,
+    bool? isPipActive,
   }) {
     return PracticeSessionState(
       collection: collection ?? this.collection,
@@ -119,6 +124,7 @@ class PracticeSessionState {
           recallThinkingDuration ?? this.recallThinkingDuration,
       filterOnlyWeakSentences:
           filterOnlyWeakSentences ?? this.filterOnlyWeakSentences,
+      isPipActive: isPipActive ?? this.isPipActive,
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/providers/app_providers.dart';
 import 'package:language_islands_app/core/services/audio_session_bootstrap.dart';
+import 'package:language_islands_app/core/services/pip_service.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
 import 'package:language_islands_app/features/metrics/providers/metrics_controller.dart';
 import 'package:language_islands_app/features/practice/pause_between_reps.dart';
@@ -24,9 +25,17 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
   @override
   PracticeSessionState? build() {
+    final pip = ref.read(pipServiceProvider);
+    pip.onStoppedExternally = _handlePipStoppedExternally;
+    ref.onDispose(() {
+      pip.onStoppedExternally = null;
+      unawaited(pip.stop());
+    });
     ref.onDispose(_disposePlayback);
     return null;
   }
+
+  PipService get _pip => ref.read(pipServiceProvider);
 
   void _disposePlayback() {
     _loopToken++;
@@ -46,6 +55,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
   void endSession() {
     pauseContinuousPlayback();
+    unawaited(_pip.stop());
     state = null;
   }
 
@@ -86,6 +96,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
       activeSentenceId: sentence.id,
       clearAudioError: true,
     );
+    await _publishPipRevealed(sentence);
 
     try {
       final path = await _ensureTargetAudioPath(sentence);
@@ -236,9 +247,78 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     unawaited(releaseAppAudioSession());
     final current = state;
     if (current == null) return;
+    unawaited(_pip.clearContent());
     state = current.copyWith(
       isPlayingContinuous: false,
       currentRep: 0,
+    );
+  }
+
+  /// Opens or closes the native floating PiP bar (iOS 15+ only).
+  Future<void> togglePictureInPicture() async {
+    final current = state;
+    if (current == null) return;
+
+    final pip = _pip;
+    if (current.isPipActive) {
+      await pip.stop();
+      final after = state;
+      if (after != null) {
+        state = after.copyWith(isPipActive: false);
+      }
+      return;
+    }
+
+    final started = await pip.start();
+    final after = state;
+    if (after == null) {
+      if (started) await pip.stop();
+      return;
+    }
+    state = after.copyWith(isPipActive: started);
+    if (!started) return;
+
+    final sentence = _activeSentence();
+    if (sentence == null) return;
+    if (after.mode == PracticeMode.shadowing ||
+        after.revealedSentenceIds.contains(sentence.id)) {
+      await _publishPipRevealed(sentence);
+    } else {
+      await _publishPipThinking(sentence);
+    }
+  }
+
+  void _handlePipStoppedExternally() {
+    final current = state;
+    if (current == null || !current.isPipActive) return;
+    state = current.copyWith(isPipActive: false);
+  }
+
+  Sentence? _activeSentence() {
+    final current = state;
+    if (current == null) return null;
+    final sentences = current.visibleSentences;
+    if (sentences.isEmpty) return null;
+    final index = _sentenceIndexForId(sentences, current.activeSentenceId);
+    return sentences[index];
+  }
+
+  /// Full sentence data: target text, phonetics and the Polish meaning.
+  Future<void> _publishPipRevealed(Sentence sentence) async {
+    if (state?.isPipActive != true) return;
+    await _pip.updateContent(
+      primaryText: sentence.targetText,
+      phoneticText: sentence.phoneticReading,
+      translationText: sentence.sourceText,
+    );
+  }
+
+  /// Recall thinking phase: the answer stays hidden behind a prompt marker.
+  Future<void> _publishPipThinking(Sentence sentence) async {
+    if (state?.isPipActive != true) return;
+    await _pip.updateContent(
+      primaryText: '???',
+      translationText: sentence.sourceText,
     );
   }
 
@@ -357,6 +437,8 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
   Future<void> _runShadowingSentence(Sentence sentence, int token) async {
     state = state!.copyWith(activeSentenceId: sentence.id);
+    await _publishPipRevealed(sentence);
+    if (!_shouldContinueLoop(token)) return;
 
     try {
       final path = await _ensureTargetAudioPath(sentence);
@@ -398,6 +480,8 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
       activeSentenceId: sentence.id,
       revealedSentenceIds: hidden,
     );
+    await _publishPipThinking(sentence);
+    if (!_shouldContinueLoop(token)) return;
 
     await _interruptibleDelay(state!.recallThinkingDuration, token);
     if (!_shouldContinueLoop(token)) return;
@@ -405,6 +489,8 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final revealed = Set<String>.from(state!.revealedSentenceIds)
       ..add(sentence.id);
     state = state!.copyWith(revealedSentenceIds: revealed);
+    await _publishPipRevealed(sentence);
+    if (!_shouldContinueLoop(token)) return;
 
     try {
       final path = await _ensureTargetAudioPath(sentence);
