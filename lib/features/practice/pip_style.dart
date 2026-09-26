@@ -1,14 +1,39 @@
-/// Overall text size of the floating PiP bar (target text + phonetics).
-enum PipFontSize {
-  standard(0, 'Aa'),
-  medium(2, 'Aa+'),
-  large(4, 'Aa++');
+enum PipWindowSize {
+  small(label: 'PiP: S', width: 320.0, height: 76.0, fontDelta: -2),
+  medium(label: 'PiP: M', width: 360.0, height: 90.0, fontDelta: 0),
+  large(label: 'PiP: L', width: 395.0, height: 108.0, fontDelta: 3);
 
-  const PipFontSize(this.delta, this.label);
+  const PipWindowSize({
+    required this.label,
+    required this.width,
+    required this.height,
+    required this.fontDelta,
+  });
 
-  /// Point size added to the 20pt target text and 13pt phonetic line.
-  final int delta;
   final String label;
+  final double width;
+  final double height;
+  final int fontDelta;
+
+  String get chipLabel => label;
+
+  PipWindowSize get next => switch (this) {
+        PipWindowSize.small => PipWindowSize.medium,
+        PipWindowSize.medium => PipWindowSize.large,
+        PipWindowSize.large => PipWindowSize.small,
+      };
+}
+
+enum PipFontSize {
+  standard(label: 'Aa', delta: 0),
+  medium(label: 'Aa+', delta: 2),
+  large(label: 'Aa++', delta: 4);
+
+  const PipFontSize({required this.label, required this.delta});
+  final String label;
+  final int delta;
+
+  String get chipLabel => label;
 
   PipFontSize get next => switch (this) {
         PipFontSize.standard => PipFontSize.medium,
@@ -17,23 +42,20 @@ enum PipFontSize {
       };
 }
 
-/// Text size of the Polish translation line, independent of [PipFontSize].
 enum PipTranslationSize {
-  small(0, 'S'),
-  medium(2, 'M'),
-  large(4, 'L');
+  small(label: 'PL: S', delta: 0),
+  medium(label: 'PL: M', delta: 2),
+  large(label: 'PL: L', delta: 4);
 
-  const PipTranslationSize(this.delta, this.label);
-
-  /// Point size added on top of the 11pt base translation line.
-  final int delta;
+  const PipTranslationSize({required this.label, required this.delta});
   final String label;
+  final int delta;
+
+  String get chipLabel => label;
 
   PipTranslationSize get next => switch (this) {
         PipTranslationSize.small => PipTranslationSize.medium,
         PipTranslationSize.medium => PipTranslationSize.large,
         PipTranslationSize.large => PipTranslationSize.small,
       };
-
-  String get chipLabel => 'PL: $label';
 }

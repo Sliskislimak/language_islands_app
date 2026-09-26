@@ -19,8 +19,6 @@ final class PipManager: NSObject {
   private var pipController: AVPictureInPictureController?
   private var sourceView: UIView?
 
-  /// Przechowywany jako `UIViewController`, bo `PipBarViewController` jest
-  /// dostępny wyłącznie od iOS 15.
   private var barViewController: UIViewController?
 
   private override init() {
@@ -101,9 +99,17 @@ final class PipManager: NSObject {
 
     let alignRight = arguments["translationAlignRight"] as? Bool
 
-    // `updateContent` dzieli obsługę z `setPipStyle`, więc ignorujemy wywołania
-    // bez żadnego z kluczy stylu.
-    guard parsedFontDelta != nil || parsedTranslationDelta != nil || alignRight != nil else {
+    var parsedWidth: CGFloat? = nil
+    if let num = arguments["windowWidth"] as? NSNumber {
+      parsedWidth = CGFloat(truncating: num)
+    }
+
+    var parsedHeight: CGFloat? = nil
+    if let num = arguments["windowHeight"] as? NSNumber {
+      parsedHeight = CGFloat(truncating: num)
+    }
+
+    guard parsedFontDelta != nil || parsedTranslationDelta != nil || alignRight != nil || parsedWidth != nil else {
       return
     }
 
@@ -113,17 +119,17 @@ final class PipManager: NSObject {
         translationSizeDelta: parsedTranslationDelta,
         translationAlignRight: alignRight
       )
-      self.syncPreferredContentSize()
+      self.syncPreferredContentSize(width: parsedWidth, height: parsedHeight)
     }
   }
 
-  /// Wyższe litery i większe tłumaczenie wymagają wyższego okna PiP, inaczej
-  /// dolna linia zostaje ucięta.
-  private func syncPreferredContentSize() {
+  private func syncPreferredContentSize(width: CGFloat? = nil, height: CGFloat? = nil) {
     guard #available(iOS 15.0, *),
           let bar = barViewController as? PipBarViewController
     else { return }
-    bar.applyPreferredContentSize(
+    bar.applyDimensions(
+      width: width,
+      height: height,
       fontDelta: content.fontDelta,
       translationSizeDelta: content.translationSizeDelta
     )
@@ -168,8 +174,6 @@ final class PipManager: NSObject {
 
     guard let host = hostWindow() else { return nil }
 
-    // Źródło PiP musi należeć do hierarchii widoków w oknie, ale samo pozostaje
-    // praktycznie niewidoczne — właściwa treść żyje w kontrolerze PiP.
     let anchor = UIView(frame: CGRect(x: 0, y: 0, width: 2, height: 2))
     anchor.backgroundColor = .clear
     anchor.isUserInteractionEnabled = false
@@ -178,10 +182,6 @@ final class PipManager: NSObject {
     sourceView = anchor
 
     let contentViewController = PipBarViewController(model: content)
-    contentViewController.applyPreferredContentSize(
-      fontDelta: content.fontDelta,
-      translationSizeDelta: content.translationSizeDelta
-    )
     barViewController = contentViewController
 
     let source = AVPictureInPictureController.ContentSource(
@@ -212,6 +212,12 @@ final class PipManager: NSObject {
 // MARK: - AVPictureInPictureControllerDelegate
 
 extension PipManager: AVPictureInPictureControllerDelegate {
+  func pictureInPictureControllerDidStartPictureInPicture(
+    _ pictureInPictureController: AVPictureInPictureController
+  ) {
+    channel?.invokeMethod("onPipStarted", arguments: nil)
+  }
+
   func pictureInPictureControllerDidStopPictureInPicture(
     _ pictureInPictureController: AVPictureInPictureController
   ) {
@@ -232,29 +238,35 @@ extension PipManager: AVPictureInPictureControllerDelegate {
 
 // MARK: - Kontroler zawartości okna PiP
 
-/// Wąski poziomy pasek hostujący `PipContentView` przez `UIHostingController`.
 @available(iOS 15.0, *)
 final class PipBarViewController: AVPictureInPictureVideoCallViewController {
   private let hostingController: UIHostingController<PipContentView>
 
-  private static let barWidth: CGFloat = 360.0
-  private static let baseBarHeight: CGFloat = 86.0
-  private static let maxBarHeight: CGFloat = 108.0
+  private static let defaultWidth: CGFloat = 360.0
+  private static let defaultHeight: CGFloat = 90.0
 
   init(model: PipContentModel) {
     hostingController = UIHostingController(rootView: PipContentView(model: model))
     super.init(nibName: nil, bundle: nil)
-    preferredContentSize = CGSize(width: Self.barWidth, height: Self.baseBarHeight)
+    preferredContentSize = CGSize(width: Self.defaultWidth, height: Self.defaultHeight)
   }
 
-  /// 86 pt dla ustawień standardowych, 96–108 pt gdy któraś czcionka rośnie.
-  func applyPreferredContentSize(fontDelta: CGFloat, translationSizeDelta: CGFloat) {
-    let grown: Bool = fontDelta > 0.0 || translationSizeDelta > 0.0
-    let raw: CGFloat = Self.baseBarHeight + (fontDelta * 3.0) + (translationSizeDelta * 2.0)
-    let minHeight: CGFloat = 96.0
-    let clampedHeight: CGFloat = min(Self.maxBarHeight, max(minHeight, raw))
-    let height: CGFloat = grown ? clampedHeight : Self.baseBarHeight
-    let size = CGSize(width: Self.barWidth, height: height)
+  func applyDimensions(
+    width: CGFloat?,
+    height: CGFloat?,
+    fontDelta: CGFloat,
+    translationSizeDelta: CGFloat
+  ) {
+    let finalWidth = width ?? Self.defaultWidth
+    let finalHeight: CGFloat
+    if let explicitHeight = height {
+      finalHeight = explicitHeight
+    } else {
+      let raw = Self.defaultHeight + (fontDelta * 3.0) + (translationSizeDelta * 2.0)
+      finalHeight = max(76.0, min(116.0, raw))
+    }
+
+    let size = CGSize(width: finalWidth, height: finalHeight)
     guard preferredContentSize != size else { return }
     preferredContentSize = size
   }

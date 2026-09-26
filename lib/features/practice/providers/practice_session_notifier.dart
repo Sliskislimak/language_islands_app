@@ -26,8 +26,10 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
   @override
   PracticeSessionState? build() {
     final pip = ref.read(pipServiceProvider);
+    pip.onStartedExternally = _handlePipStartedExternally;
     pip.onStoppedExternally = _handlePipStoppedExternally;
     ref.onDispose(() {
+      pip.onStartedExternally = null;
       pip.onStoppedExternally = null;
       unawaited(pip.stop());
     });
@@ -214,7 +216,6 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
     try {
       await ensureAppAudioSessionActive();
-      // Keep-alive uruchamiamy asynchronicznie, by pętla odtwarzania ruszyła natychmiast
       unawaited(
         ref.read(audioPlaybackServiceProvider).startBackgroundKeepAlive(),
       );
@@ -254,7 +255,6 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     );
   }
 
-  /// Opens or closes the native floating PiP bar (iOS 15+ only).
   Future<void> togglePictureInPicture() async {
     final current = state;
     if (current == null) return;
@@ -269,6 +269,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
       return;
     }
 
+    await _publishPipStyle();
     final started = await pip.start();
     final after = state;
     if (after == null) {
@@ -278,8 +279,6 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     state = after.copyWith(isPipActive: started);
     if (!started) return;
 
-    await _publishPipStyle();
-
     final sentence = _activeSentence();
     if (sentence == null) return;
     if (after.mode == PracticeMode.shadowing ||
@@ -288,6 +287,13 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     } else {
       await _publishPipThinking(sentence);
     }
+  }
+
+  void cyclePipWindowSize() {
+    final current = state;
+    if (current == null) return;
+    state = current.copyWith(pipWindowSize: current.pipWindowSize.next);
+    unawaited(_publishPipStyle());
   }
 
   void cyclePipFontSize() {
@@ -319,10 +325,18 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final current = state;
     if (current == null) return;
     await _pip.updateStyle(
-      fontDelta: current.pipFontSize.delta,
+      windowWidth: current.pipWindowSize.width,
+      windowHeight: current.pipWindowSize.height + (current.pipTranslationSize.delta * 2.0),
+      fontDelta: current.pipWindowSize.fontDelta + current.pipFontSize.delta,
       translationSizeDelta: current.pipTranslationSize.delta,
       alignUnderPhonetics: current.pipTranslationUnderPhonetics,
     );
+  }
+
+  void _handlePipStartedExternally() {
+    final current = state;
+    if (current == null || current.isPipActive) return;
+    state = current.copyWith(isPipActive: true);
   }
 
   void _handlePipStoppedExternally() {
@@ -340,7 +354,6 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     return sentences[index];
   }
 
-  /// Full sentence data: target text, phonetics and the Polish meaning.
   Future<void> _publishPipRevealed(Sentence sentence) async {
     if (state?.isPipActive != true) return;
     await _pip.updateContent(
@@ -350,7 +363,6 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     );
   }
 
-  /// Recall thinking phase: the answer stays hidden behind a prompt marker.
   Future<void> _publishPipThinking(Sentence sentence) async {
     if (state?.isPipActive != true) return;
     await _pip.updateContent(

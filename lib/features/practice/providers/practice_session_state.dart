@@ -22,6 +22,7 @@ class PracticeSessionState {
     this.recallThinkingDuration = const Duration(milliseconds: 2500),
     this.filterOnlyWeakSentences = false,
     this.isPipActive = false,
+    this.pipWindowSize = PipWindowSize.medium,
     this.pipFontSize = PipFontSize.standard,
     this.pipTranslationSize = PipTranslationSize.small,
     this.pipTranslationUnderPhonetics = true,
@@ -40,31 +41,17 @@ class PracticeSessionState {
   final double playbackSpeed;
   final bool isSingleSentenceLoop;
 
-  /// Sentences touched during this session (reps or ratings) — used for Today metrics.
   final Set<String> sessionPracticedSentenceIds;
   final int sessionRepsCount;
-
-  /// Sentence ids rated 5★ in the active mode during this session.
   final Set<String> sessionMasteredSentenceIds;
 
-  /// Time to formulate a spoken answer before the Japanese sentence is revealed.
   final Duration recallThinkingDuration;
-
-  /// When true, only sentences rated below 4★ in the active mode are shown.
   final bool filterOnlyWeakSentences;
 
-  /// When true, the native floating Picture-in-Picture bar is open (iOS only).
   final bool isPipActive;
-
-  /// Overall text size of the PiP bar.
+  final PipWindowSize pipWindowSize;
   final PipFontSize pipFontSize;
-
-  /// Text size of the Polish translation line inside the PiP bar.
   final PipTranslationSize pipTranslationSize;
-
-  /// When true, the translation sits in the right column under the phonetics —
-  /// easier to read for learners who don't know kana/kanji yet. When false it
-  /// is left-aligned under the target text.
   final bool pipTranslationUnderPhonetics;
 
   int scoreForActiveMode(Sentence sentence) {
@@ -74,7 +61,6 @@ class PracticeSessionState {
     };
   }
 
-  /// Sentences already rated in the active mode, but not yet mastered (5★).
   int get dueCount {
     return collection.sentences.where((sentence) {
       final score = scoreForActiveMode(sentence);
@@ -113,6 +99,7 @@ class PracticeSessionState {
     Duration? recallThinkingDuration,
     bool? filterOnlyWeakSentences,
     bool? isPipActive,
+    PipWindowSize? pipWindowSize,
     PipFontSize? pipFontSize,
     PipTranslationSize? pipTranslationSize,
     bool? pipTranslationUnderPhonetics,
@@ -143,6 +130,7 @@ class PracticeSessionState {
       filterOnlyWeakSentences:
           filterOnlyWeakSentences ?? this.filterOnlyWeakSentences,
       isPipActive: isPipActive ?? this.isPipActive,
+      pipWindowSize: pipWindowSize ?? this.pipWindowSize,
       pipFontSize: pipFontSize ?? this.pipFontSize,
       pipTranslationSize: pipTranslationSize ?? this.pipTranslationSize,
       pipTranslationUnderPhonetics:

@@ -1,11 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// Opakowanie na natywny pływający pasek Picture-in-Picture (iOS 15+).
-///
-/// Kanał natywny hostuje `AVPictureInPictureVideoCallViewController` z widokiem
-/// SwiftUI, więc pasek utrzymuje się nad innymi aplikacjami podczas pętli
-/// Shadowing i Recall. Na platformach bez wsparcia wszystkie metody są no-op.
 class PipService {
   PipService({MethodChannel? channel})
       : _channel = channel ?? const MethodChannel(channelName) {
@@ -19,15 +14,15 @@ class PipService {
   bool? _supported;
   bool _isActive = false;
 
+  double? _windowWidth;
+  double? _windowHeight;
   int _fontDelta = 0;
   int _translationSizeDelta = 0;
   bool _alignUnderPhonetics = true;
 
-  /// Wywoływane, gdy okno PiP zostanie zamknięte poza aplikacją
-  /// (przycisk zamknięcia w oknie PiP lub błąd systemowy).
+  VoidCallback? onStartedExternally;
   VoidCallback? onStoppedExternally;
 
-  /// Czy okno PiP jest — zgodnie z ostatnią znaną odpowiedzią natywną — otwarte.
   bool get isActive => _isActive;
 
   Future<bool> isSupported() async {
@@ -71,13 +66,15 @@ class PipService {
     });
   }
 
-  /// Pushes font sizes and translation alignment to the native bar. Applied
-  /// even while the bar is closed, so the next [start] opens it pre-styled.
   Future<void> updateStyle({
+    double? windowWidth,
+    double? windowHeight,
     required int fontDelta,
     required int translationSizeDelta,
     required bool alignUnderPhonetics,
   }) async {
+    _windowWidth = windowWidth;
+    _windowHeight = windowHeight;
     _fontDelta = fontDelta;
     _translationSizeDelta = translationSizeDelta;
     _alignUnderPhonetics = alignUnderPhonetics;
@@ -85,11 +82,20 @@ class PipService {
     await _invoke<void>('setPipStyle', _stylePayload);
   }
 
-  Map<String, dynamic> get _stylePayload => <String, dynamic>{
-        'fontDelta': _fontDelta,
-        'translationSizeDelta': _translationSizeDelta,
-        'translationAlignRight': _alignUnderPhonetics,
-      };
+  Map<String, dynamic> get _stylePayload {
+    final payload = <String, dynamic>{
+      'fontDelta': _fontDelta,
+      'translationSizeDelta': _translationSizeDelta,
+      'translationAlignRight': _alignUnderPhonetics,
+    };
+    if (_windowWidth != null) {
+      payload['windowWidth'] = _windowWidth;
+    }
+    if (_windowHeight != null) {
+      payload['windowHeight'] = _windowHeight;
+    }
+    return payload;
+  }
 
   Future<void> clearContent() async {
     if (!_isActive) return;
@@ -97,9 +103,13 @@ class PipService {
   }
 
   Future<void> _handleNativeCall(MethodCall call) async {
-    if (call.method != 'onPipStopped') return;
-    _isActive = false;
-    onStoppedExternally?.call();
+    if (call.method == 'onPipStarted') {
+      _isActive = true;
+      onStartedExternally?.call();
+    } else if (call.method == 'onPipStopped') {
+      _isActive = false;
+      onStoppedExternally?.call();
+    }
   }
 
   Future<T?> _invoke<T>(String method, [Object? arguments]) async {
