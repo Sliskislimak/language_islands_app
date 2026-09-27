@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
+import 'package:language_islands_app/features/practice/presentation/widgets/sentence_card_widget.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/weak_sentences_filter_button.dart';
 import 'package:language_islands_app/features/practice/providers/practice_session_notifier.dart';
 
@@ -25,9 +26,9 @@ class _FocusModeScreenState extends ConsumerState<FocusModeScreen> {
     super.initState();
     _cardIndex = widget.initialIndex;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(practiceSessionProvider.notifier).setActiveSentenceIndex(
-            _cardIndex,
-          );
+      ref
+          .read(practiceSessionProvider.notifier)
+          .setActiveSentenceIndex(_cardIndex);
       _focusNode.requestFocus();
     });
   }
@@ -118,9 +119,7 @@ class _FocusModeScreenState extends ConsumerState<FocusModeScreen> {
       (previous, next) => _syncCardIndexToVisible(),
     );
     ref.listen<int>(
-      practiceSessionProvider.select(
-        (s) => s?.visibleSentences.length ?? 0,
-      ),
+      practiceSessionProvider.select((s) => s?.visibleSentences.length ?? 0),
       (previous, next) => _syncCardIndexToVisible(),
     );
 
@@ -373,75 +372,37 @@ class _FocusCardContent extends StatelessWidget {
     }
 
     if (mode == PracticeMode.recall && isRevealed) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            sentence.targetText,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppTheme.sakuraPrimary,
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              height: 1.35,
-            ),
-          ),
-          if (sentence.phoneticReading != null &&
-              sentence.phoneticReading!.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Text(
-              sentence.phoneticReading!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppTheme.phoneticText,
-                fontSize: 18,
-                height: 1.3,
-              ),
-            ),
-          ],
-        ],
+      return JapaneseReadingColumn(
+        sentence: sentence,
+        textAlign: TextAlign.center,
+        targetFontSize: 32,
+        katakanaFontSize: 22,
+        romajiFontSize: 18,
+        sourceFontSize: 16,
+        gap: 10,
+        showSource: true,
+        enableCopy: false,
       );
     }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          sentence.targetText,
+        JapaneseReadingColumn(
+          sentence: sentence,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppTheme.sakuraPrimary,
-            fontSize: 32,
-            fontWeight: FontWeight.w700,
-            height: 1.35,
-          ),
+          targetFontSize: 32,
+          katakanaFontSize: 22,
+          romajiFontSize: 18,
+          sourceFontSize: 16,
+          gap: 10,
+          showSource: isRevealed,
+          enableCopy: false,
         ),
-        if (sentence.phoneticReading != null &&
-            sentence.phoneticReading!.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Text(
-            sentence.phoneticReading!,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppTheme.phoneticText,
-              fontSize: 18,
-              height: 1.3,
-            ),
-          ),
-        ],
-        const SizedBox(height: 28),
-        if (isRevealed)
-          Text(
-            sentence.sourceText,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppTheme.textMuted,
-              fontSize: 16,
-              height: 1.4,
-            ),
-          )
-        else
+        if (!isRevealed) ...[
+          const SizedBox(height: 28),
           _TapToRevealButton(onTap: onShadowingReveal),
+        ],
       ],
     );
   }
@@ -516,9 +477,7 @@ class _FocusControlPanel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       decoration: const BoxDecoration(
         color: AppTheme.surface,
-        border: Border(
-          top: BorderSide(color: AppTheme.surfaceBorder),
-        ),
+        border: Border(top: BorderSide(color: AppTheme.surfaceBorder)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -589,10 +548,7 @@ class _FocusControlPanel extends StatelessWidget {
 }
 
 class _NavCircleButton extends StatelessWidget {
-  const _NavCircleButton({
-    required this.icon,
-    required this.onPressed,
-  });
+  const _NavCircleButton({required this.icon, required this.onPressed});
 
   final IconData icon;
   final VoidCallback? onPressed;

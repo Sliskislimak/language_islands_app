@@ -43,9 +43,7 @@ class CollectionsScreen extends ConsumerWidget {
             tooltip: 'Biegłość',
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const MetricsScreen(),
-                ),
+                MaterialPageRoute<void>(builder: (_) => const MetricsScreen()),
               );
             },
             icon: const Icon(Icons.insights_rounded),
@@ -89,16 +87,13 @@ class CollectionsScreen extends ConsumerWidget {
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppTheme.sakuraPrimary),
         ),
-        error: (error, _) => _MessagePanel(
-          title: 'Błąd wczytywania',
-          message: error.toString(),
-        ),
+        error: (error, _) =>
+            _MessagePanel(title: 'Błąd wczytywania', message: error.toString()),
         data: (collections) {
           if (collections.isEmpty) {
             return _MessagePanel(
               title: 'Brak kolekcji',
-              message:
-                  'Zaimportuj plik JSON z wyspą językową (przycisk w pasku narzędzi).',
+              message: 'Zaimportuj plik JSON z wyspą językową (przycisk w pasku narzędzi).',
               actionLabel: 'Import JSON',
               onAction: () => _openImportDialog(context, ref),
             );
@@ -118,17 +113,17 @@ class CollectionsScreen extends ConsumerWidget {
   }
 
   Future<void> _openImportDialog(BuildContext context, WidgetRef ref) async {
-    final jsonStr = await showDialog<String>(
+    final request = await showDialog<ImportCollectionRequest>(
       context: context,
       builder: (context) => const ImportCollectionDialog(),
     );
-    if (jsonStr == null || jsonStr.trim().isEmpty) return;
+    if (request == null || request.jsonStr.trim().isEmpty) return;
     if (!context.mounted) return;
 
     try {
       await ref
           .read(collectionsControllerProvider.notifier)
-          .importFromJson(jsonStr);
+          .importFromJson(request.jsonStr, title: request.title);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Kolekcja zaimportowana.')),
@@ -136,9 +131,8 @@ class CollectionsScreen extends ConsumerWidget {
       }
     } catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import nieudany: $error')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Import nieudany: $error')));
       }
     }
   }
@@ -151,6 +145,14 @@ class _CollectionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final stats = collection.stats;
+    final statsLabel =
+        '${stats.sentenceCount} zdań'
+        ' · ${stats.newCount} nowe'
+        ' · ${stats.dueCount} do powtórki'
+        ' · ${stats.masteredCount} opanowane'
+        ' · ${stats.totalReps} powtórzeń';
+
     return Material(
       color: AppTheme.surface,
       borderRadius: BorderRadius.circular(10),
@@ -181,19 +183,16 @@ class _CollectionTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              Row(
-                children: [
-                  _ChipLabel(text: collection.cefrLevel),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${collection.sentences.length} zdań',
-                    style: const TextStyle(
-                      color: AppTheme.textMuted,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
+              Text(
+                statsLabel,
+                style: const TextStyle(
+                  color: AppTheme.textMuted,
+                  fontSize: 12,
+                  height: 1.45,
+                ),
               ),
+              const SizedBox(height: 8),
+              _ChipLabel(text: collection.cefrLevel),
               if (collection.tags.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Wrap(
@@ -293,10 +292,7 @@ class _MessagePanel extends StatelessWidget {
 enum _CollectionsMenuAction { philosophy, importJson }
 
 class _PopupMenuRow extends StatelessWidget {
-  const _PopupMenuRow({
-    required this.icon,
-    required this.label,
-  });
+  const _PopupMenuRow({required this.icon, required this.label});
 
   final IconData icon;
   final String label;

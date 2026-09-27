@@ -26,12 +26,30 @@ class CollectionRepository {
     return null;
   }
 
-  Future<SentenceCollection> importFromJsonString(String jsonStr) async {
-    final imported = SentenceCollection.fromJsonString(jsonStr);
-    final merged = await _mergeWithExistingProgress(imported);
-    await _writeCollection(merged);
+  Future<SentenceCollection> importFromJsonString(
+    String jsonStr, {
+    String? title,
+  }) async {
+    var imported = SentenceCollection.fromJsonString(jsonStr);
+    final trimmedTitle = title?.trim();
+    if (trimmedTitle != null && trimmedTitle.isNotEmpty) {
+      imported = imported.copyWith(title: trimmedTitle);
+    }
+
+    final existingIds = {
+      for (final collection in await loadAll()) collection.id,
+    };
+    final id = independentCollectionId(
+      baseId: imported.id,
+      idExists: existingIds.contains,
+    );
+    if (id != imported.id) {
+      imported = imported.copyWith(id: id);
+    }
+
+    await _writeCollection(imported);
     _cache = null;
-    return merged;
+    return imported;
   }
 
   Future<void> updateSentence(String collectionId, Sentence sentence) async {
@@ -42,8 +60,9 @@ class CollectionRepository {
     }
 
     final collection = all[index];
-    final sentenceIndex =
-        collection.sentences.indexWhere((s) => s.id == sentence.id);
+    final sentenceIndex = collection.sentences.indexWhere(
+      (s) => s.id == sentence.id,
+    );
     if (sentenceIndex < 0) {
       throw StateError(
         'Sentence "${sentence.id}" not found in "$collectionId".',
@@ -52,8 +71,7 @@ class CollectionRepository {
 
     final updatedSentences = List<Sentence>.from(collection.sentences);
     updatedSentences[sentenceIndex] = sentence;
-    final updatedCollection =
-        collection.copyWith(sentences: updatedSentences);
+    final updatedCollection = collection.copyWith(sentences: updatedSentences);
     await _writeCollection(updatedCollection);
 
     final next = List<SentenceCollection>.from(all);
@@ -67,27 +85,6 @@ class CollectionRepository {
       await file.delete();
     }
     _cache = null;
-  }
-
-  Future<SentenceCollection> _mergeWithExistingProgress(
-    SentenceCollection imported,
-  ) async {
-    final existing = await getById(imported.id);
-    if (existing == null) return imported;
-
-    final byId = {for (final s in existing.sentences) s.id: s};
-    final mergedSentences = imported.sentences.map((sentence) {
-      final previous = byId[sentence.id];
-      if (previous == null) return sentence;
-      return sentence.copyWith(
-        targetAudioPath: previous.targetAudioPath,
-        comprehensionScore: previous.comprehensionScore,
-        speakingScore: previous.speakingScore,
-        totalReps: previous.totalReps,
-      );
-    }).toList();
-
-    return imported.copyWith(sentences: mergedSentences);
   }
 
   Future<List<SentenceCollection>> _readAllFromDisk() async {
@@ -129,4 +126,17 @@ class CollectionRepository {
     final safeId = collectionId.replaceAll(RegExp(r'[^\w\-.]'), '_');
     return File(p.join(dir.path, '$safeId.json'));
   }
+}
+
+/// Returns [baseId] when it is free, otherwise the first `baseId_N` that is not.
+String independentCollectionId({
+  required String baseId,
+  required bool Function(String id) idExists,
+}) {
+  if (!idExists(baseId)) return baseId;
+  for (var n = 2; n < 10000; n++) {
+    final candidate = '${baseId}_$n';
+    if (!idExists(candidate)) return candidate;
+  }
+  return '${baseId}_${DateTime.now().microsecondsSinceEpoch}';
 }

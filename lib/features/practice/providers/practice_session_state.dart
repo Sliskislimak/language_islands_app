@@ -3,6 +3,18 @@ import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/features/practice/pip_style.dart';
 
+enum LoopMode {
+  off,
+  list,
+  single;
+
+  LoopMode get next => switch (this) {
+    LoopMode.off => LoopMode.list,
+    LoopMode.list => LoopMode.single,
+    LoopMode.single => LoopMode.off,
+  };
+}
+
 class PracticeSessionState {
   const PracticeSessionState({
     required this.collection,
@@ -15,7 +27,7 @@ class PracticeSessionState {
     this.currentRep = 0,
     this.pauseBetweenReps = const Duration(milliseconds: 1500),
     this.playbackSpeed = 1.0,
-    this.isSingleSentenceLoop = false,
+    this.loopMode = LoopMode.off,
     this.sessionPracticedSentenceIds = const {},
     this.sessionRepsCount = 0,
     this.sessionMasteredSentenceIds = const {},
@@ -39,7 +51,11 @@ class PracticeSessionState {
   final int currentRep;
   final Duration pauseBetweenReps;
   final double playbackSpeed;
-  final bool isSingleSentenceLoop;
+  final LoopMode loopMode;
+
+  bool get isListLoopEnabled => loopMode == LoopMode.list;
+
+  bool get isSingleSentenceLoop => loopMode == LoopMode.single;
 
   final Set<String> sessionPracticedSentenceIds;
   final int sessionRepsCount;
@@ -69,7 +85,9 @@ class PracticeSessionState {
   }
 
   int get newCount {
-    return collection.sentences.where((sentence) => sentence.totalReps == 0).length;
+    return collection.sentences
+        .where((sentence) => sentence.totalReps == 0)
+        .length;
   }
 
   List<Sentence> get visibleSentences {
@@ -92,7 +110,7 @@ class PracticeSessionState {
     int? currentRep,
     Duration? pauseBetweenReps,
     double? playbackSpeed,
-    bool? isSingleSentenceLoop,
+    LoopMode? loopMode,
     Set<String>? sessionPracticedSentenceIds,
     int? sessionRepsCount,
     Set<String>? sessionMasteredSentenceIds,
@@ -111,15 +129,13 @@ class PracticeSessionState {
           ? null
           : (activeSentenceId ?? this.activeSentenceId),
       revealedSentenceIds: revealedSentenceIds ?? this.revealedSentenceIds,
-      audioError:
-          clearAudioError ? null : (audioError ?? this.audioError),
+      audioError: clearAudioError ? null : (audioError ?? this.audioError),
       isPlayingContinuous: isPlayingContinuous ?? this.isPlayingContinuous,
       repsPerSentence: repsPerSentence ?? this.repsPerSentence,
       currentRep: currentRep ?? this.currentRep,
       pauseBetweenReps: pauseBetweenReps ?? this.pauseBetweenReps,
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
-      isSingleSentenceLoop:
-          isSingleSentenceLoop ?? this.isSingleSentenceLoop,
+      loopMode: loopMode ?? this.loopMode,
       sessionPracticedSentenceIds:
           sessionPracticedSentenceIds ?? this.sessionPracticedSentenceIds,
       sessionRepsCount: sessionRepsCount ?? this.sessionRepsCount,

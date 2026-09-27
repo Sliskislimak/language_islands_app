@@ -65,8 +65,9 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     if (session == null) return 0;
     final id = session.activeSentenceId;
     if (id == null) return 0;
-    final index =
-        session.visibleSentences.indexWhere((sentence) => sentence.id == id);
+    final index = session.visibleSentences.indexWhere(
+      (sentence) => sentence.id == id,
+    );
     return index >= 0 ? index : 0;
   }
 
@@ -231,7 +232,7 @@ class _SessionContentColumn extends ConsumerWidget {
                     final isActive = session?.activeSentenceId == sentence.id;
                     final isRevealed =
                         session?.revealedSentenceIds.contains(sentence.id) ??
-                            false;
+                        false;
                     final itemKey = sentenceItemKeys.putIfAbsent(
                       sentence.id,
                       GlobalKey.new,
@@ -337,8 +338,10 @@ class _WeakFilterEmptyState extends StatelessWidget {
               onTap: onDisableFilter,
               borderRadius: BorderRadius.circular(8),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppTheme.yellowPrompt),
@@ -371,8 +374,18 @@ class _ShadowingSequencerBar extends ConsumerWidget {
     final isPlaying = session.isPlayingContinuous;
     final reps = session.repsPerSentence;
     final speed = session.playbackSpeed;
-    final loopOne = session.isSingleSentenceLoop;
+    final loopMode = session.loopMode;
     final currentRep = session.currentRep;
+    final loopActive = loopMode != LoopMode.off;
+    final loopIcon = loopMode == LoopMode.single
+        ? Icons.repeat_one_rounded
+        : Icons.repeat_rounded;
+    final loopColor = loopActive ? AppTheme.sakuraAccent : AppTheme.textMuted;
+    final loopTooltip = switch (loopMode) {
+      LoopMode.off => 'Zapętlanie wyłączone',
+      LoopMode.list => 'Zapętl listę',
+      LoopMode.single => 'Zapętl jedno zdanie',
+    };
 
     final repLabel = isPlaying && currentRep > 0
         ? 'Rep ${currentRep}x/$reps'
@@ -403,9 +416,7 @@ class _ShadowingSequencerBar extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(6),
                   child: Icon(
-                    isPlaying
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
+                    isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                     size: 36,
                     color: AppTheme.sakuraPrimary,
                   ),
@@ -422,36 +433,34 @@ class _ShadowingSequencerBar extends ConsumerWidget {
             const SizedBox(width: 6),
             _SequencerChip(
               label: PlaybackSpeed.formatLabel(speed),
-              onTap: () => showPlaybackSpeedPicker(
-                context,
-                ref,
-                currentSpeed: speed,
-              ),
+              onTap: () =>
+                  showPlaybackSpeedPicker(context, ref, currentSpeed: speed),
             ),
             const SizedBox(width: 6),
-            Material(
-              color: loopOne
-                  ? AppTheme.sakuraAccent.withValues(alpha: 0.2)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-              child: InkWell(
-                onTap: notifier.toggleSingleSentenceLoop,
+            Tooltip(
+              message: loopTooltip,
+              child: Material(
+                color: loopActive
+                    ? AppTheme.sakuraAccent.withValues(alpha: 0.2)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(6),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: loopOne
-                          ? AppTheme.sakuraAccent
-                          : AppTheme.surfaceBorder,
+                child: InkWell(
+                  onTap: notifier.cycleLoopMode,
+                  borderRadius: BorderRadius.circular(6),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
                     ),
-                  ),
-                  child: Icon(
-                    Icons.repeat_one_rounded,
-                    size: 22,
-                    color: loopOne ? AppTheme.sakuraAccent : AppTheme.textMuted,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: loopActive
+                            ? AppTheme.sakuraAccent
+                            : AppTheme.surfaceBorder,
+                      ),
+                    ),
+                    child: Icon(loopIcon, size: 22, color: loopColor),
                   ),
                 ),
               ),
@@ -502,9 +511,7 @@ class _RecallSequencerBar extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(6),
                   child: Icon(
-                    isPlaying
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
+                    isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                     size: 36,
                     color: AppTheme.sakuraPrimary,
                   ),
@@ -518,11 +525,8 @@ class _RecallSequencerBar extends ConsumerWidget {
             const SizedBox(width: 6),
             _SequencerChip(
               label: PlaybackSpeed.formatLabel(speed),
-              onTap: () => showPlaybackSpeedPicker(
-                context,
-                ref,
-                currentSpeed: speed,
-              ),
+              onTap: () =>
+                  showPlaybackSpeedPicker(context, ref, currentSpeed: speed),
             ),
             const SizedBox(width: 6),
             const PipToggleButton(),
@@ -535,10 +539,7 @@ class _RecallSequencerBar extends ConsumerWidget {
 }
 
 class _SequencerChip extends StatelessWidget {
-  const _SequencerChip({
-    required this.label,
-    required this.onTap,
-  });
+  const _SequencerChip({required this.label, required this.onTap});
 
   final String label;
   final VoidCallback onTap;

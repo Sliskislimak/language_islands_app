@@ -16,8 +16,8 @@ import 'package:language_islands_app/features/practice/recall_thinking_duration.
 
 final practiceSessionProvider =
     NotifierProvider<PracticeSessionNotifier, PracticeSessionState?>(
-  PracticeSessionNotifier.new,
-);
+      PracticeSessionNotifier.new,
+    );
 
 class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
   int _loopToken = 0;
@@ -122,8 +122,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
     final clamped = stars.clamp(0, 5);
     final updated = switch (current.mode) {
-      PracticeMode.shadowing =>
-        sentence.copyWith(comprehensionScore: clamped),
+      PracticeMode.shadowing => sentence.copyWith(comprehensionScore: clamped),
       PracticeMode.recall => sentence.copyWith(speakingScore: clamped),
     };
 
@@ -228,13 +227,8 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
         );
       }
       final after = state;
-      if (after != null &&
-          after.isPlayingContinuous &&
-          token == _loopToken) {
-        state = after.copyWith(
-          isPlayingContinuous: false,
-          currentRep: 0,
-        );
+      if (after != null && after.isPlayingContinuous && token == _loopToken) {
+        state = after.copyWith(isPlayingContinuous: false, currentRep: 0);
       }
     }
   }
@@ -249,10 +243,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final current = state;
     if (current == null) return;
     unawaited(_pip.clearContent());
-    state = current.copyWith(
-      isPlayingContinuous: false,
-      currentRep: 0,
-    );
+    state = current.copyWith(isPlayingContinuous: false, currentRep: 0);
   }
 
   Future<void> togglePictureInPicture() async {
@@ -326,7 +317,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     if (current == null) return;
     await _pip.updateStyle(
       windowWidth: current.pipWindowSize.width,
-      windowHeight: current.pipWindowSize.height + (current.pipTranslationSize.delta * 2.0),
+      windowHeight:
+          current.pipWindowSize.height +
+          (current.pipTranslationSize.delta * 2.0),
       fontDelta: current.pipWindowSize.fontDelta + current.pipFontSize.delta,
       translationSizeDelta: current.pipTranslationSize.delta,
       alignUnderPhonetics: current.pipTranslationUnderPhonetics,
@@ -413,12 +406,10 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     ref.read(audioPlaybackServiceProvider).setSpeed(snapped);
   }
 
-  void toggleSingleSentenceLoop() {
+  void cycleLoopMode() {
     final current = state;
     if (current == null) return;
-    state = current.copyWith(
-      isSingleSentenceLoop: !current.isSingleSentenceLoop,
-    );
+    state = current.copyWith(loopMode: current.loopMode.next);
   }
 
   bool _shouldContinueLoop(int token) {
@@ -477,6 +468,10 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
         continue;
       }
       if (idx >= nextList.length - 1) {
+        if (state!.isListLoopEnabled) {
+          currentId = nextList.first.id;
+          continue;
+        }
         pauseContinuousPlayback();
         return;
       }
@@ -604,8 +599,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final current = state;
     if (current == null) return;
 
-    final index =
-        current.collection.sentences.indexWhere((s) => s.id == sentenceId);
+    final index = current.collection.sentences.indexWhere(
+      (s) => s.id == sentenceId,
+    );
     if (index < 0) return;
     final sentence = current.collection.sentences[index];
 
@@ -639,9 +635,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final seconds = _secondsFromDuration(duration);
     if (seconds <= 0) return;
     try {
-      await ref.read(userMetricsRepositoryProvider).logListeningTime(
-            seconds: seconds,
-          );
+      await ref
+          .read(userMetricsRepositoryProvider)
+          .logListeningTime(seconds: seconds);
       ref.invalidate(metricsControllerProvider);
     } on Object {
       return;
@@ -650,10 +646,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
   Future<void> _logRepetition(String sentenceId) async {
     try {
-      await ref.read(userMetricsRepositoryProvider).logRepetition(
-            count: 1,
-            sentenceId: sentenceId,
-          );
+      await ref
+          .read(userMetricsRepositoryProvider)
+          .logRepetition(count: 1, sentenceId: sentenceId);
       ref.invalidate(metricsControllerProvider);
     } on Object {
       return;
@@ -662,10 +657,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
   Future<void> _logSpeakingRating(String sentenceId, int stars) async {
     try {
-      await ref.read(userMetricsRepositoryProvider).logSpeakingRating(
-            sentenceId: sentenceId,
-            stars: stars,
-          );
+      await ref
+          .read(userMetricsRepositoryProvider)
+          .logSpeakingRating(sentenceId: sentenceId, stars: stars);
     } on Object {
       return;
     }

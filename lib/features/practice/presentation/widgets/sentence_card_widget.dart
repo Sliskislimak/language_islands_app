@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
+import 'package:language_islands_app/features/practice/sentence_display_lines.dart';
 
 void _copyToClipboard(BuildContext context, String text, String message) {
   Clipboard.setData(ClipboardData(text: text));
@@ -22,13 +23,14 @@ void _copyToClipboard(BuildContext context, String text, String message) {
 }
 
 String _fullCardClipboardText(Sentence sentence) {
-  final lines = <String>[sentence.targetText];
-  final phonetic = sentence.phoneticReading?.trim();
-  if (phonetic != null && phonetic.isNotEmpty) {
-    lines.add(phonetic);
-  }
-  lines.add(sentence.sourceText);
-  return lines.join('\n');
+  final lines = SentenceDisplayLines.resolve(sentence);
+  final parts = <String>[lines.targetText];
+  final katakana = lines.katakana;
+  if (katakana != null) parts.add(katakana);
+  final romaji = lines.romaji;
+  if (romaji != null) parts.add(romaji);
+  parts.add(sentence.sourceText);
+  return parts.join('\n');
 }
 
 class SentenceCardWidget extends StatelessWidget {
@@ -54,9 +56,9 @@ class SentenceCardWidget extends StatelessWidget {
   final ValueChanged<int> onRate;
 
   int get _displayScore => switch (currentMode) {
-        PracticeMode.shadowing => sentence.comprehensionScore,
-        PracticeMode.recall => sentence.speakingScore,
-      };
+    PracticeMode.shadowing => sentence.comprehensionScore,
+    PracticeMode.recall => sentence.speakingScore,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -174,10 +176,7 @@ class _ToolbarRow extends StatelessWidget {
 }
 
 class _StarRatingRow extends StatelessWidget {
-  const _StarRatingRow({
-    required this.score,
-    required this.onRate,
-  });
+  const _StarRatingRow({required this.score, required this.onRate});
 
   final int score;
   final ValueChanged<int> onRate;
@@ -216,11 +215,13 @@ class _CopyableLine extends StatelessWidget {
     required this.text,
     required this.style,
     required this.copyMessage,
+    this.textAlign = TextAlign.start,
   });
 
   final String text;
   final TextStyle style;
   final String copyMessage;
+  final TextAlign textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -228,7 +229,7 @@ class _CopyableLine extends StatelessWidget {
       onLongPress: () => _copyToClipboard(context, text, copyMessage),
       child: Tooltip(
         message: 'Przytrzymaj, aby skopiować',
-        child: Text(text, style: style),
+        child: Text(text, textAlign: textAlign, style: style),
       ),
     );
   }
@@ -263,35 +264,129 @@ class _TextSection extends StatelessWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _CopyableLine(
-          text: sentence.targetText,
-          style: const TextStyle(
-            color: AppTheme.sakuraPrimary,
-            fontSize: 21,
-            fontWeight: FontWeight.w700,
-            height: 1.35,
-          ),
-          copyMessage: 'Skopiowano tekst japoński',
+    return JapaneseReadingColumn(
+      sentence: sentence,
+      targetFontSize: 21,
+      katakanaFontSize: 15,
+      romajiFontSize: 13,
+    );
+  }
+}
+
+class JapaneseReadingColumn extends StatelessWidget {
+  const JapaneseReadingColumn({
+    super.key,
+    required this.sentence,
+    this.textAlign = TextAlign.start,
+    this.targetFontSize = 21,
+    this.katakanaFontSize = 15,
+    this.romajiFontSize = 13,
+    this.sourceFontSize = 16,
+    this.gap = 6,
+    this.showSource = false,
+    this.enableCopy = true,
+  });
+
+  final Sentence sentence;
+  final TextAlign textAlign;
+  final double targetFontSize;
+  final double katakanaFontSize;
+  final double romajiFontSize;
+  final double sourceFontSize;
+  final double gap;
+  final bool showSource;
+  final bool enableCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    final lines = SentenceDisplayLines.resolve(sentence);
+    final align = textAlign == TextAlign.center
+        ? CrossAxisAlignment.center
+        : CrossAxisAlignment.start;
+    final children = <Widget>[
+      _readingLine(
+        text: lines.targetText,
+        style: TextStyle(
+          color: AppTheme.sakuraPrimary,
+          fontSize: targetFontSize,
+          fontWeight: FontWeight.w700,
+          height: 1.35,
         ),
-        if (sentence.phoneticReading != null &&
-            sentence.phoneticReading!.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          _CopyableLine(
-            text: sentence.phoneticReading!,
-            style: const TextStyle(
+        copyMessage: 'Skopiowano tekst japoński',
+      ),
+    ];
+
+    final katakana = lines.katakana;
+    if (katakana != null) {
+      children
+        ..add(SizedBox(height: gap))
+        ..add(
+          _readingLine(
+            text: katakana,
+            style: TextStyle(
               color: AppTheme.phoneticText,
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              height: 1.3,
+              fontSize: katakanaFontSize,
+              fontWeight: FontWeight.w500,
+              height: 1.35,
+            ),
+            copyMessage: 'Skopiowano katakanę',
+          ),
+        );
+    }
+
+    final romaji = lines.romaji;
+    if (romaji != null) {
+      children
+        ..add(SizedBox(height: gap))
+        ..add(
+          _readingLine(
+            text: romaji,
+            style: TextStyle(
+              color: AppTheme.yellowPrompt,
+              fontSize: romajiFontSize,
+              fontWeight: FontWeight.w500,
+              height: 1.35,
             ),
             copyMessage: 'Skopiowano zapis fonetyczny',
           ),
-        ],
-      ],
+        );
+    }
+
+    if (showSource) {
+      children
+        ..add(SizedBox(height: gap + 4))
+        ..add(
+          _readingLine(
+            text: sentence.sourceText,
+            style: TextStyle(
+              color: AppTheme.textMuted,
+              fontSize: sourceFontSize,
+              height: 1.4,
+            ),
+            copyMessage: 'Skopiowano tłumaczenie',
+          ),
+        );
+    }
+
+    return Column(
+      crossAxisAlignment: align,
+      mainAxisSize: MainAxisSize.min,
+      children: children,
+    );
+  }
+
+  Widget _readingLine({
+    required String text,
+    required TextStyle style,
+    required String copyMessage,
+  }) {
+    final line = Text(text, textAlign: textAlign, style: style);
+    if (!enableCopy) return line;
+    return _CopyableLine(
+      text: text,
+      style: style,
+      copyMessage: copyMessage,
+      textAlign: textAlign,
     );
   }
 }

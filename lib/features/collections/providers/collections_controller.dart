@@ -4,8 +4,8 @@ import 'package:language_islands_app/core/providers/app_providers.dart';
 
 final collectionsControllerProvider =
     AsyncNotifierProvider<CollectionsController, List<SentenceCollection>>(
-  CollectionsController.new,
-);
+      CollectionsController.new,
+    );
 
 class CollectionsController extends AsyncNotifier<List<SentenceCollection>> {
   @override
@@ -14,11 +14,11 @@ class CollectionsController extends AsyncNotifier<List<SentenceCollection>> {
     return repo.loadAll();
   }
 
-  Future<void> importFromJson(String jsonStr) async {
+  Future<void> importFromJson(String jsonStr, {String? title}) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(collectionRepositoryProvider);
-      await repo.importFromJsonString(jsonStr);
+      await repo.importFromJsonString(jsonStr, title: title);
       return repo.loadAll();
     });
   }

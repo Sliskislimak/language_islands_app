@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
 
 const _aiJsonPromptTemplate = '''
@@ -11,7 +12,7 @@ ZASADY TWORZENIA ZDAŃ:
 2. Zdania muszą być naturalne, praktyczne i gotowe do natychmiastowego użycia w rozmowie.
 3. Gramatyka i koniugacje mają wynikać bezpośrednio z kontekstu zdań.
 4. Dla poziomu A1 zdania powinny być krótkie i zwięzłe (najlepiej do 5-7 słów).
-5. Pole `phoneticReading` musi zawierać zapis fonetyczny (dla japońskiego: Furigana/Hiragana oraz Romaji), ułatwiający natychmiastowe czytanie i powtarzanie na głos.
+5. Pole `katakana` jest opcjonalne i zawiera wyłącznie katakanę. Pole `phoneticReading` zawiera Romaji. Te dwa zapisy mają być w osobnych polach, nigdy w jednym wierszu.
 
 WYMAGANY FORMAT JSON (zwróć TYLKO czysty kod JSON bez znaczników markdown):
 {
@@ -24,7 +25,8 @@ WYMAGANY FORMAT JSON (zwróć TYLKO czysty kod JSON bez znaczników markdown):
     {
       "id": "unikalne_id_zdania_1",
       "targetText": "Zdanie w języku docelowym (np. 毎朝コーヒーを飲みます。)",
-      "phoneticReading": "Zapis fonetyczny (np. まいあさコーヒーをのみます。 Maiasa kōhī o nomimasu.)",
+      "katakana": "Opcjonalna katakana (np. コーヒー)",
+      "phoneticReading": "Romaji (np. Maiasa kōhī o nomimasu.)",
       "sourceText": "Naturalne tłumaczenie na język ojczysty (np. Piję kawę każdego ranka.)"
     },
     {
@@ -37,6 +39,13 @@ WYMAGANY FORMAT JSON (zwróć TYLKO czysty kod JSON bez znaczników markdown):
 }
 ''';
 
+class ImportCollectionRequest {
+  const ImportCollectionRequest({required this.jsonStr, required this.title});
+
+  final String jsonStr;
+  final String title;
+}
+
 class ImportCollectionDialog extends StatefulWidget {
   const ImportCollectionDialog({super.key});
 
@@ -45,12 +54,29 @@ class ImportCollectionDialog extends StatefulWidget {
 }
 
 class _ImportCollectionDialogState extends State<ImportCollectionDialog> {
-  final _controller = TextEditingController();
+  final _jsonController = TextEditingController();
+  final _titleController = TextEditingController();
+  bool _titleTouched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _jsonController.addListener(_syncTitleFromJson);
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _jsonController.removeListener(_syncTitleFromJson);
+    _jsonController.dispose();
+    _titleController.dispose();
     super.dispose();
+  }
+
+  void _syncTitleFromJson() {
+    if (_titleTouched) return;
+    final title = SentenceCollection.tryParseTitle(_jsonController.text);
+    if (title == null || title == _titleController.text) return;
+    _titleController.text = title;
   }
 
   void _copyAiTemplate(BuildContext context) {
@@ -95,24 +121,50 @@ class _ImportCollectionDialogState extends State<ImportCollectionDialog> {
       ),
       content: SizedBox(
         width: 480,
-        child: TextField(
-          controller: _controller,
-          maxLines: 12,
-          style: const TextStyle(
-            color: AppTheme.textLight,
-            fontFamily: 'monospace',
-            fontSize: 12,
-          ),
-          decoration: const InputDecoration(
-            hintText: 'Wklej zawartość pliku JSON…',
-            hintStyle: TextStyle(color: AppTheme.textMuted),
-            border: OutlineInputBorder(),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppTheme.surfaceBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppTheme.sakuraAccent),
-            ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _titleController,
+                onChanged: (_) => _titleTouched = true,
+                style: const TextStyle(color: AppTheme.textLight, fontSize: 14),
+                decoration: const InputDecoration(
+                  labelText: 'Nazwa listy',
+                  labelStyle: TextStyle(color: AppTheme.textMuted),
+                  hintText: 'Nazwa nowej wyspy językowej',
+                  hintStyle: TextStyle(color: AppTheme.textMuted),
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.surfaceBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.sakuraAccent),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _jsonController,
+                maxLines: 10,
+                style: const TextStyle(
+                  color: AppTheme.textLight,
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                ),
+                decoration: const InputDecoration(
+                  hintText: 'Wklej zawartość pliku JSON…',
+                  hintStyle: TextStyle(color: AppTheme.textMuted),
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.surfaceBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.sakuraAccent),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -126,7 +178,12 @@ class _ImportCollectionDialogState extends State<ImportCollectionDialog> {
             backgroundColor: AppTheme.greenMatcha,
             foregroundColor: AppTheme.bgDark,
           ),
-          onPressed: () => Navigator.of(context).pop(_controller.text),
+          onPressed: () => Navigator.of(context).pop(
+            ImportCollectionRequest(
+              jsonStr: _jsonController.text,
+              title: _titleController.text,
+            ),
+          ),
           child: const Text('Importuj'),
         ),
       ],

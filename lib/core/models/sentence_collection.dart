@@ -105,4 +105,64 @@ class SentenceCollection {
         if (tag is String && tag.trim().isNotEmpty) tag.trim(),
     ];
   }
+
+  /// Per-list counters. Global session metrics stay on the practice screen.
+  CollectionListStats get stats {
+    var newCount = 0;
+    var dueCount = 0;
+    var masteredCount = 0;
+    var totalReps = 0;
+
+    for (final sentence in sentences) {
+      totalReps += sentence.totalReps;
+      if (sentence.totalReps == 0) newCount++;
+      if (_isDueForReview(sentence)) dueCount++;
+      if (sentence.comprehensionScore == 5 && sentence.speakingScore == 5) {
+        masteredCount++;
+      }
+    }
+
+    return CollectionListStats(
+      sentenceCount: sentences.length,
+      newCount: newCount,
+      dueCount: dueCount,
+      masteredCount: masteredCount,
+      totalReps: totalReps,
+    );
+  }
+
+  static String? tryParseTitle(String jsonStr) {
+    try {
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is! Map) return null;
+      final title = decoded['title'];
+      if (title is! String) return null;
+      final trimmed = title.trim();
+      return trimmed.isEmpty ? null : trimmed;
+    } on Object {
+      return null;
+    }
+  }
+}
+
+class CollectionListStats {
+  const CollectionListStats({
+    required this.sentenceCount,
+    required this.newCount,
+    required this.dueCount,
+    required this.masteredCount,
+    required this.totalReps,
+  });
+
+  final int sentenceCount;
+  final int newCount;
+  final int dueCount;
+  final int masteredCount;
+  final int totalReps;
+}
+
+bool _isDueForReview(Sentence sentence) {
+  bool ratedForReview(int score) => score >= 1 && score <= 4;
+  return ratedForReview(sentence.comprehensionScore) ||
+      ratedForReview(sentence.speakingScore);
 }

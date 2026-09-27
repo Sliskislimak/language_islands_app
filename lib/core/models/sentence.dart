@@ -2,6 +2,7 @@ class Sentence {
   const Sentence({
     required this.id,
     required this.targetText,
+    this.katakana,
     this.phoneticReading,
     required this.sourceText,
     this.targetAudioPath,
@@ -12,6 +13,7 @@ class Sentence {
 
   final String id;
   final String targetText;
+  final String? katakana;
   final String? phoneticReading;
   final String sourceText;
   final String? targetAudioPath;
@@ -22,6 +24,8 @@ class Sentence {
   Sentence copyWith({
     String? id,
     String? targetText,
+    String? katakana,
+    bool clearKatakana = false,
     String? phoneticReading,
     bool clearPhoneticReading = false,
     String? sourceText,
@@ -34,8 +38,10 @@ class Sentence {
     return Sentence(
       id: id ?? this.id,
       targetText: targetText ?? this.targetText,
-      phoneticReading:
-          clearPhoneticReading ? null : (phoneticReading ?? this.phoneticReading),
+      katakana: clearKatakana ? null : (katakana ?? this.katakana),
+      phoneticReading: clearPhoneticReading
+          ? null
+          : (phoneticReading ?? this.phoneticReading),
       sourceText: sourceText ?? this.sourceText,
       targetAudioPath: clearTargetAudioPath
           ? null
@@ -63,6 +69,7 @@ class Sentence {
     return Sentence(
       id: id,
       targetText: targetText,
+      katakana: _optionalString(map['katakana']),
       phoneticReading: _optionalString(map['phoneticReading']),
       sourceText: sourceText,
       targetAudioPath: _optionalString(map['targetAudioPath']),
@@ -76,6 +83,7 @@ class Sentence {
     return {
       'id': id,
       'targetText': targetText,
+      'katakana': katakana,
       'phoneticReading': phoneticReading,
       'sourceText': sourceText,
       'targetAudioPath': targetAudioPath,
@@ -115,6 +123,7 @@ class Sentence {
           runtimeType == other.runtimeType &&
           id == other.id &&
           targetText == other.targetText &&
+          katakana == other.katakana &&
           phoneticReading == other.phoneticReading &&
           sourceText == other.sourceText &&
           targetAudioPath == other.targetAudioPath &&
@@ -124,13 +133,14 @@ class Sentence {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        targetText,
-        phoneticReading,
-        sourceText,
-        targetAudioPath,
-        comprehensionScore,
-        speakingScore,
-        totalReps,
-      );
+    id,
+    targetText,
+    katakana,
+    phoneticReading,
+    sourceText,
+    targetAudioPath,
+    comprehensionScore,
+    speakingScore,
+    totalReps,
+  );
 }
