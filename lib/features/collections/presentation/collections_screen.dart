@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
+import 'package:language_islands_app/features/collections/presentation/edit_collection_json_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/import_collection_dialog.dart';
 import 'package:language_islands_app/features/info/presentation/screens/philosophy_screen.dart';
 import 'package:language_islands_app/features/info/presentation/screens/study_plans_screen.dart';
@@ -105,11 +106,25 @@ class CollectionsScreen extends ConsumerWidget {
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               final collection = collections[index];
-              return _CollectionTile(collection: collection);
+              return _CollectionTile(
+                collection: collection,
+                onEditJson: () => _openEditJsonDialog(context, ref, collection),
+              );
             },
           );
         },
       ),
+    );
+  }
+
+  Future<void> _openEditJsonDialog(
+    BuildContext context,
+    WidgetRef ref,
+    SentenceCollection collection,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => EditCollectionJsonDialog(collection: collection),
     );
   }
 
@@ -140,9 +155,13 @@ class CollectionsScreen extends ConsumerWidget {
 }
 
 class _CollectionTile extends StatelessWidget {
-  const _CollectionTile({required this.collection});
+  const _CollectionTile({
+    required this.collection,
+    required this.onEditJson,
+  });
 
   final SentenceCollection collection;
+  final VoidCallback onEditJson;
 
   @override
   Widget build(BuildContext context) {
@@ -176,61 +195,94 @@ class _CollectionTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
-                      collection.title,
-                      style: const TextStyle(
-                        color: AppTheme.textLight,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          collection.title,
+                          style: const TextStyle(
+                            color: AppTheme.textLight,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          statsLabel,
+                          style: const TextStyle(
+                            color: AppTheme.textMuted,
+                            fontSize: 12,
+                            height: 1.45,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Tooltip(
-                    message: 'Kopiuj JSON kolekcji',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(6),
-                        onTap: () {
-                          Clipboard.setData(
-                            ClipboardData(
-                              text: collection.toJsonString(pretty: true),
+                  const SizedBox(width: 8),
+                  // Prawy górny róg wyspy: przyciski kopiowania i edycji JSON
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Tooltip(
+                        message: 'Kopiuj JSON wyspy',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTap: () {
+                              Clipboard.setData(
+                                ClipboardData(
+                                  text: collection.toJsonString(pretty: true),
+                                ),
+                              );
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Skopiowano JSON wyspy "${collection.title}" do schowka!',
+                                  ),
+                                  backgroundColor: AppTheme.surfaceElevated,
+                                  duration: const Duration(milliseconds: 1400),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(5),
+                              child: Icon(
+                                Icons.copy_rounded,
+                                size: 18,
+                                color: AppTheme.textMuted,
+                              ),
                             ),
-                          );
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('Skopiowano JSON kolekcji do schowka!'),
-                              backgroundColor: AppTheme.surfaceElevated,
-                              duration: Duration(milliseconds: 1400),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.all(4),
-                          child: Icon(
-                            Icons.copy_all_rounded,
-                            size: 18,
-                            color: AppTheme.textMuted,
                           ),
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      Tooltip(
+                        message: 'Edytuj JSON wyspy (wklej nowy)',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTap: onEditJson,
+                            child: const Padding(
+                              padding: EdgeInsets.all(5),
+                              child: Icon(
+                                Icons.edit_note_rounded,
+                                size: 22,
+                                color: AppTheme.sakuraPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                statsLabel,
-                style: const TextStyle(
-                  color: AppTheme.textMuted,
-                  fontSize: 12,
-                  height: 1.45,
-                ),
               ),
               const SizedBox(height: 8),
               _ChipLabel(text: collection.cefrLevel),

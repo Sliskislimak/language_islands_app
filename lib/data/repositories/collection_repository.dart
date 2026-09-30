@@ -79,6 +79,34 @@ class CollectionRepository {
     _cache = next;
   }
 
+  Future<SentenceCollection> updateCollectionFromJson(
+    String collectionId,
+    String jsonStr,
+  ) async {
+    final decoded = jsonDecode(jsonStr);
+    if (decoded is! Map) {
+      throw const FormatException(
+        'JSON kolekcji musi być obiektem zawierającym co najmniej title i sentences.',
+      );
+    }
+    final map = Map<String, dynamic>.from(decoded);
+    final rawId = map['id'];
+    if (rawId == null || (rawId is String && rawId.trim().isEmpty)) {
+      map['id'] = collectionId;
+    }
+
+    final updated = SentenceCollection.fromMap(map);
+
+    // If ID changed in JSON, delete old file to prevent orphaned duplication
+    if (updated.id != collectionId) {
+      await deleteCollection(collectionId);
+    }
+
+    await _writeCollection(updated);
+    _cache = null;
+    return updated;
+  }
+
   Future<void> deleteCollection(String id) async {
     final file = await _collectionFile(id);
     if (await file.exists()) {

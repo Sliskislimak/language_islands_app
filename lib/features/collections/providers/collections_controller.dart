@@ -23,6 +23,18 @@ class CollectionsController extends AsyncNotifier<List<SentenceCollection>> {
     });
   }
 
+  Future<void> updateCollectionFromJson(
+    String collectionId,
+    String jsonStr,
+  ) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(collectionRepositoryProvider);
+      await repo.updateCollectionFromJson(collectionId, jsonStr);
+      return repo.loadAll();
+    });
+  }
+
   Future<void> deleteCollection(String id) async {
     final repo = ref.read(collectionRepositoryProvider);
     await repo.deleteCollection(id);
