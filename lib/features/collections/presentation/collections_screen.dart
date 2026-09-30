@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
@@ -174,13 +175,53 @@ class _CollectionTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                collection.title,
-                style: const TextStyle(
-                  color: AppTheme.textLight,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      collection.title,
+                      style: const TextStyle(
+                        color: AppTheme.textLight,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Kopiuj JSON kolekcji',
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(6),
+                        onTap: () {
+                          Clipboard.setData(
+                            ClipboardData(
+                              text: collection.toJsonString(pretty: true),
+                            ),
+                          );
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Skopiowano JSON kolekcji do schowka!'),
+                              backgroundColor: AppTheme.surfaceElevated,
+                              duration: Duration(milliseconds: 1400),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.copy_all_rounded,
+                            size: 18,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 6),
               Text(

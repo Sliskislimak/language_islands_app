@@ -13,6 +13,8 @@ ZASADY TWORZENIA ZDAŃ:
 3. Gramatyka i koniugacje mają wynikać bezpośrednio z kontekstu zdań.
 4. Dla poziomu A1 zdania powinny być krótkie i zwięzłe (najlepiej do 5-7 słów).
 5. Pole `katakana` jest opcjonalne i zawiera wyłącznie katakanę. Pole `phoneticReading` zawiera Romaji. Te dwa zapisy mają być w osobnych polach, nigdy w jednym wierszu.
+6. Pole `notes` na odwrocie fiszki (opcjonalne) – służy do wyjaśnienia teorii gramatycznej, niuansów, konstrukcji zdania lub wskazówek.
+7. Pole `emojis` (opcjonalne) – tablica emoji (np. ["🐱"], ["🏥"]), które służą jako wizualne skojarzenia ułatwiające zapamiętywanie słów w zdaniu.
 
 WYMAGANY FORMAT JSON (zwróć TYLKO czysty kod JSON bez znaczników markdown):
 {
@@ -24,16 +26,20 @@ WYMAGANY FORMAT JSON (zwróć TYLKO czysty kod JSON bez znaczników markdown):
   "sentences": [
     {
       "id": "unikalne_id_zdania_1",
-      "targetText": "Zdanie w języku docelowym (np. 毎朝コーヒーを飲みます。)",
-      "katakana": "Opcjonalna katakana (np. コーヒー)",
-      "phoneticReading": "Romaji (np. Maiasa kōhī o nomimasu.)",
-      "sourceText": "Naturalne tłumaczenie na język ojczysty (np. Piję kawę każdego ranka.)"
+      "targetText": "毎朝コーヒーを飲みます。",
+      "katakana": "コーヒー",
+      "phoneticReading": "Maiasa kōhī o nomimasu.",
+      "sourceText": "Piję kawę każdego ranka.",
+      "notes": "Konstrukcja: 毎朝 (każdego ranka) + コーヒー (kawa) + partykuła を (biernik) + 飲みます (pić w formie grzecznej masu).",
+      "emojis": ["☕"]
     },
     {
       "id": "unikalne_id_zdania_2",
-      "targetText": "Kolejne zdanie w języku docelowym",
-      "phoneticReading": "Zapis fonetyczny kolejnego zdania",
-      "sourceText": "Tłumaczenie kolejnego zdania"
+      "targetText": "猫は病院の前にいます。",
+      "phoneticReading": "Neko wa byōin no mae ni imasu.",
+      "sourceText": "Kot jest przed szpitalem.",
+      "notes": "Neko (kot) + wa + byōin (szpital) + no mae ni (przed) + imasu (jest dla istot żywych).",
+      "emojis": ["🐱", "🏥"]
     }
   ]
 }

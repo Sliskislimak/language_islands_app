@@ -106,6 +106,25 @@ class _FocusModeScreenState extends ConsumerState<FocusModeScreen> {
         .playSentenceAudio(sentence);
   }
 
+  void _openNotesSheet(Sentence sentence) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppTheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => _FocusNotesSheet(
+        sentence: sentence,
+        onSave: (notes) {
+          ref
+              .read(practiceSessionProvider.notifier)
+              .updateSentenceNotes(sentence.id, notes);
+        },
+      ),
+    );
+  }
+
   void _shadowingReveal(Sentence sentence) {
     ref.read(practiceSessionProvider.notifier).toggleReveal(sentence.id);
   }
@@ -247,9 +266,11 @@ class _FocusModeScreenState extends ConsumerState<FocusModeScreen> {
               children: [
                 _FocusTopBar(
                   title: session.collection.title,
+                  sentence: sentence,
                   cardIndex: safeIndex,
                   total: sentences.length,
                   onClose: () => Navigator.of(context).pop(),
+                  onOpenNotes: () => _openNotesSheet(sentence),
                 ),
                 Expanded(
                   child: Padding(
@@ -286,15 +307,19 @@ class _FocusModeScreenState extends ConsumerState<FocusModeScreen> {
 class _FocusTopBar extends StatelessWidget {
   const _FocusTopBar({
     required this.title,
+    required this.sentence,
     required this.cardIndex,
     required this.total,
     required this.onClose,
+    required this.onOpenNotes,
   });
 
   final String title;
+  final Sentence sentence;
   final int cardIndex;
   final int total;
   final VoidCallback onClose;
+  final VoidCallback onOpenNotes;
 
   @override
   Widget build(BuildContext context) {
@@ -324,6 +349,39 @@ class _FocusTopBar extends StatelessWidget {
               color: AppTheme.textMuted,
               fontSize: 13,
               fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Tooltip(
+            message: sentence.hasNotes
+                ? 'Notatki (zawiera notatki)'
+                : 'Notatki / Teoria',
+            child: IconButton(
+              onPressed: onOpenNotes,
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    Icons.turn_right_rounded,
+                    color: sentence.hasNotes
+                        ? AppTheme.sakuraPrimary
+                        : AppTheme.textMuted,
+                  ),
+                  if (sentence.hasNotes)
+                    Positioned(
+                      right: -1,
+                      top: -1,
+                      child: Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.sakuraAccent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 4),
@@ -367,21 +425,34 @@ class _FocusCardContent extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           _TapToRevealButton(onTap: onRecallReveal),
+          if (sentence.visualEmojis.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _FocusEmojiVisualCuesBadge(emojis: sentence.visualEmojis),
+          ],
         ],
       );
     }
 
     if (mode == PracticeMode.recall && isRevealed) {
-      return JapaneseReadingColumn(
-        sentence: sentence,
-        textAlign: TextAlign.center,
-        targetFontSize: 32,
-        katakanaFontSize: 22,
-        romajiFontSize: 18,
-        sourceFontSize: 16,
-        gap: 10,
-        showSource: true,
-        enableCopy: false,
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          JapaneseReadingColumn(
+            sentence: sentence,
+            textAlign: TextAlign.center,
+            targetFontSize: 32,
+            katakanaFontSize: 22,
+            romajiFontSize: 18,
+            sourceFontSize: 16,
+            gap: 10,
+            showSource: true,
+            enableCopy: false,
+          ),
+          if (sentence.visualEmojis.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _FocusEmojiVisualCuesBadge(emojis: sentence.visualEmojis),
+          ],
+        ],
       );
     }
 
@@ -402,6 +473,10 @@ class _FocusCardContent extends StatelessWidget {
         if (!isRevealed) ...[
           const SizedBox(height: 28),
           _TapToRevealButton(onTap: onShadowingReveal),
+        ],
+        if (sentence.visualEmojis.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          _FocusEmojiVisualCuesBadge(emojis: sentence.visualEmojis),
         ],
       ],
     );
@@ -569,6 +644,196 @@ class _NavCircleButton extends StatelessWidget {
             size: 32,
             color: enabled ? AppTheme.textLight : AppTheme.surfaceBorder,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FocusNotesSheet extends StatefulWidget {
+  const _FocusNotesSheet({required this.sentence, required this.onSave});
+
+  final Sentence sentence;
+  final ValueChanged<String> onSave;
+
+  @override
+  State<_FocusNotesSheet> createState() => _FocusNotesSheetState();
+}
+
+class _FocusNotesSheetState extends State<_FocusNotesSheet> {
+  late bool _isLocked;
+  late TextEditingController _controller;
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _isLocked = widget.sentence.hasNotes;
+    _controller = TextEditingController(text: widget.sentence.notes ?? '');
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _toggleLock() {
+    setState(() => _isLocked = !_isLocked);
+    if (_isLocked) {
+      _focusNode.unfocus();
+      widget.onSave(_controller.text);
+    } else {
+      _focusNode.requestFocus();
+    }
+  }
+
+  void _copyNotes() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Skopiowano notatki z odwrotu'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        left: 20,
+        right: 20,
+        top: 16,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                tooltip: _isLocked ? 'Odblokuj edycję' : 'Zablokuj zapis',
+                icon: Icon(
+                  _isLocked
+                      ? Icons.lock_outline_rounded
+                      : Icons.lock_open_rounded,
+                  color: _isLocked ? AppTheme.textMuted : AppTheme.yellowPrompt,
+                ),
+                onPressed: _toggleLock,
+              ),
+              IconButton(
+                tooltip: 'Kopiuj notatki',
+                icon: const Icon(
+                  Icons.copy_outlined,
+                  size: 20,
+                  color: AppTheme.textMuted,
+                ),
+                onPressed: _copyNotes,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _isLocked ? 'Notatki / Teoria' : 'Notatki (edycja)',
+                style: TextStyle(
+                  color: _isLocked ? AppTheme.textLight : AppTheme.yellowPrompt,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.close_rounded, color: AppTheme.textMuted),
+                onPressed: () {
+                  widget.onSave(_controller.text);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_isLocked)
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceElevated,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppTheme.surfaceBorder),
+              ),
+              child: _controller.text.trim().isEmpty
+                  ? const Text(
+                      'Brak notatek dla tej karty. Kliknij kłódkę w lewym górnym rogu, aby dodać teorię lub notatki.',
+                      style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                    )
+                  : SelectableText(
+                      _controller.text,
+                      style: const TextStyle(
+                        color: AppTheme.textLight,
+                        fontSize: 15,
+                        height: 1.45,
+                      ),
+                    ),
+            )
+          else
+            TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              minLines: 4,
+              maxLines: 8,
+              style: const TextStyle(color: AppTheme.textLight, fontSize: 15),
+              cursorColor: AppTheme.sakuraPrimary,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: AppTheme.surfaceElevated,
+                hintText: 'Wpisz notatki gramatyczne, teorię lub kontekst...',
+                hintStyle:
+                    const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: AppTheme.sakuraAccent),
+                ),
+              ),
+              onChanged: widget.onSave,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FocusEmojiVisualCuesBadge extends StatelessWidget {
+  const _FocusEmojiVisualCuesBadge({required this.emojis});
+
+  final List<String> emojis;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTheme.surface.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppTheme.surfaceBorder.withValues(alpha: 0.8),
+          width: 0.8,
+        ),
+      ),
+      child: Tooltip(
+        message: 'Skojarzenie wizualne',
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < emojis.length; i++) ...[
+              if (i > 0) const SizedBox(width: 6),
+              Text(
+                emojis[i],
+                style: const TextStyle(fontSize: 26),
+              ),
+            ],
+          ],
         ),
       ),
     );

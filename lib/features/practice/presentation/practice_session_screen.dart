@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
@@ -85,6 +86,13 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     );
   }
 
+  void _openExportDialog(BuildContext context, SentenceCollection collection) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => _ExportCollectionDialog(collection: collection),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<String?>(
@@ -108,6 +116,13 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
           collection.title,
           style: const TextStyle(color: AppTheme.textLight, fontSize: 16),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Eksportuj kolekcję (JSON)',
+            icon: const Icon(Icons.file_download_outlined, color: AppTheme.textLight),
+            onPressed: () => _openExportDialog(context, collection),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(session != null ? 108 : 44),
           child: Column(
@@ -256,6 +271,9 @@ class _SessionContentColumn extends ConsumerWidget {
                         onRate: (stars) => ref
                             .read(practiceSessionProvider.notifier)
                             .rateSentence(sentence, stars),
+                        onSaveNotes: (notes) => ref
+                            .read(practiceSessionProvider.notifier)
+                            .updateSentenceNotes(sentence.id, notes),
                       ),
                     );
                   },
@@ -609,6 +627,94 @@ class _ModeToggle extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ExportCollectionDialog extends StatelessWidget {
+  const _ExportCollectionDialog({required this.collection});
+
+  final SentenceCollection collection;
+
+  @override
+  Widget build(BuildContext context) {
+    final jsonStr = collection.toJsonString(pretty: true);
+
+    return AlertDialog(
+      backgroundColor: AppTheme.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      title: Row(
+        children: [
+          const Icon(Icons.code_rounded, color: AppTheme.sakuraPrimary, size: 22),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Eksport JSON: ${collection.title}',
+              style: const TextStyle(color: AppTheme.textLight, fontSize: 16),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 600,
+        height: 400,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Poniższy JSON zawiera wygenerowane fiszki wraz z polami notatek (odwrotu) oraz przypisanymi ikonami/emoji:',
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.bgDark,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppTheme.surfaceBorder),
+                ),
+                child: SingleChildScrollView(
+                  child: SelectableText(
+                    jsonStr,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: AppTheme.textLight,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Zamknij', style: TextStyle(color: AppTheme.textMuted)),
+        ),
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.sakuraPrimary,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: jsonStr));
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Skopiowano JSON kolekcji do schowka!'),
+                backgroundColor: AppTheme.surfaceElevated,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+          icon: const Icon(Icons.copy_rounded, size: 16),
+          label: const Text('Kopiuj JSON'),
+        ),
+      ],
     );
   }
 }

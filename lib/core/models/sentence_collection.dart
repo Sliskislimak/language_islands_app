@@ -93,6 +93,14 @@ class SentenceCollection {
     };
   }
 
+  String toJsonString({bool pretty = true}) {
+    final map = toMap();
+    if (pretty) {
+      return const JsonEncoder.withIndent('  ').convert(map);
+    }
+    return jsonEncode(map);
+  }
+
   static String _cefrLevel(Object? value) {
     if (value is String && value.trim().isNotEmpty) return value.trim();
     return 'Unassigned';

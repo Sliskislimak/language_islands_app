@@ -154,6 +154,32 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     ref.invalidate(metricsControllerProvider);
   }
 
+  Future<void> updateSentenceNotes(String sentenceId, String? notes) async {
+    final current = state;
+    if (current == null) return;
+
+    final index = current.collection.sentences.indexWhere(
+      (s) => s.id == sentenceId,
+    );
+    if (index < 0) return;
+
+    final sentence = current.collection.sentences[index];
+    final trimmed = notes?.trim();
+    final updated = sentence.copyWith(
+      notes: trimmed,
+      clearNotes: trimmed == null || trimmed.isEmpty,
+    );
+
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.updateSentence(current.collection.id, updated);
+
+    final refreshed =
+        await repo.getById(current.collection.id) ?? current.collection;
+
+    state = current.copyWith(collection: refreshed);
+    ref.invalidate(collectionsControllerProvider);
+  }
+
   void setActiveSentenceIndex(int index) {
     final current = state;
     if (current == null) return;

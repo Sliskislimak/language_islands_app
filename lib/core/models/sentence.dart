@@ -1,3 +1,5 @@
+import 'package:language_islands_app/core/services/visual_cue_detector.dart';
+
 class Sentence {
   const Sentence({
     required this.id,
@@ -9,6 +11,8 @@ class Sentence {
     this.comprehensionScore = 0,
     this.speakingScore = 0,
     this.totalReps = 0,
+    this.notes,
+    this.emojis = const [],
   });
 
   final String id;
@@ -20,6 +24,20 @@ class Sentence {
   final int comprehensionScore;
   final int speakingScore;
   final int totalReps;
+  final String? notes;
+  final List<String> emojis;
+
+  bool get hasNotes => notes != null && notes!.trim().isNotEmpty;
+
+  /// Returns visual cues. If explicit [emojis] were specified in JSON, uses them.
+  /// Otherwise auto-detects based on target/source/phonetic text.
+  List<String> get visualEmojis => VisualCueDetector.detectEmojis(
+        targetText: targetText,
+        sourceText: sourceText,
+        phoneticReading: phoneticReading,
+        katakana: katakana,
+        explicitEmojis: emojis,
+      );
 
   Sentence copyWith({
     String? id,
@@ -34,6 +52,10 @@ class Sentence {
     int? comprehensionScore,
     int? speakingScore,
     int? totalReps,
+    String? notes,
+    bool clearNotes = false,
+    List<String>? emojis,
+    bool clearEmojis = false,
   }) {
     return Sentence(
       id: id ?? this.id,
@@ -49,6 +71,8 @@ class Sentence {
       comprehensionScore: comprehensionScore ?? this.comprehensionScore,
       speakingScore: speakingScore ?? this.speakingScore,
       totalReps: totalReps ?? this.totalReps,
+      notes: clearNotes ? null : (notes ?? this.notes),
+      emojis: clearEmojis ? const [] : (emojis ?? this.emojis),
     );
   }
 
@@ -76,11 +100,21 @@ class Sentence {
       comprehensionScore: _score(map['comprehensionScore']),
       speakingScore: _score(map['speakingScore']),
       totalReps: _nonNegativeInt(map['totalReps']),
+      notes: _optionalString(
+        map['notes'] ??
+            map['backNotes'] ??
+            map['grammarNotes'] ??
+            map['theory'] ??
+            map['grammar'],
+      ),
+      emojis: _parseEmojis(
+        map['emojis'] ?? map['emoji'] ?? map['visualCues'] ?? map['icons'],
+      ),
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    final map = <String, dynamic>{
       'id': id,
       'targetText': targetText,
       'katakana': katakana,
@@ -91,6 +125,13 @@ class Sentence {
       'speakingScore': speakingScore,
       'totalReps': totalReps,
     };
+    if (notes != null && notes!.trim().isNotEmpty) {
+      map['notes'] = notes!.trim();
+    }
+    if (emojis.isNotEmpty) {
+      map['emojis'] = emojis;
+    }
+    return map;
   }
 
   static String? _optionalString(Object? value) {
@@ -98,6 +139,30 @@ class Sentence {
     if (value is! String) return null;
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
+  }
+
+  static List<String> _parseEmojis(Object? value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value
+          .whereType<String>()
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    }
+    if (value is String) {
+      final trimmed = value.trim();
+      if (trimmed.isEmpty) return const [];
+      if (trimmed.contains(',')) {
+        return trimmed
+            .split(',')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+      }
+      return [trimmed];
+    }
+    return const [];
   }
 
   static int _score(Object? value) {
@@ -129,18 +194,31 @@ class Sentence {
           targetAudioPath == other.targetAudioPath &&
           comprehensionScore == other.comprehensionScore &&
           speakingScore == other.speakingScore &&
-          totalReps == other.totalReps;
+          totalReps == other.totalReps &&
+          notes == other.notes &&
+          _listEquals(emojis, other.emojis);
 
   @override
   int get hashCode => Object.hash(
-    id,
-    targetText,
-    katakana,
-    phoneticReading,
-    sourceText,
-    targetAudioPath,
-    comprehensionScore,
-    speakingScore,
-    totalReps,
-  );
+        id,
+        targetText,
+        katakana,
+        phoneticReading,
+        sourceText,
+        targetAudioPath,
+        comprehensionScore,
+        speakingScore,
+        totalReps,
+        notes,
+        Object.hashAll(emojis),
+      );
+
+  static bool _listEquals(List<String> a, List<String> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }
