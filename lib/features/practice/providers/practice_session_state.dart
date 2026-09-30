@@ -1,7 +1,10 @@
+import 'package:language_islands_app/core/models/audio_translation_mode.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/features/practice/pip_style.dart';
+
+export 'package:language_islands_app/core/models/audio_translation_mode.dart';
 
 enum LoopMode {
   off,
@@ -9,10 +12,10 @@ enum LoopMode {
   single;
 
   LoopMode get next => switch (this) {
-    LoopMode.off => LoopMode.list,
-    LoopMode.list => LoopMode.single,
-    LoopMode.single => LoopMode.off,
-  };
+        LoopMode.off => LoopMode.list,
+        LoopMode.list => LoopMode.single,
+        LoopMode.single => LoopMode.off,
+      };
 }
 
 class PracticeSessionState {
@@ -23,11 +26,15 @@ class PracticeSessionState {
     this.revealedSentenceIds = const {},
     this.audioError,
     this.isPlayingContinuous = false,
-    this.repsPerSentence = 1,
+    this.repsPerSentence = 3,
     this.currentRep = 0,
-    this.pauseBetweenReps = const Duration(milliseconds: 1500),
+    this.pauseBetweenReps = const Duration(milliseconds: 1000),
+    this.pauseBetweenLanguages = const Duration(milliseconds: 1500),
+    this.pauseBetweenSentences = const Duration(milliseconds: 1500),
     this.playbackSpeed = 1.0,
     this.loopMode = LoopMode.off,
+    this.audioTranslationMode = AudioTranslationMode.disabled,
+    this.activeAudioChannel = ActiveAudioChannel.none,
     this.sessionPracticedSentenceIds = const {},
     this.sessionRepsCount = 0,
     this.sessionMasteredSentenceIds = const {},
@@ -50,8 +57,23 @@ class PracticeSessionState {
   final int repsPerSentence;
   final int currentRep;
   final Duration pauseBetweenReps;
+  final Duration pauseBetweenLanguages;
+  final Duration pauseBetweenSentences;
   final double playbackSpeed;
   final LoopMode loopMode;
+
+  /// Audio translation / lektor mode (disabled, prefix, alternating).
+  final AudioTranslationMode audioTranslationMode;
+
+  /// Currently playing audio channel for visual highlights (none, translation, target).
+  final ActiveAudioChannel activeAudioChannel;
+
+  /// Synonym for [repsPerSentence] in accordance with playback specifications.
+  int get targetReps => repsPerSentence;
+
+  int get pauseBetweenLanguagesMs => pauseBetweenLanguages.inMilliseconds;
+  int get pauseBetweenRepsMs => pauseBetweenReps.inMilliseconds;
+  int get pauseBetweenSentencesMs => pauseBetweenSentences.inMilliseconds;
 
   bool get isListLoopEnabled => loopMode == LoopMode.list;
 
@@ -107,10 +129,15 @@ class PracticeSessionState {
     bool clearAudioError = false,
     bool? isPlayingContinuous,
     int? repsPerSentence,
+    int? targetReps,
     int? currentRep,
     Duration? pauseBetweenReps,
+    Duration? pauseBetweenLanguages,
+    Duration? pauseBetweenSentences,
     double? playbackSpeed,
     LoopMode? loopMode,
+    AudioTranslationMode? audioTranslationMode,
+    ActiveAudioChannel? activeAudioChannel,
     Set<String>? sessionPracticedSentenceIds,
     int? sessionRepsCount,
     Set<String>? sessionMasteredSentenceIds,
@@ -131,11 +158,17 @@ class PracticeSessionState {
       revealedSentenceIds: revealedSentenceIds ?? this.revealedSentenceIds,
       audioError: clearAudioError ? null : (audioError ?? this.audioError),
       isPlayingContinuous: isPlayingContinuous ?? this.isPlayingContinuous,
-      repsPerSentence: repsPerSentence ?? this.repsPerSentence,
+      repsPerSentence: targetReps ?? repsPerSentence ?? this.repsPerSentence,
       currentRep: currentRep ?? this.currentRep,
       pauseBetweenReps: pauseBetweenReps ?? this.pauseBetweenReps,
+      pauseBetweenLanguages:
+          pauseBetweenLanguages ?? this.pauseBetweenLanguages,
+      pauseBetweenSentences:
+          pauseBetweenSentences ?? this.pauseBetweenSentences,
       playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       loopMode: loopMode ?? this.loopMode,
+      audioTranslationMode: audioTranslationMode ?? this.audioTranslationMode,
+      activeAudioChannel: activeAudioChannel ?? this.activeAudioChannel,
       sessionPracticedSentenceIds:
           sessionPracticedSentenceIds ?? this.sessionPracticedSentenceIds,
       sessionRepsCount: sessionRepsCount ?? this.sessionRepsCount,

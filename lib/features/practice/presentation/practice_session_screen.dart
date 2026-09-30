@@ -6,7 +6,9 @@ import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
 import 'package:language_islands_app/features/practice/playback_speed.dart';
 import 'package:language_islands_app/features/practice/presentation/screens/focus_mode_screen.dart';
+import 'package:language_islands_app/features/practice/presentation/widgets/audio_settings_sheet.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/focus_mode_launch_button.dart';
+import 'package:language_islands_app/features/practice/presentation/widgets/landscape_exercise_view.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/pause_duration_button.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/pip_style_buttons.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/pip_toggle_button.dart';
@@ -30,6 +32,7 @@ class PracticeSessionScreen extends ConsumerStatefulWidget {
 
 class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
   final _sentenceItemKeys = <String, GlobalKey>{};
+  bool _forceListViewInLandscape = false;
 
   @override
   void initState() {
@@ -43,7 +46,9 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
 
   @override
   void dispose() {
-    ref.read(practiceSessionProvider.notifier).endSession();
+    try {
+      ref.read(practiceSessionProvider.notifier).endSession();
+    } catch (_) {}
     super.dispose();
   }
 
@@ -104,6 +109,22 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
       },
     );
 
+    final orientation = MediaQuery.orientationOf(context);
+    if (orientation == Orientation.portrait && _forceListViewInLandscape) {
+      _forceListViewInLandscape = false;
+    }
+    final isLandscape = orientation == Orientation.landscape;
+
+    if (isLandscape && !_forceListViewInLandscape) {
+      return LandscapeExerciseView(
+        onExit: () {
+          setState(() {
+            _forceListViewInLandscape = true;
+          });
+        },
+      );
+    }
+
     final session = ref.watch(practiceSessionProvider);
     final collection = session?.collection ?? widget.collection;
     final mode = session?.mode ?? PracticeMode.shadowing;
@@ -117,6 +138,24 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
           style: const TextStyle(color: AppTheme.textLight, fontSize: 16),
         ),
         actions: [
+          if (isLandscape)
+            IconButton(
+              tooltip: 'Włącz tryb biurkowy (Landscape)',
+              icon: const Icon(
+                Icons.fullscreen_rounded,
+                color: AppTheme.sakuraPrimary,
+              ),
+              onPressed: () {
+                setState(() {
+                  _forceListViewInLandscape = false;
+                });
+              },
+            ),
+          IconButton(
+            tooltip: 'Ustawienia odtwarzacza & lektora audio',
+            icon: const Icon(Icons.tune_rounded, color: AppTheme.textLight),
+            onPressed: () => showAudioSettingsSheet(context, ref),
+          ),
           IconButton(
             tooltip: 'Eksportuj kolekcję (JSON)',
             icon: const Icon(Icons.file_download_outlined, color: AppTheme.textLight),
@@ -274,6 +313,8 @@ class _SessionContentColumn extends ConsumerWidget {
                         onSaveNotes: (notes) => ref
                             .read(practiceSessionProvider.notifier)
                             .updateSentenceNotes(sentence.id, notes),
+                        activeAudioChannel: session?.activeAudioChannel ??
+                            ActiveAudioChannel.none,
                       ),
                     );
                   },
@@ -447,6 +488,8 @@ class _ShadowingSequencerBar extends ConsumerWidget {
               onTap: notifier.cycleRepsPerSentence,
             ),
             const SizedBox(width: 6),
+            _AudioSettingsChip(session: session),
+            const SizedBox(width: 6),
             const PauseDurationButton(),
             const SizedBox(width: 6),
             _SequencerChip(
@@ -537,6 +580,8 @@ class _RecallSequencerBar extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 8),
+            _AudioSettingsChip(session: session),
+            const SizedBox(width: 6),
             const RecallThinkingDurationButton(),
             const SizedBox(width: 6),
             const WeakSentencesFilterButton(),
@@ -550,6 +595,70 @@ class _RecallSequencerBar extends ConsumerWidget {
             const PipToggleButton(),
             const PipStyleControls(),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AudioSettingsChip extends ConsumerWidget {
+  const _AudioSettingsChip({required this.session});
+
+  final PracticeSessionState session;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = session.audioTranslationMode;
+    final isModeActive = mode != AudioTranslationMode.disabled;
+
+    return Tooltip(
+      message:
+          'Lektor tłumaczenia: ${mode.label} (kliknij, aby dostosować audio)',
+      child: Material(
+        color: isModeActive
+            ? AppTheme.sakuraAccent.withValues(alpha: 0.15)
+            : AppTheme.surfaceElevated,
+        borderRadius: BorderRadius.circular(6),
+        child: InkWell(
+          onTap: () => showAudioSettingsSheet(context, ref),
+          onLongPress: () => ref
+              .read(practiceSessionProvider.notifier)
+              .cycleAudioTranslationMode(),
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: isModeActive
+                    ? AppTheme.sakuraAccent
+                    : AppTheme.surfaceBorder,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.translate_rounded,
+                  size: 16,
+                  color: isModeActive
+                      ? AppTheme.sakuraPrimary
+                      : AppTheme.textMuted,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  mode.shortLabel,
+                  style: TextStyle(
+                    color:
+                        isModeActive ? AppTheme.textLight : AppTheme.textMuted,
+                    fontSize: 12,
+                    fontWeight:
+                        isModeActive ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

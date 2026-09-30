@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:language_islands_app/core/models/daily_sentence_entry.dart';
+
 /// Offline training telemetry persisted on disk.
 ///
 /// Extra daily id maps exist so the Today tab can reconstruct unique
@@ -12,6 +14,9 @@ class UserMetrics {
     this.dailySecondsHistory = const {},
     this.dailyPracticedSentenceIds = const {},
     this.dailyMasteredSpeakingIds = const {},
+    this.dailyDayRatings = const {},
+    this.dailyNotes = const {},
+    this.dailySentenceEntries = const {},
   });
 
   final int totalListeningSeconds;
@@ -20,6 +25,9 @@ class UserMetrics {
   final Map<String, int> dailySecondsHistory;
   final Map<String, List<String>> dailyPracticedSentenceIds;
   final Map<String, List<String>> dailyMasteredSpeakingIds;
+  final Map<String, int> dailyDayRatings;
+  final Map<String, String> dailyNotes;
+  final Map<String, List<DailySentenceEntry>> dailySentenceEntries;
 
   static String dateKey(DateTime date) {
     final year = date.year.toString().padLeft(4, '0');
@@ -40,6 +48,29 @@ class UserMetrics {
   int masteredSpeakingCountOn(String dateKey) =>
       dailyMasteredSpeakingIds[dateKey]?.length ?? 0;
 
+  int dayRatingOn(String dateKey) => dailyDayRatings[dateKey] ?? 0;
+
+  String noteOn(String dateKey) => dailyNotes[dateKey] ?? '';
+
+  List<DailySentenceEntry> sentenceEntriesOn(String dateKey) =>
+      dailySentenceEntries[dateKey] ?? const [];
+
+  /// All unique date keys that have any telemetry, rating, or note recorded,
+  /// ordered descending (newest first).
+  List<String> get allRecordedDates {
+    final dates = <String>{
+      ...dailyRepsHistory.keys,
+      ...dailySecondsHistory.keys,
+      ...dailyPracticedSentenceIds.keys,
+      ...dailyMasteredSpeakingIds.keys,
+      ...dailyDayRatings.keys,
+      ...dailyNotes.keys,
+      ...dailySentenceEntries.keys,
+    };
+    final list = dates.toList()..sort((a, b) => b.compareTo(a));
+    return list;
+  }
+
   UserMetrics copyWith({
     int? totalListeningSeconds,
     int? totalReps,
@@ -47,6 +78,9 @@ class UserMetrics {
     Map<String, int>? dailySecondsHistory,
     Map<String, List<String>>? dailyPracticedSentenceIds,
     Map<String, List<String>>? dailyMasteredSpeakingIds,
+    Map<String, int>? dailyDayRatings,
+    Map<String, String>? dailyNotes,
+    Map<String, List<DailySentenceEntry>>? dailySentenceEntries,
   }) {
     return UserMetrics(
       totalListeningSeconds:
@@ -58,6 +92,9 @@ class UserMetrics {
           dailyPracticedSentenceIds ?? this.dailyPracticedSentenceIds,
       dailyMasteredSpeakingIds:
           dailyMasteredSpeakingIds ?? this.dailyMasteredSpeakingIds,
+      dailyDayRatings: dailyDayRatings ?? this.dailyDayRatings,
+      dailyNotes: dailyNotes ?? this.dailyNotes,
+      dailySentenceEntries: dailySentenceEntries ?? this.dailySentenceEntries,
     );
   }
 
@@ -69,6 +106,9 @@ class UserMetrics {
       dailySecondsHistory: _intMap(map['dailySecondsHistory']),
       dailyPracticedSentenceIds: _idMap(map['dailyPracticedSentenceIds']),
       dailyMasteredSpeakingIds: _idMap(map['dailyMasteredSpeakingIds']),
+      dailyDayRatings: _intMap(map['dailyDayRatings']),
+      dailyNotes: _stringMap(map['dailyNotes']),
+      dailySentenceEntries: _dailySentenceEntriesMap(map['dailySentenceEntries']),
     );
   }
 
@@ -80,6 +120,12 @@ class UserMetrics {
       'dailySecondsHistory': dailySecondsHistory,
       'dailyPracticedSentenceIds': dailyPracticedSentenceIds,
       'dailyMasteredSpeakingIds': dailyMasteredSpeakingIds,
+      'dailyDayRatings': dailyDayRatings,
+      'dailyNotes': dailyNotes,
+      'dailySentenceEntries': {
+        for (final entry in dailySentenceEntries.entries)
+          entry.key: entry.value.map((e) => e.toMap()).toList(),
+      },
     };
   }
 
@@ -116,6 +162,18 @@ class UserMetrics {
     return result;
   }
 
+  static Map<String, String> _stringMap(Object? value) {
+    if (value is! Map) return const {};
+    final result = <String, String>{};
+    value.forEach((key, raw) {
+      if (key is! String || key.isEmpty) return;
+      if (raw is String) {
+        result[key] = raw;
+      }
+    });
+    return result;
+  }
+
   static Map<String, List<String>> _idMap(Object? value) {
     if (value is! Map) return const {};
     final result = <String, List<String>>{};
@@ -131,6 +189,29 @@ class UserMetrics {
         ids.add(id);
       }
       result[key] = ids;
+    });
+    return result;
+  }
+
+  static Map<String, List<DailySentenceEntry>> _dailySentenceEntriesMap(
+    Object? value,
+  ) {
+    if (value is! Map) return const {};
+    final result = <String, List<DailySentenceEntry>>{};
+    value.forEach((key, raw) {
+      if (key is! String || key.isEmpty) return;
+      if (raw is! List) return;
+      final entries = <DailySentenceEntry>[];
+      for (final item in raw) {
+        if (item is Map<String, dynamic>) {
+          entries.add(DailySentenceEntry.fromMap(item));
+        } else if (item is Map) {
+          entries.add(
+            DailySentenceEntry.fromMap(Map<String, dynamic>.from(item)),
+          );
+        }
+      }
+      result[key] = entries;
     });
     return result;
   }

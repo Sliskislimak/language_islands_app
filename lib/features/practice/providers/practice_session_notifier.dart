@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/providers/app_providers.dart';
+import 'package:language_islands_app/core/services/audio_playback_service.dart';
 import 'package:language_islands_app/core/services/audio_session_bootstrap.dart';
 import 'package:language_islands_app/core/services/pip_service.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
@@ -22,9 +24,12 @@ final practiceSessionProvider =
 class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
   int _loopToken = 0;
   bool _isLoopRunning = false;
+  String? _manualSkipToSentenceId;
+  late AudioPlaybackService _playback;
 
   @override
   PracticeSessionState? build() {
+    _playback = ref.read(audioPlaybackServiceProvider);
     final pip = ref.read(pipServiceProvider);
     pip.onStartedExternally = _handlePipStartedExternally;
     pip.onStoppedExternally = _handlePipStoppedExternally;
@@ -40,11 +45,11 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
   PipService get _pip => ref.read(pipServiceProvider);
 
   void _disposePlayback() {
+    _manualSkipToSentenceId = null;
     _loopToken++;
     _isLoopRunning = false;
-    final playback = ref.read(audioPlaybackServiceProvider);
-    playback.stop();
-    unawaited(playback.stopBackgroundKeepAlive());
+    _playback.stop();
+    unawaited(_playback.stopBackgroundKeepAlive());
     unawaited(releaseAppAudioSession());
   }
 
@@ -52,6 +57,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     state = PracticeSessionState(
       collection: collection,
       mode: PracticeMode.shadowing,
+      activeSentenceId: collection.sentences.firstOrNull?.id,
     );
   }
 
@@ -101,19 +107,54 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     await _publishPipRevealed(sentence);
 
     try {
-      final path = await _ensureTargetAudioPath(sentence);
-      if (path == null || state == null) return;
-
       final playback = ref.read(audioPlaybackServiceProvider);
-      final duration = await playback.playFile(
-        path,
+
+      if (current.audioTranslationMode != AudioTranslationMode.disabled) {
+        final translationPath = await _ensureTranslationAudioPath(sentence);
+        if (translationPath != null) {
+          state = state?.copyWith(
+            activeAudioChannel: ActiveAudioChannel.translation,
+          );
+          final duration = await playback.playFileUntilComplete(
+            translationPath,
+            speed: current.playbackSpeed,
+          );
+          await _logListeningTime(duration);
+          state = state?.copyWith(
+            activeAudioChannel: ActiveAudioChannel.none,
+          );
+          await Future<void>.delayed(current.pauseBetweenLanguages);
+        } else {
+          debugPrint(
+            'Ostrzeżenie: Brak audio tłumaczenia dla zdania "${sentence.id}". '
+            'Fallback do trybu Target-only.',
+          );
+        }
+      }
+
+      final targetPath = await _ensureTargetAudioPath(sentence);
+      if (targetPath == null || state == null) return;
+
+      state = state?.copyWith(activeAudioChannel: ActiveAudioChannel.target);
+      final targetDuration = await playback.playFile(
+        targetPath,
         speed: state!.playbackSpeed,
       );
-      await _logListeningTime(duration);
+      await _logListeningTime(targetDuration);
+      state = state?.copyWith(activeAudioChannel: ActiveAudioChannel.none);
       ref.invalidate(collectionsControllerProvider);
     } catch (error) {
-      state = state?.copyWith(audioError: error.toString());
+      state = state?.copyWith(
+        audioError: error.toString(),
+        activeAudioChannel: ActiveAudioChannel.none,
+      );
     }
+  }
+
+  void updateActiveAudioChannel(ActiveAudioChannel channel) {
+    final current = state;
+    if (current == null) return;
+    state = current.copyWith(activeAudioChannel: channel);
   }
 
   Future<void> rateSentence(Sentence sentence, int stars) async {
@@ -134,6 +175,11 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     if (current.mode == PracticeMode.recall) {
       await _logSpeakingRating(sentence.id, clamped);
     }
+    await _logSentenceRating(
+      sentence: sentence,
+      stars: clamped,
+      mode: current.mode == PracticeMode.shadowing ? 'Shadowing' : 'Active Recall',
+    );
 
     var practiced = Set<String>.from(current.sessionPracticedSentenceIds);
     practiced.add(sentence.id);
@@ -254,12 +300,17 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
       }
       final after = state;
       if (after != null && after.isPlayingContinuous && token == _loopToken) {
-        state = after.copyWith(isPlayingContinuous: false, currentRep: 0);
+        state = after.copyWith(
+          isPlayingContinuous: false,
+          currentRep: 0,
+          activeAudioChannel: ActiveAudioChannel.none,
+        );
       }
     }
   }
 
   void pauseContinuousPlayback() {
+    _manualSkipToSentenceId = null;
     _loopToken++;
     _isLoopRunning = false;
     final playback = ref.read(audioPlaybackServiceProvider);
@@ -269,7 +320,11 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final current = state;
     if (current == null) return;
     unawaited(_pip.clearContent());
-    state = current.copyWith(isPlayingContinuous: false, currentRep: 0);
+    state = current.copyWith(
+      isPlayingContinuous: false,
+      currentRep: 0,
+      activeAudioChannel: ActiveAudioChannel.none,
+    );
   }
 
   Future<void> togglePictureInPicture() async {
@@ -390,30 +445,63 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     );
   }
 
-  void setRepsPerSentence(int reps) {
-    if (reps != 1 && reps != 2 && reps != 3 && reps != 5) return;
+  void setAudioTranslationMode(AudioTranslationMode mode) {
     final current = state;
     if (current == null) return;
-    state = current.copyWith(repsPerSentence: reps);
+    state = current.copyWith(audioTranslationMode: mode);
+  }
+
+  void cycleAudioTranslationMode() {
+    final current = state;
+    if (current == null) return;
+    state = current.copyWith(
+      audioTranslationMode: current.audioTranslationMode.next,
+    );
+  }
+
+  void setTargetReps(int reps) {
+    setRepsPerSentence(reps);
+  }
+
+  void setRepsPerSentence(int reps) {
+    final current = state;
+    if (current == null) return;
+    final clamped = reps.clamp(1, 5);
+    state = current.copyWith(repsPerSentence: clamped);
   }
 
   void cycleRepsPerSentence() {
     final current = state;
     if (current == null) return;
-    final next = switch (current.repsPerSentence) {
-      1 => 2,
-      2 => 3,
-      3 => 5,
-      _ => 1,
-    };
+    final next = (current.repsPerSentence % 5) + 1;
     setRepsPerSentence(next);
+  }
+
+  void setPauseBetweenLanguages(Duration duration) {
+    final current = state;
+    if (current == null) return;
+    final clampedMs = duration.inMilliseconds.clamp(500, 3000);
+    state = current.copyWith(
+      pauseBetweenLanguages: Duration(milliseconds: clampedMs),
+    );
+  }
+
+  void setPauseBetweenSentences(Duration duration) {
+    final current = state;
+    if (current == null) return;
+    final clampedMs = duration.inMilliseconds.clamp(500, 4000);
+    state = current.copyWith(
+      pauseBetweenSentences: Duration(milliseconds: clampedMs),
+    );
   }
 
   void setPauseBetweenReps(Duration duration) {
     final current = state;
     if (current == null) return;
-    if (!PauseBetweenReps.presets.contains(duration)) return;
-    state = current.copyWith(pauseBetweenReps: duration);
+    final clampedMs = duration.inMilliseconds.clamp(250, 4000);
+    state = current.copyWith(
+      pauseBetweenReps: Duration(milliseconds: clampedMs),
+    );
   }
 
   void cyclePauseBetweenReps() {
@@ -422,6 +510,52 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     state = current.copyWith(
       pauseBetweenReps: PauseBetweenReps.cycle(current.pauseBetweenReps),
     );
+  }
+
+  void skipToNextSentence() {
+    final current = state;
+    if (current == null) return;
+    final sentences = current.visibleSentences;
+    if (sentences.isEmpty) return;
+
+    final currentIndex =
+        _sentenceIndexForId(sentences, current.activeSentenceId);
+    final nextIndex = (currentIndex + 1) % sentences.length;
+    final nextSentence = sentences[nextIndex];
+
+    if (current.isPlayingContinuous) {
+      _manualSkipToSentenceId = nextSentence.id;
+      state = current.copyWith(
+        activeSentenceId: nextSentence.id,
+        activeAudioChannel: ActiveAudioChannel.none,
+      );
+      ref.read(audioPlaybackServiceProvider).stop();
+    } else {
+      state = current.copyWith(activeSentenceId: nextSentence.id);
+    }
+  }
+
+  void skipToPreviousSentence() {
+    final current = state;
+    if (current == null) return;
+    final sentences = current.visibleSentences;
+    if (sentences.isEmpty) return;
+
+    final currentIndex =
+        _sentenceIndexForId(sentences, current.activeSentenceId);
+    final prevIndex = (currentIndex - 1 + sentences.length) % sentences.length;
+    final prevSentence = sentences[prevIndex];
+
+    if (current.isPlayingContinuous) {
+      _manualSkipToSentenceId = prevSentence.id;
+      state = current.copyWith(
+        activeSentenceId: prevSentence.id,
+        activeAudioChannel: ActiveAudioChannel.none,
+      );
+      ref.read(audioPlaybackServiceProvider).stop();
+    } else {
+      state = current.copyWith(activeSentenceId: prevSentence.id);
+    }
   }
 
   void setPlaybackSpeed(double speed) {
@@ -439,7 +573,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
   }
 
   bool _shouldContinueLoop(int token) {
-    return state?.isPlayingContinuous == true && token == _loopToken;
+    return state?.isPlayingContinuous == true &&
+        token == _loopToken &&
+        _manualSkipToSentenceId == null;
   }
 
   int _sentenceIndexForId(List<Sentence> sentences, String? id) {
@@ -475,6 +611,20 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
         await _runShadowingSentence(sentence, token);
       }
 
+      if (_manualSkipToSentenceId != null) {
+        currentId = _manualSkipToSentenceId!;
+        _manualSkipToSentenceId = null;
+        continue;
+      }
+      if (!_shouldContinueLoop(token)) return;
+
+      // Scenariusz A krok 4 / Scenariusz B krok 2: Odczekaj pauseBetweenSentencesMs i przejdź do następnego zdania
+      await _interruptibleDelay(state!.pauseBetweenSentences, token);
+      if (_manualSkipToSentenceId != null) {
+        currentId = _manualSkipToSentenceId!;
+        _manualSkipToSentenceId = null;
+        continue;
+      }
       if (!_shouldContinueLoop(token)) return;
 
       if (state!.mode == PracticeMode.shadowing &&
@@ -510,37 +660,11 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     await _publishPipRevealed(sentence);
     if (!_shouldContinueLoop(token)) return;
 
-    try {
-      final path = await _ensureTargetAudioPath(sentence);
-      if (!_shouldContinueLoop(token)) return;
-      if (path == null) {
-        pauseContinuousPlayback();
-        return;
-      }
-
-      final reps = state!.repsPerSentence;
-      for (var rep = 1; rep <= reps; rep++) {
-        if (!_shouldContinueLoop(token)) return;
-
-        state = state!.copyWith(currentRep: rep);
-
-        final playback = ref.read(audioPlaybackServiceProvider);
-        final duration = await playback.playFileUntilComplete(
-          path,
-          speed: state!.playbackSpeed,
-        );
-        if (!_shouldContinueLoop(token)) return;
-
-        await _logListeningTime(duration);
-        await _incrementSentenceReps(sentence.id);
-        if (!_shouldContinueLoop(token)) return;
-
-        await _interruptibleDelay(state!.pauseBetweenReps, token);
-      }
-    } catch (error) {
-      state = state?.copyWith(audioError: error.toString());
-      pauseContinuousPlayback();
-    }
+    await _runSentenceSequence(
+      sentence: sentence,
+      token: token,
+      isRecallMode: false,
+    );
   }
 
   Future<void> _runRecallSentence(Sentence sentence, int token) async {
@@ -553,37 +677,191 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     await _publishPipThinking(sentence);
     if (!_shouldContinueLoop(token)) return;
 
-    await _interruptibleDelay(state!.recallThinkingDuration, token);
-    if (!_shouldContinueLoop(token)) return;
+    await _runSentenceSequence(
+      sentence: sentence,
+      token: token,
+      isRecallMode: true,
+    );
+  }
 
-    final revealed = Set<String>.from(state!.revealedSentenceIds)
-      ..add(sentence.id);
-    state = state!.copyWith(revealedSentenceIds: revealed);
-    await _publishPipRevealed(sentence);
-    if (!_shouldContinueLoop(token)) return;
-
+  Future<void> _runSentenceSequence({
+    required Sentence sentence,
+    required int token,
+    required bool isRecallMode,
+  }) async {
     try {
-      final path = await _ensureTargetAudioPath(sentence);
+      final targetPath = await _ensureTargetAudioPath(sentence);
       if (!_shouldContinueLoop(token)) return;
-      if (path == null) {
+      if (targetPath == null) {
         pauseContinuousPlayback();
         return;
       }
 
       final playback = ref.read(audioPlaybackServiceProvider);
-      final duration = await playback.playFileUntilComplete(
-        path,
-        speed: state!.playbackSpeed,
-      );
-      if (!_shouldContinueLoop(token)) return;
+      var translationMode = state!.audioTranslationMode;
+      String? translationPath;
 
-      await _logListeningTime(duration);
-      await _incrementSentenceReps(sentence.id);
-      if (!_shouldContinueLoop(token)) return;
+      if (translationMode != AudioTranslationMode.disabled) {
+        translationPath = await _ensureTranslationAudioPath(sentence);
+        if (!_shouldContinueLoop(token)) return;
+        if (translationPath == null) {
+          debugPrint(
+            'Ostrzeżenie: Brak audio tłumaczenia dla zdania "${sentence.id}". '
+            'Fallback do trybu Target-only.',
+          );
+          translationMode = AudioTranslationMode.disabled;
+        }
+      }
 
-      await _interruptibleDelay(state!.pauseBetweenReps, token);
+      final reps = state!.targetReps;
+
+      switch (translationMode) {
+        case AudioTranslationMode.prefix:
+          // Scenariusz A: prefix (1x PL -> N x JP)
+          // 1. Odtwórz translationAudio (1x)
+          state = state!.copyWith(
+            activeAudioChannel: ActiveAudioChannel.translation,
+          );
+          final tDuration = await playback.playFileUntilComplete(
+            translationPath!,
+            speed: state!.playbackSpeed,
+          );
+          await _logListeningTime(tDuration);
+          state = state!.copyWith(activeAudioChannel: ActiveAudioChannel.none);
+          if (!_shouldContinueLoop(token)) return;
+
+          // 2. Odczekaj pauseBetweenLanguagesMs
+          await _interruptibleDelay(state!.pauseBetweenLanguages, token);
+          if (!_shouldContinueLoop(token)) return;
+
+          // Odkryj zdanie w trybie recall po pauzie Active Recall
+          if (isRecallMode) {
+            final revealed = Set<String>.from(state!.revealedSentenceIds)
+              ..add(sentence.id);
+            state = state!.copyWith(revealedSentenceIds: revealed);
+            await _publishPipRevealed(sentence);
+            if (!_shouldContinueLoop(token)) return;
+          }
+
+          // 3. Pętla i od 1 do targetReps
+          for (var rep = 1; rep <= reps; rep++) {
+            if (!_shouldContinueLoop(token)) return;
+            state = state!.copyWith(
+              currentRep: rep,
+              activeAudioChannel: ActiveAudioChannel.target,
+            );
+
+            final duration = await playback.playFileUntilComplete(
+              targetPath,
+              speed: state!.playbackSpeed,
+            );
+            state = state!.copyWith(activeAudioChannel: ActiveAudioChannel.none);
+            if (!_shouldContinueLoop(token)) return;
+
+            await _logListeningTime(duration);
+            await _incrementSentenceReps(sentence.id);
+            if (!_shouldContinueLoop(token)) return;
+
+            if (rep < reps) {
+              await _interruptibleDelay(state!.pauseBetweenReps, token);
+            }
+          }
+          break;
+
+        case AudioTranslationMode.alternating:
+          // Scenariusz B: alternating (PL -> JP -> PL -> JP...)
+          for (var rep = 1; rep <= reps; rep++) {
+            if (!_shouldContinueLoop(token)) return;
+            state = state!.copyWith(currentRep: rep);
+
+            // a. Odtwórz translationAudio
+            state = state!.copyWith(
+              activeAudioChannel: ActiveAudioChannel.translation,
+            );
+            final tDuration = await playback.playFileUntilComplete(
+              translationPath!,
+              speed: state!.playbackSpeed,
+            );
+            await _logListeningTime(tDuration);
+            state = state!.copyWith(activeAudioChannel: ActiveAudioChannel.none);
+            if (!_shouldContinueLoop(token)) return;
+
+            // b. Odczekaj pauseBetweenLanguagesMs
+            await _interruptibleDelay(state!.pauseBetweenLanguages, token);
+            if (!_shouldContinueLoop(token)) return;
+
+            if (isRecallMode && rep == 1) {
+              final revealed = Set<String>.from(state!.revealedSentenceIds)
+                ..add(sentence.id);
+              state = state!.copyWith(revealedSentenceIds: revealed);
+              await _publishPipRevealed(sentence);
+              if (!_shouldContinueLoop(token)) return;
+            }
+
+            // c. Odtwórz targetAudio
+            state = state!.copyWith(
+              activeAudioChannel: ActiveAudioChannel.target,
+            );
+            final duration = await playback.playFileUntilComplete(
+              targetPath,
+              speed: state!.playbackSpeed,
+            );
+            state = state!.copyWith(activeAudioChannel: ActiveAudioChannel.none);
+            if (!_shouldContinueLoop(token)) return;
+
+            await _logListeningTime(duration);
+            await _incrementSentenceReps(sentence.id);
+            if (!_shouldContinueLoop(token)) return;
+
+            // d. Jeśli i < targetReps, odczekaj pauseBetweenRepsMs
+            if (rep < reps) {
+              await _interruptibleDelay(state!.pauseBetweenReps, token);
+            }
+          }
+          break;
+
+        case AudioTranslationMode.disabled:
+          // Tryb standardowy (tylko język docelowy)
+          if (isRecallMode) {
+            await _interruptibleDelay(state!.recallThinkingDuration, token);
+            if (!_shouldContinueLoop(token)) return;
+
+            final revealed = Set<String>.from(state!.revealedSentenceIds)
+              ..add(sentence.id);
+            state = state!.copyWith(revealedSentenceIds: revealed);
+            await _publishPipRevealed(sentence);
+            if (!_shouldContinueLoop(token)) return;
+          }
+
+          for (var rep = 1; rep <= reps; rep++) {
+            if (!_shouldContinueLoop(token)) return;
+            state = state!.copyWith(
+              currentRep: rep,
+              activeAudioChannel: ActiveAudioChannel.target,
+            );
+
+            final duration = await playback.playFileUntilComplete(
+              targetPath,
+              speed: state!.playbackSpeed,
+            );
+            state = state!.copyWith(activeAudioChannel: ActiveAudioChannel.none);
+            if (!_shouldContinueLoop(token)) return;
+
+            await _logListeningTime(duration);
+            await _incrementSentenceReps(sentence.id);
+            if (!_shouldContinueLoop(token)) return;
+
+            if (rep < reps) {
+              await _interruptibleDelay(state!.pauseBetweenReps, token);
+            }
+          }
+          break;
+      }
     } catch (error) {
-      state = state?.copyWith(audioError: error.toString());
+      state = state?.copyWith(
+        audioError: error.toString(),
+        activeAudioChannel: ActiveAudioChannel.none,
+      );
       pauseContinuousPlayback();
     }
   }
@@ -621,6 +899,27 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     return path;
   }
 
+  Future<String?> _ensureTranslationAudioPath(Sentence sentence) async {
+    final current = state;
+    if (current == null) return null;
+
+    final tts = ref.read(azureTtsServiceProvider);
+    final repo = ref.read(collectionRepositoryProvider);
+
+    final path = await tts.ensureTranslationAudio(sentence);
+    if (path != null && path != sentence.translationAudioPath) {
+      final withPath = sentence.copyWith(translationAudioPath: path);
+      await repo.updateSentence(current.collection.id, withPath);
+
+      final refreshed =
+          await repo.getById(current.collection.id) ?? current.collection;
+      state = state?.copyWith(collection: refreshed);
+      ref.invalidate(collectionsControllerProvider);
+    }
+
+    return path;
+  }
+
   Future<void> _incrementSentenceReps(String sentenceId) async {
     final current = state;
     if (current == null) return;
@@ -646,7 +945,12 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
       sessionPracticedSentenceIds: practiced,
       sessionRepsCount: state!.sessionRepsCount + 1,
     );
-    await _logRepetition(sentenceId);
+    await _logRepetition(
+      sentenceId,
+      targetText: sentence.targetText,
+      sourceText: sentence.sourceText,
+      mode: current.mode == PracticeMode.shadowing ? 'Shadowing' : 'Active Recall',
+    );
     ref.invalidate(collectionsControllerProvider);
     ref.invalidate(metricsControllerProvider);
   }
@@ -670,11 +974,39 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     }
   }
 
-  Future<void> _logRepetition(String sentenceId) async {
+  Future<void> _logRepetition(
+    String sentenceId, {
+    String? targetText,
+    String? sourceText,
+    String? mode,
+  }) async {
     try {
-      await ref
-          .read(userMetricsRepositoryProvider)
-          .logRepetition(count: 1, sentenceId: sentenceId);
+      await ref.read(userMetricsRepositoryProvider).logRepetition(
+            count: 1,
+            sentenceId: sentenceId,
+            targetText: targetText,
+            sourceText: sourceText,
+            mode: mode,
+          );
+      ref.invalidate(metricsControllerProvider);
+    } on Object {
+      return;
+    }
+  }
+
+  Future<void> _logSentenceRating({
+    required Sentence sentence,
+    required int stars,
+    required String mode,
+  }) async {
+    try {
+      await ref.read(userMetricsRepositoryProvider).logSentenceRating(
+            sentenceId: sentence.id,
+            targetText: sentence.targetText,
+            sourceText: sentence.sourceText,
+            stars: stars,
+            mode: mode,
+          );
       ref.invalidate(metricsControllerProvider);
     } on Object {
       return;

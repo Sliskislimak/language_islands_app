@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
 import 'package:language_islands_app/features/info/presentation/screens/study_plans_screen.dart';
 import 'package:language_islands_app/features/metrics/domain/level_calculator.dart';
+import 'package:language_islands_app/features/metrics/presentation/screens/daily_history_screen.dart';
 import 'package:language_islands_app/features/metrics/providers/metrics_controller.dart';
 
 class MetricsScreen extends ConsumerWidget {
@@ -20,6 +21,22 @@ class MetricsScreen extends ConsumerWidget {
           'Biegłość',
           style: TextStyle(color: AppTheme.textLight, fontSize: 18),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Historia i Dziennik Dnia',
+            icon: const Icon(
+              Icons.auto_stories_rounded,
+              color: AppTheme.sakuraPrimary,
+            ),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DailyHistoryScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: metricsAsync.when(
         loading: () => const Center(
@@ -81,6 +98,30 @@ class _MetricsBody extends StatelessWidget {
         const SizedBox(height: 20),
         const _MethodBlock(),
         const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const DailyHistoryScreen(),
+              ),
+            );
+          },
+          style: OutlinedButton.styleFrom(
+            backgroundColor: AppTheme.surfaceElevated,
+            foregroundColor: AppTheme.textLight,
+            side: const BorderSide(color: AppTheme.surfaceBorder),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          ),
+          icon: const Icon(
+            Icons.auto_stories_rounded,
+            color: AppTheme.greenMatcha,
+          ),
+          label: const Text(
+            'Dziennik Postępów i Historia Dni',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+        ),
+        const SizedBox(height: 10),
         OutlinedButton.icon(
           onPressed: () {
             Navigator.of(context).push(

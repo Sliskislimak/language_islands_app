@@ -8,6 +8,7 @@ import 'package:language_islands_app/features/collections/presentation/edit_coll
 import 'package:language_islands_app/features/collections/presentation/import_collection_dialog.dart';
 import 'package:language_islands_app/features/info/presentation/screens/philosophy_screen.dart';
 import 'package:language_islands_app/features/info/presentation/screens/study_plans_screen.dart';
+import 'package:language_islands_app/features/metrics/presentation/screens/daily_history_screen.dart';
 import 'package:language_islands_app/features/metrics/presentation/screens/metrics_screen.dart';
 import 'package:language_islands_app/features/practice/presentation/practice_session_screen.dart';
 
@@ -39,6 +40,20 @@ class CollectionsScreen extends ConsumerWidget {
             icon: const Icon(
               Icons.calendar_today_rounded,
               color: AppTheme.sakuraPrimary,
+            ),
+          ),
+          IconButton(
+            tooltip: 'Historia i Dziennik Dnia',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DailyHistoryScreen(),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.auto_stories_rounded,
+              color: AppTheme.textLight,
             ),
           ),
           IconButton(

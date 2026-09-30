@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:language_islands_app/core/models/daily_sentence_entry.dart';
 import 'package:language_islands_app/core/models/user_metrics.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -10,8 +11,9 @@ import 'package:path_provider/path_provider.dart';
 /// Writes go through a temp file + backup rename so a crash cannot leave
 /// a half-written `user_metrics.json`.
 class UserMetricsRepository {
-  UserMetricsRepository();
+  UserMetricsRepository({this.metricsFileOverride});
 
+  final File? metricsFileOverride;
   UserMetrics? _cache;
   Future<void> _queue = Future.value();
 
@@ -25,11 +27,16 @@ class UserMetricsRepository {
   Future<void> logRepetition({
     required int count,
     String? sentenceId,
+    String? targetText,
+    String? sourceText,
+    String? mode,
+    DateTime? now,
   }) {
     if (count <= 0) return Future.value();
     return _enqueue(() async {
       final current = _cache ?? await _readFromDisk();
-      final today = UserMetrics.todayKey();
+      final effectiveDate = now ?? DateTime.now();
+      final today = UserMetrics.dateKey(effectiveDate);
 
       final nextReps = Map<String, int>.from(current.dailyRepsHistory);
       nextReps[today] = (nextReps[today] ?? 0) + count;
@@ -41,11 +48,138 @@ class UserMetricsRepository {
         _addId(nextPracticed, today, id);
       }
 
+      final nextSentenceEntries =
+          _copySentenceEntriesMap(current.dailySentenceEntries);
+      if (id != null && id.isNotEmpty && (targetText != null || sourceText != null)) {
+        final entries = List<DailySentenceEntry>.from(
+          nextSentenceEntries[today] ?? const [],
+        );
+        final matchIndex = entries.indexWhere(
+          (e) => e.sentenceId == id && (mode == null || e.mode == mode),
+        );
+        if (matchIndex >= 0) {
+          final existing = entries[matchIndex];
+          entries[matchIndex] = existing.copyWith(
+            reps: existing.reps + count,
+            targetText: targetText ?? existing.targetText,
+            sourceText: sourceText ?? existing.sourceText,
+            mode: mode ?? existing.mode,
+            timestamp: effectiveDate,
+          );
+        } else {
+          entries.add(
+            DailySentenceEntry(
+              sentenceId: id,
+              targetText: targetText ?? '',
+              sourceText: sourceText ?? '',
+              stars: 0,
+              mode: mode,
+              reps: count,
+              timestamp: effectiveDate,
+            ),
+          );
+        }
+        nextSentenceEntries[today] = entries;
+      }
+
       final updated = current.copyWith(
         totalReps: current.totalReps + count,
         dailyRepsHistory: nextReps,
         dailyPracticedSentenceIds: nextPracticed,
+        dailySentenceEntries: nextSentenceEntries,
       );
+      await _writeToDisk(updated);
+      _cache = updated;
+    });
+  }
+
+  Future<void> logSentenceRating({
+    required String sentenceId,
+    required String targetText,
+    required String sourceText,
+    required int stars,
+    String? mode,
+    DateTime? now,
+  }) {
+    final id = sentenceId.trim();
+    if (id.isEmpty) return Future.value();
+    final clamped = stars.clamp(0, 5);
+    return _enqueue(() async {
+      final current = _cache ?? await _readFromDisk();
+      final effectiveDate = now ?? DateTime.now();
+      final today = UserMetrics.dateKey(effectiveDate);
+
+      final nextPracticed =
+          _copyIdMap(current.dailyPracticedSentenceIds);
+      _addId(nextPracticed, today, id);
+
+      final nextSentenceEntries =
+          _copySentenceEntriesMap(current.dailySentenceEntries);
+      final entries = List<DailySentenceEntry>.from(
+        nextSentenceEntries[today] ?? const [],
+      );
+
+      final matchIndex = entries.indexWhere(
+        (e) => e.sentenceId == id && (mode == null || e.mode == mode),
+      );
+      if (matchIndex >= 0) {
+        final existing = entries[matchIndex];
+        entries[matchIndex] = existing.copyWith(
+          targetText: targetText.isNotEmpty ? targetText : existing.targetText,
+          sourceText: sourceText.isNotEmpty ? sourceText : existing.sourceText,
+          stars: clamped,
+          mode: mode ?? existing.mode,
+          timestamp: effectiveDate,
+        );
+      } else {
+        entries.add(
+          DailySentenceEntry(
+            sentenceId: id,
+            targetText: targetText,
+            sourceText: sourceText,
+            stars: clamped,
+            mode: mode,
+            reps: 0,
+            timestamp: effectiveDate,
+          ),
+        );
+      }
+      nextSentenceEntries[today] = entries;
+
+      final updated = current.copyWith(
+        dailyPracticedSentenceIds: nextPracticed,
+        dailySentenceEntries: nextSentenceEntries,
+      );
+      await _writeToDisk(updated);
+      _cache = updated;
+    });
+  }
+
+  Future<void> saveDayRating({
+    required String dateKey,
+    required int stars,
+  }) {
+    return _enqueue(() async {
+      final current = _cache ?? await _readFromDisk();
+      final nextRatings = Map<String, int>.from(current.dailyDayRatings);
+      nextRatings[dateKey] = stars.clamp(0, 5);
+
+      final updated = current.copyWith(dailyDayRatings: nextRatings);
+      await _writeToDisk(updated);
+      _cache = updated;
+    });
+  }
+
+  Future<void> saveDailyNote({
+    required String dateKey,
+    required String note,
+  }) {
+    return _enqueue(() async {
+      final current = _cache ?? await _readFromDisk();
+      final nextNotes = Map<String, String>.from(current.dailyNotes);
+      nextNotes[dateKey] = note;
+
+      final updated = current.copyWith(dailyNotes: nextNotes);
       await _writeToDisk(updated);
       _cache = updated;
     });
@@ -164,6 +298,7 @@ class UserMetricsRepository {
   }
 
   Future<File> _metricsFile() async {
+    if (metricsFileOverride != null) return metricsFileOverride!;
     final docs = await getApplicationDocumentsDirectory();
     return File(p.join(docs.path, 'metrics', 'user_metrics.json'));
   }
@@ -174,6 +309,15 @@ class UserMetricsRepository {
     return {
       for (final entry in source.entries)
         entry.key: List<String>.from(entry.value),
+    };
+  }
+
+  static Map<String, List<DailySentenceEntry>> _copySentenceEntriesMap(
+    Map<String, List<DailySentenceEntry>> source,
+  ) {
+    return {
+      for (final entry in source.entries)
+        entry.key: List<DailySentenceEntry>.from(entry.value),
     };
   }
 

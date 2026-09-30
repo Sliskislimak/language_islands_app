@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:language_islands_app/core/models/audio_translation_mode.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
+import 'package:language_islands_app/features/practice/presentation/widgets/audio_settings_sheet.dart';
+import 'package:language_islands_app/features/practice/presentation/widgets/landscape_exercise_view.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/sentence_card_widget.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/weak_sentences_filter_button.dart';
 import 'package:language_islands_app/features/practice/providers/practice_session_notifier.dart';
@@ -53,8 +56,17 @@ class _FocusModeScreenState extends ConsumerState<FocusModeScreen> {
     final count = session?.visibleSentences.length ?? 0;
     if (count == 0) return;
     final next = index.clamp(0, count - 1);
+    final prev = _cardIndex;
     setState(() => _cardIndex = next);
-    ref.read(practiceSessionProvider.notifier).setActiveSentenceIndex(next);
+    if (session?.isPlayingContinuous == true) {
+      if (next > prev) {
+        ref.read(practiceSessionProvider.notifier).skipToNextSentence();
+      } else if (next < prev) {
+        ref.read(practiceSessionProvider.notifier).skipToPreviousSentence();
+      }
+    } else {
+      ref.read(practiceSessionProvider.notifier).setActiveSentenceIndex(next);
+    }
   }
 
   void _syncCardIndexToVisible() {
@@ -141,6 +153,21 @@ class _FocusModeScreenState extends ConsumerState<FocusModeScreen> {
       practiceSessionProvider.select((s) => s?.visibleSentences.length ?? 0),
       (previous, next) => _syncCardIndexToVisible(),
     );
+    ref.listen<String?>(
+      practiceSessionProvider.select((s) => s?.activeSentenceId),
+      (previous, next) {
+        if (next != null && next != previous) {
+          _syncCardIndexToVisible();
+        }
+      },
+    );
+
+    final orientation = MediaQuery.orientationOf(context);
+    if (orientation == Orientation.landscape) {
+      return LandscapeExerciseView(
+        onExit: () => Navigator.of(context).pop(),
+      );
+    }
 
     final session = ref.watch(practiceSessionProvider);
     if (session == null) {
@@ -282,6 +309,7 @@ class _FocusModeScreenState extends ConsumerState<FocusModeScreen> {
                         isRevealed: isRevealed,
                         onShadowingReveal: () => _shadowingReveal(sentence),
                         onRecallReveal: _onRevealOrPlay,
+                        activeAudioChannel: session.activeAudioChannel,
                       ),
                     ),
                   ),
@@ -304,7 +332,7 @@ class _FocusModeScreenState extends ConsumerState<FocusModeScreen> {
   }
 }
 
-class _FocusTopBar extends StatelessWidget {
+class _FocusTopBar extends ConsumerWidget {
   const _FocusTopBar({
     required this.title,
     required this.sentence,
@@ -322,7 +350,7 @@ class _FocusTopBar extends StatelessWidget {
   final VoidCallback onOpenNotes;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
       child: Row(
@@ -352,6 +380,14 @@ class _FocusTopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 4),
+          Tooltip(
+            message: 'Lektor tłumaczenia & Audio',
+            child: IconButton(
+              onPressed: () => showAudioSettingsSheet(context, ref),
+              icon: const Icon(Icons.tune_rounded, color: AppTheme.textLight),
+            ),
+          ),
+          const SizedBox(width: 2),
           Tooltip(
             message: sentence.hasNotes
                 ? 'Notatki (zawiera notatki)'
@@ -399,6 +435,7 @@ class _FocusCardContent extends StatelessWidget {
     required this.isRevealed,
     required this.onShadowingReveal,
     required this.onRecallReveal,
+    this.activeAudioChannel = ActiveAudioChannel.none,
   });
 
   final Sentence sentence;
@@ -406,21 +443,69 @@ class _FocusCardContent extends StatelessWidget {
   final bool isRevealed;
   final VoidCallback onShadowingReveal;
   final VoidCallback onRecallReveal;
+  final ActiveAudioChannel activeAudioChannel;
 
   @override
   Widget build(BuildContext context) {
     if (mode == PracticeMode.recall && !isRevealed) {
+      final isHighlight = activeAudioChannel.isTranslation;
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            sentence.sourceText,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppTheme.textLight,
-              fontSize: 26,
-              fontWeight: FontWeight.w600,
-              height: 1.35,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: isHighlight
+                ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                : EdgeInsets.zero,
+            decoration: isHighlight
+                ? BoxDecoration(
+                    color: AppTheme.yellowPrompt.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppTheme.yellowPrompt.withValues(alpha: 0.8),
+                      width: 1.5,
+                    ),
+                  )
+                : null,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isHighlight) ...[
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(
+                        Icons.volume_up_rounded,
+                        size: 20,
+                        color: AppTheme.yellowPrompt,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Lektor tłumaczenia (PL)',
+                        style: TextStyle(
+                          color: AppTheme.yellowPrompt,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                Text(
+                  sentence.sourceText,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: isHighlight
+                        ? AppTheme.yellowPrompt
+                        : AppTheme.textLight,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 28),
@@ -447,6 +532,7 @@ class _FocusCardContent extends StatelessWidget {
             gap: 10,
             showSource: true,
             enableCopy: false,
+            activeAudioChannel: activeAudioChannel,
           ),
           if (sentence.visualEmojis.isNotEmpty) ...[
             const SizedBox(height: 24),
@@ -469,6 +555,7 @@ class _FocusCardContent extends StatelessWidget {
           gap: 10,
           showSource: isRevealed,
           enableCopy: false,
+          activeAudioChannel: activeAudioChannel,
         ),
         if (!isRevealed) ...[
           const SizedBox(height: 28),
@@ -587,10 +674,10 @@ class _FocusControlPanel extends StatelessWidget {
                     onTap: () => onRate(star),
                     borderRadius: BorderRadius.circular(8),
                     child: Padding(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(8),
                       child: Icon(
                         Icons.star_rounded,
-                        size: 36,
+                        size: 42,
                         color: filled
                             ? AppTheme.greenMatcha
                             : AppTheme.surfaceBorder,

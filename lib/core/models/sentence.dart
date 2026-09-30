@@ -8,6 +8,7 @@ class Sentence {
     this.phoneticReading,
     required this.sourceText,
     this.targetAudioPath,
+    this.translationAudioPath,
     this.comprehensionScore = 0,
     this.speakingScore = 0,
     this.totalReps = 0,
@@ -21,6 +22,7 @@ class Sentence {
   final String? phoneticReading;
   final String sourceText;
   final String? targetAudioPath;
+  final String? translationAudioPath;
   final int comprehensionScore;
   final int speakingScore;
   final int totalReps;
@@ -49,6 +51,8 @@ class Sentence {
     String? sourceText,
     String? targetAudioPath,
     bool clearTargetAudioPath = false,
+    String? translationAudioPath,
+    bool clearTranslationAudioPath = false,
     int? comprehensionScore,
     int? speakingScore,
     int? totalReps,
@@ -68,6 +72,9 @@ class Sentence {
       targetAudioPath: clearTargetAudioPath
           ? null
           : (targetAudioPath ?? this.targetAudioPath),
+      translationAudioPath: clearTranslationAudioPath
+          ? null
+          : (translationAudioPath ?? this.translationAudioPath),
       comprehensionScore: comprehensionScore ?? this.comprehensionScore,
       speakingScore: speakingScore ?? this.speakingScore,
       totalReps: totalReps ?? this.totalReps,
@@ -97,6 +104,12 @@ class Sentence {
       phoneticReading: _optionalString(map['phoneticReading']),
       sourceText: sourceText,
       targetAudioPath: _optionalString(map['targetAudioPath']),
+      translationAudioPath: _optionalString(
+        map['translationAudioPath'] ??
+            map['translationAudio'] ??
+            map['sourceAudioPath'] ??
+            map['sourceAudio'],
+      ),
       comprehensionScore: _score(map['comprehensionScore']),
       speakingScore: _score(map['speakingScore']),
       totalReps: _nonNegativeInt(map['totalReps']),
@@ -121,6 +134,7 @@ class Sentence {
       'phoneticReading': phoneticReading,
       'sourceText': sourceText,
       'targetAudioPath': targetAudioPath,
+      'translationAudioPath': translationAudioPath,
       'comprehensionScore': comprehensionScore,
       'speakingScore': speakingScore,
       'totalReps': totalReps,

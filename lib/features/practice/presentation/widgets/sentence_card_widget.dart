@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:language_islands_app/core/models/audio_translation_mode.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
@@ -51,6 +52,7 @@ class SentenceCardWidget extends StatefulWidget {
     required this.onToggleReveal,
     required this.onRate,
     this.onSaveNotes,
+    this.activeAudioChannel = ActiveAudioChannel.none,
   });
 
   final Sentence sentence;
@@ -62,6 +64,7 @@ class SentenceCardWidget extends StatefulWidget {
   final VoidCallback onToggleReveal;
   final ValueChanged<int> onRate;
   final ValueChanged<String>? onSaveNotes;
+  final ActiveAudioChannel activeAudioChannel;
 
   @override
   State<SentenceCardWidget> createState() => _SentenceCardWidgetState();
@@ -202,6 +205,9 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
                 sentence: widget.sentence,
                 currentMode: widget.currentMode,
                 isRevealed: widget.isRevealed,
+                activeAudioChannel: widget.isActive
+                    ? widget.activeAudioChannel
+                    : ActiveAudioChannel.none,
               ),
               const SizedBox(height: 10),
               Row(
@@ -212,6 +218,9 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
                       sentence: widget.sentence,
                       isRevealed: widget.isRevealed,
                       onToggleReveal: widget.onToggleReveal,
+                      activeAudioChannel: widget.isActive
+                          ? widget.activeAudioChannel
+                          : ActiveAudioChannel.none,
                     ),
                   ),
                   if (widget.sentence.visualEmojis.isNotEmpty)
@@ -626,12 +635,12 @@ class _StarRatingRow extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => onRate(starIndex),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(6),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 4),
               child: Icon(
                 Icons.star_rounded,
-                size: 18,
+                size: 28,
                 color: filled ? AppTheme.greenMatcha : AppTheme.surfaceBorder,
               ),
             ),
@@ -672,11 +681,13 @@ class _TextSection extends StatelessWidget {
     required this.sentence,
     required this.currentMode,
     required this.isRevealed,
+    this.activeAudioChannel = ActiveAudioChannel.none,
   });
 
   final Sentence sentence;
   final PracticeMode currentMode;
   final bool isRevealed;
+  final ActiveAudioChannel activeAudioChannel;
 
   bool get _showRecallPromptOnly =>
       currentMode == PracticeMode.recall && !isRevealed;
@@ -684,15 +695,48 @@ class _TextSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (_showRecallPromptOnly) {
-      return _CopyableLine(
-        text: sentence.sourceText,
-        style: const TextStyle(
-          color: AppTheme.textLight,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          height: 1.35,
+      final isHighlight = activeAudioChannel.isTranslation;
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: isHighlight
+            ? const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+            : EdgeInsets.zero,
+        decoration: isHighlight
+            ? BoxDecoration(
+                color: AppTheme.yellowPrompt.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.yellowPrompt.withValues(alpha: 0.75),
+                  width: 1.5,
+                ),
+              )
+            : null,
+        child: Row(
+          children: [
+            if (isHighlight) ...[
+              const Icon(
+                Icons.volume_up_rounded,
+                size: 20,
+                color: AppTheme.yellowPrompt,
+              ),
+              const SizedBox(width: 8),
+            ],
+            Expanded(
+              child: _CopyableLine(
+                text: sentence.sourceText,
+                style: TextStyle(
+                  color: isHighlight
+                      ? AppTheme.yellowPrompt
+                      : AppTheme.textLight,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  height: 1.35,
+                ),
+                copyMessage: 'Skopiowano tłumaczenie',
+              ),
+            ),
+          ],
         ),
-        copyMessage: 'Skopiowano tłumaczenie',
       );
     }
 
@@ -701,6 +745,7 @@ class _TextSection extends StatelessWidget {
       targetFontSize: 21,
       katakanaFontSize: 15,
       romajiFontSize: 13,
+      activeAudioChannel: activeAudioChannel,
     );
   }
 }
@@ -717,6 +762,7 @@ class JapaneseReadingColumn extends StatelessWidget {
     this.gap = 6,
     this.showSource = false,
     this.enableCopy = true,
+    this.activeAudioChannel = ActiveAudioChannel.none,
   });
 
   final Sentence sentence;
@@ -728,6 +774,7 @@ class JapaneseReadingColumn extends StatelessWidget {
   final double gap;
   final bool showSource;
   final bool enableCopy;
+  final ActiveAudioChannel activeAudioChannel;
 
   @override
   Widget build(BuildContext context) {
@@ -735,7 +782,10 @@ class JapaneseReadingColumn extends StatelessWidget {
     final align = textAlign == TextAlign.center
         ? CrossAxisAlignment.center
         : CrossAxisAlignment.start;
-    final children = <Widget>[
+    final isTargetActive = activeAudioChannel.isTarget;
+    final isTranslationActive = activeAudioChannel.isTranslation;
+
+    final targetChildren = <Widget>[
       _readingLine(
         text: lines.targetText,
         style: TextStyle(
@@ -743,6 +793,14 @@ class JapaneseReadingColumn extends StatelessWidget {
           fontSize: targetFontSize,
           fontWeight: FontWeight.w700,
           height: 1.35,
+          shadows: isTargetActive
+              ? const [
+                  Shadow(
+                    color: AppTheme.sakuraAccent,
+                    blurRadius: 12,
+                  ),
+                ]
+              : null,
         ),
         copyMessage: 'Skopiowano tekst japoński',
       ),
@@ -750,7 +808,7 @@ class JapaneseReadingColumn extends StatelessWidget {
 
     final katakana = lines.katakana;
     if (katakana != null) {
-      children
+      targetChildren
         ..add(SizedBox(height: gap))
         ..add(
           _readingLine(
@@ -768,7 +826,7 @@ class JapaneseReadingColumn extends StatelessWidget {
 
     final romaji = lines.romaji;
     if (romaji != null) {
-      children
+      targetChildren
         ..add(SizedBox(height: gap))
         ..add(
           _readingLine(
@@ -776,34 +834,141 @@ class JapaneseReadingColumn extends StatelessWidget {
             style: TextStyle(
               color: AppTheme.yellowPrompt,
               fontSize: romajiFontSize,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               height: 1.35,
+              shadows: isTargetActive
+                  ? const [
+                      Shadow(
+                        color: AppTheme.yellowPrompt,
+                        blurRadius: 10,
+                      ),
+                    ]
+                  : null,
             ),
             copyMessage: 'Skopiowano zapis fonetyczny',
           ),
         );
     }
 
-    if (showSource) {
-      children
-        ..add(SizedBox(height: gap + 4))
-        ..add(
+    final targetBlock = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: isTargetActive
+          ? const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+          : EdgeInsets.zero,
+      decoration: isTargetActive
+          ? BoxDecoration(
+              color: AppTheme.sakuraAccent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.sakuraAccent.withValues(alpha: 0.7),
+                width: 1.5,
+              ),
+            )
+          : null,
+      child: Column(
+        crossAxisAlignment: align,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isTargetActive) ...[
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(
+                  Icons.volume_up_rounded,
+                  size: 16,
+                  color: AppTheme.sakuraPrimary,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Japoński (Audio docelowe)',
+                  style: TextStyle(
+                    color: AppTheme.sakuraPrimary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+          ],
+          ...targetChildren,
+        ],
+      ),
+    );
+
+    if (!showSource) {
+      return targetBlock;
+    }
+
+    final sourceBlock = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: isTranslationActive
+          ? const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+          : EdgeInsets.zero,
+      decoration: isTranslationActive
+          ? BoxDecoration(
+              color: AppTheme.yellowPrompt.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.yellowPrompt.withValues(alpha: 0.75),
+                width: 1.5,
+              ),
+            )
+          : null,
+      child: Column(
+        crossAxisAlignment: align,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isTranslationActive) ...[
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(
+                  Icons.volume_up_rounded,
+                  size: 16,
+                  color: AppTheme.yellowPrompt,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Tłumaczenie (Lektor PL)',
+                  style: TextStyle(
+                    color: AppTheme.yellowPrompt,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+          ],
           _readingLine(
             text: sentence.sourceText,
             style: TextStyle(
-              color: AppTheme.textMuted,
+              color: isTranslationActive
+                  ? AppTheme.yellowPrompt
+                  : AppTheme.textMuted,
               fontSize: sourceFontSize,
+              fontWeight: isTranslationActive
+                  ? FontWeight.w600
+                  : FontWeight.normal,
               height: 1.4,
             ),
             copyMessage: 'Skopiowano tłumaczenie',
           ),
-        );
-    }
+        ],
+      ),
+    );
 
     return Column(
       crossAxisAlignment: align,
       mainAxisSize: MainAxisSize.min,
-      children: children,
+      children: [
+        targetBlock,
+        SizedBox(height: gap + 4),
+        sourceBlock,
+      ],
     );
   }
 
@@ -828,39 +993,82 @@ class _RevealBar extends StatelessWidget {
     required this.sentence,
     required this.isRevealed,
     required this.onToggleReveal,
+    this.activeAudioChannel = ActiveAudioChannel.none,
   });
 
   final Sentence sentence;
   final bool isRevealed;
   final VoidCallback onToggleReveal;
+  final ActiveAudioChannel activeAudioChannel;
 
   @override
   Widget build(BuildContext context) {
+    final isTranslationActive = activeAudioChannel.isTranslation;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onToggleReveal,
         borderRadius: BorderRadius.circular(6),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: isRevealed
-              ? GestureDetector(
-                  onLongPress: () => _copyToClipboard(
-                    context,
-                    sentence.sourceText,
-                    'Skopiowano tłumaczenie',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: isTranslationActive
+              ? const EdgeInsets.symmetric(horizontal: 8, vertical: 6)
+              : const EdgeInsets.symmetric(vertical: 6),
+          decoration: isTranslationActive
+              ? BoxDecoration(
+                  color: AppTheme.yellowPrompt.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppTheme.yellowPrompt.withValues(alpha: 0.75),
+                    width: 1.2,
                   ),
-                  child: Tooltip(
-                    message: 'Przytrzymaj, aby skopiować',
-                    child: Text(
-                      sentence.sourceText,
-                      style: const TextStyle(
-                        color: AppTheme.textMuted,
-                        fontSize: 14,
-                        height: 1.35,
+                )
+              : null,
+          child: isRevealed
+              ? Row(
+                  children: [
+                    if (isTranslationActive) ...[
+                      const Icon(
+                        Icons.volume_up_rounded,
+                        size: 16,
+                        color: AppTheme.yellowPrompt,
+                      ),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Tłumaczenie (Lektor PL): ',
+                        style: TextStyle(
+                          color: AppTheme.yellowPrompt,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                    Expanded(
+                      child: GestureDetector(
+                        onLongPress: () => _copyToClipboard(
+                          context,
+                          sentence.sourceText,
+                          'Skopiowano tłumaczenie',
+                        ),
+                        child: Tooltip(
+                          message: 'Przytrzymaj, aby skopiować',
+                          child: Text(
+                            sentence.sourceText,
+                            style: TextStyle(
+                              color: isTranslationActive
+                                  ? AppTheme.yellowPrompt
+                                  : AppTheme.textMuted,
+                              fontSize: 14,
+                              fontWeight: isTranslationActive
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 )
               : Row(
                   mainAxisSize: MainAxisSize.min,
