@@ -80,5 +80,59 @@ void main() {
         contains('☕'),
       );
     });
+
+    test('detects N5 everyday objects: key, umbrella, camera, photo, window, light', () {
+      expect(
+        VisualCueDetector.detectEmojis(
+          targetText: 'これは私の鍵です。',
+          phoneticReading: 'Kore wa watashi no kagi desu.',
+          sourceText: 'This is my key.',
+        ),
+        contains('🔑'),
+      );
+
+      expect(
+        VisualCueDetector.detectEmojis(
+          targetText: '傘と鍵を持ちました。',
+          sourceText: 'An umbrella and key, I took.',
+        ),
+        containsAll(['🔑', '☂️']),
+      );
+
+      expect(
+        VisualCueDetector.detectEmojis(
+          targetText: '日本のカメラを買いました。',
+          sourceText: 'A Japanese camera, I bought.',
+        ),
+        contains('📷'),
+      );
+
+      expect(
+        VisualCueDetector.detectEmojis(
+          targetText: '寒いから、窓を閉めます。',
+          sourceText: 'Because it is cold, I close the window.',
+        ),
+        contains('🪟'),
+      );
+
+      expect(
+        VisualCueDetector.detectEmojis(
+          targetText: '暗いから、電気を点けます。',
+          sourceText: 'Because it is dark, I turn on the light.',
+        ),
+        contains('💡'),
+      );
+    });
+
+    test('train densha does not trigger car emoji due to compound exclusion', () {
+      final emojis = VisualCueDetector.detectEmojis(
+        targetText: '次の駅で電車を降ります。',
+        phoneticReading: 'Tsugi no eki de densha o orimasu.',
+        sourceText: 'At the next station, the train I get off.',
+      );
+
+      expect(emojis, contains('🚆'));
+      expect(emojis, isNot(contains('🚗')));
+    });
   });
 }

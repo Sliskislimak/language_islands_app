@@ -138,6 +138,7 @@ class VisualCueDetector {
     VisualCueRule(
       emoji: '🚗',
       japaneseSubstrings: ['車', 'くるま'],
+      excludeJapaneseSubstrings: ['電車', '自転車'],
       latinWords: [
         'samochód', 'samochodu', 'samochodem', 'samochody', 'auto', 'auta', 'autem',
         'car', 'cars', 'coche', 'carro', 'kuruma',
@@ -295,7 +296,7 @@ class VisualCueDetector {
       emoji: '⏰',
       japaneseSubstrings: ['時計', '時間', 'とけい', 'じかん'],
       latinWords: [
-        'zegarek', 'zegar', 'czas', 'godzina', 'time', 'clock', 'watch', 'reloj', 'hora', 'tokei', 'jikan',
+        'zegarek', 'zegar', 'czas', 'godzina', 'time', 'clock', 'wristwatch', 'reloj', 'hora', 'tokei', 'jikan',
       ],
     ),
     // Sun / Słońce
@@ -325,17 +326,17 @@ class VisualCueDetector {
     // Flower / Kwiat / Sakura
     VisualCueRule(
       emoji: '🌸',
-      japaneseSubstrings: ['花', '桜', 'はな', 'さくら'],
+      japaneseSubstrings: ['花', 'お花', '桜', 'さくら'],
       latinWords: [
-        'kwiat', 'kwiaty', 'kwiatów', 'sakura', 'flower', 'flowers', 'flor', 'hana',
+        'kwiat', 'kwiaty', 'kwiatów', 'sakura', 'flower', 'flowers', 'flor',
       ],
     ),
-    // Tree / Drzewo
+    // Tree / Forest / Drzewo / Las
     VisualCueRule(
       emoji: '🌳',
-      japaneseSubstrings: ['木', 'き', '森', 'もり'],
+      japaneseSubstrings: ['木', '森', 'もり'],
       latinWords: [
-        'drzewo', 'drzewa', 'las', 'tree', 'trees', 'forest', 'arbol', 'árbol', 'ki', 'mori',
+        'drzewo', 'drzewa', 'las', 'tree', 'trees', 'forest', 'arbol', 'árbol', 'mori',
       ],
     ),
     // Sea / Beach / Morze
@@ -352,6 +353,134 @@ class VisualCueDetector {
       japaneseSubstrings: ['山', 'やま', '富士山'],
       latinWords: [
         'góra', 'góry', 'górach', 'mountain', 'mount', 'montaña', 'yama', 'fuji',
+      ],
+    ),
+    // Key / Klucz / Kagi
+    VisualCueRule(
+      emoji: '🔑',
+      japaneseSubstrings: ['鍵', 'かぎ'],
+      latinWords: [
+        'klucz', 'klucza', 'klucze', 'key', 'keys', 'llave', 'kagi',
+      ],
+    ),
+    // Camera / Aparat / Kamera
+    VisualCueRule(
+      emoji: '📷',
+      japaneseSubstrings: ['カメラ', 'かめら'],
+      latinWords: [
+        'aparat', 'kamera', 'camera', 'kamera',
+      ],
+    ),
+    // Umbrella / Parasol / Kasa
+    VisualCueRule(
+      emoji: '☂️',
+      japaneseSubstrings: ['傘', 'かさ'],
+      latinWords: [
+        'parasol', 'parasolka', 'umbrella', 'paraguas', 'kasa',
+      ],
+    ),
+    // Photo / Zdjęcie / Shashin
+    VisualCueRule(
+      emoji: '📸',
+      japaneseSubstrings: ['写真', 'しゃしん'],
+      latinWords: [
+        'zdjęcie', 'zdjęcia', 'fotografia', 'photo', 'photos', 'picture', 'shashin',
+      ],
+    ),
+    // Window / Okno / Mado
+    VisualCueRule(
+      emoji: '🪟',
+      japaneseSubstrings: ['窓', 'まど'],
+      latinWords: [
+        'okno', 'okna', 'window', 'ventana', 'mado',
+      ],
+    ),
+    // Light / Światło / Denki
+    VisualCueRule(
+      emoji: '💡',
+      japaneseSubstrings: ['電気', 'でんき'],
+      latinWords: [
+        'światło', 'prąd', 'elektryczność', 'light', 'electricity', 'luz', 'denki',
+      ],
+    ),
+    // Pen / Długopis / Pióro
+    VisualCueRule(
+      emoji: '🖊️',
+      japaneseSubstrings: ['ペン', 'ボールペン'],
+      latinWords: [
+        'długopis', 'pióro', 'pen', 'boligrafo', 'bolígrafo',
+      ],
+    ),
+    // Scissors / Nożyczki / Hasami
+    VisualCueRule(
+      emoji: '✂️',
+      japaneseSubstrings: ['はさみ', 'ハサミ', '鋏'],
+      latinWords: [
+        'nożyczki', 'scissors', 'tijeras', 'hasami',
+      ],
+    ),
+    // Chair / Krzesło / Isu
+    VisualCueRule(
+      emoji: '🪑',
+      japaneseSubstrings: ['椅子', 'いす'],
+      latinWords: [
+        'krzesło', 'krzesła', 'chair', 'silla', 'isu',
+      ],
+    ),
+    // Desk / Biurko / Tsukue
+    VisualCueRule(
+      emoji: '🪵',
+      japaneseSubstrings: ['机', 'つくえ'],
+      latinWords: [
+        'biurko', 'biurka', 'desk', 'tsukue',
+      ],
+    ),
+    // Park / Kouen
+    VisualCueRule(
+      emoji: '🏞️',
+      japaneseSubstrings: ['公園', 'こうえん'],
+      latinWords: [
+        'park', 'parku', 'kouen', 'kōen',
+      ],
+    ),
+    // Subway / Metro / Chikatetsu
+    VisualCueRule(
+      emoji: '🚇',
+      japaneseSubstrings: ['地下鉄', 'ちかてつ'],
+      latinWords: [
+        'metro', 'metrem', 'subway', 'chikatetsu',
+      ],
+    ),
+    // Student / Uczeń / Gakusei
+    VisualCueRule(
+      emoji: '🎒',
+      japaneseSubstrings: ['学生', 'がくせい'],
+      latinWords: [
+        'student', 'studenci', 'uczeń', 'gakusei', 'studentka',
+      ],
+    ),
+    // Clothes / Ubranie / Fuku
+    VisualCueRule(
+      emoji: '👕',
+      japaneseSubstrings: ['服', '洋服', 'ふく'],
+      latinWords: [
+        'ubranie', 'ubrania', 'clothes', 'clothing', 'ropa', 'fuku',
+      ],
+    ),
+    // Dictionary / Słownik / Jisho
+    VisualCueRule(
+      emoji: '📕',
+      japaneseSubstrings: ['辞書', 'じしょ'],
+      latinWords: [
+        'słownik', 'dictionary', 'diccionario', 'jisho',
+      ],
+    ),
+    // Room / Pokój / Heya
+    VisualCueRule(
+      emoji: '🛋️',
+      japaneseSubstrings: ['部屋', 'へや'],
+      latinWords: [
+        'pokój', 'pokoju', 'room', 'habitacion', 'habitación', 'heya',
       ],
     ),
     // Doctor / Lekarz
@@ -389,9 +518,9 @@ class VisualCueDetector {
     // Love / Like / Miłość
     VisualCueRule(
       emoji: '❤️',
-      japaneseSubstrings: ['好き', '大好き', '愛', 'あい', 'すき'],
+      japaneseSubstrings: ['好き', '大好き', '愛', '愛してる', 'すき'],
       latinWords: [
-        'kochać', 'miłość', 'lubić', 'uwielbiam', 'love', 'like', 'amor', 'amar', 'ai', 'suki', 'daisuki',
+        'kochać', 'miłość', 'lubić', 'uwielbiam', 'love', 'like', 'amor', 'amar', 'suki', 'daisuki',
       ],
     ),
   ];
@@ -434,8 +563,19 @@ class VisualCueDetector {
       var hit = false;
       for (final sub in rule.japaneseSubstrings) {
         if (japaneseHaystack.contains(sub)) {
-          hit = true;
-          break;
+          if (rule.excludeJapaneseSubstrings.isNotEmpty) {
+            var remaining = japaneseHaystack;
+            for (final exc in rule.excludeJapaneseSubstrings) {
+              remaining = remaining.replaceAll(exc, '');
+            }
+            if (remaining.contains(sub)) {
+              hit = true;
+              break;
+            }
+          } else {
+            hit = true;
+            break;
+          }
         }
       }
 
@@ -478,9 +618,11 @@ class VisualCueRule {
     required this.emoji,
     this.japaneseSubstrings = const [],
     this.latinWords = const [],
+    this.excludeJapaneseSubstrings = const [],
   });
 
   final String emoji;
   final List<String> japaneseSubstrings;
   final List<String> latinWords;
+  final List<String> excludeJapaneseSubstrings;
 }

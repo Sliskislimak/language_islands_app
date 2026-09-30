@@ -1,0 +1,1306 @@
+{
+  "id": "particles_and_pronouns_n5",
+  "title": "Zaimki i Partykuły N5 (A1) - Japońskie klocki gramatyczne",
+  "cefrLevel": "A1",
+  "tags": [
+    "partykuły",
+    "zaimki",
+    "gramatyka",
+    "a1",
+    "n5"
+  ],
+  "isCustomIsland": false,
+  "sentences": [
+    {
+      "id": "part_n5_001",
+      "targetText": "これは何ですか。",
+      "katakana": null,
+      "phoneticReading": "これはなんですか。 Kore wa nan desu ka.",
+      "sourceText": "This, what is it?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_002",
+      "targetText": "これはいくらですか。",
+      "katakana": null,
+      "phoneticReading": "これはいくらですか。 Kore wa ikura desu ka.",
+      "sourceText": "This, how much is it?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_003",
+      "targetText": "それは本です。",
+      "katakana": null,
+      "phoneticReading": "それはほんです。 Sore wa hon desu.",
+      "sourceText": "That, is a book.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖"
+      ]
+    },
+    {
+      "id": "part_n5_004",
+      "targetText": "それは辞書です。",
+      "katakana": null,
+      "phoneticReading": "それはじしょです。 Sore wa jisho desu.",
+      "sourceText": "That, is a dictionary.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📕"
+      ]
+    },
+    {
+      "id": "part_n5_005",
+      "targetText": "あれは何ですか。",
+      "katakana": null,
+      "phoneticReading": "あれはなんですか。 Are wa nan desu ka.",
+      "sourceText": "That over there, what is it?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_006",
+      "targetText": "あれは病院です。",
+      "katakana": null,
+      "phoneticReading": "あれはびょういんです。 Are wa byōin desu.",
+      "sourceText": "That over there, is a hospital.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🏥"
+      ]
+    },
+    {
+      "id": "part_n5_007",
+      "targetText": "このペンを使います。",
+      "katakana": null,
+      "phoneticReading": "このペンをつかいます。 Kono pen o tsukaimasu.",
+      "sourceText": "This pen, I use.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🖊️"
+      ]
+    },
+    {
+      "id": "part_n5_008",
+      "targetText": "この本を読みます。",
+      "katakana": null,
+      "phoneticReading": "このほんをよみます。 Kono hon o yomimasu.",
+      "sourceText": "This book, I read.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖"
+      ]
+    },
+    {
+      "id": "part_n5_009",
+      "targetText": "その傘は誰のですか。",
+      "katakana": null,
+      "phoneticReading": "そのかさはだれのですか。 Sono kasa wa dare no desu ka.",
+      "sourceText": "That umbrella, whose is it?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "☂️"
+      ]
+    },
+    {
+      "id": "part_n5_010",
+      "targetText": "その鍵は誰のですか。",
+      "katakana": null,
+      "phoneticReading": "そのかぎはだれのですか。 Sono kagi wa dare no desu ka.",
+      "sourceText": "That key, whose is it?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🔑"
+      ]
+    },
+    {
+      "id": "part_n5_011",
+      "targetText": "あの店に入りましょう。",
+      "katakana": null,
+      "phoneticReading": "あのみせにはいりましょう。 Ano mise ni hairimashō.",
+      "sourceText": "Into that shop over there, let's enter.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🏪"
+      ]
+    },
+    {
+      "id": "part_n5_012",
+      "targetText": "あのカフェで休みましょう。",
+      "katakana": null,
+      "phoneticReading": "あのカフェでやすみましょう。 Ano kafe de yasumimashō.",
+      "sourceText": "At that cafe over there, let's rest.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "☕"
+      ]
+    },
+    {
+      "id": "part_n5_013",
+      "targetText": "ここに座ってください。",
+      "katakana": null,
+      "phoneticReading": "ここにすわってください。 Koko ni suwatte kudasai.",
+      "sourceText": "Here, please sit.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_014",
+      "targetText": "ここに名前を書いてください。",
+      "katakana": null,
+      "phoneticReading": "ここになまえをかいてください。 Koko ni namae o kaite kudasai.",
+      "sourceText": "Here, please write your name.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_015",
+      "targetText": "そこは寒くないですか。",
+      "katakana": null,
+      "phoneticReading": "そこはさむくないですか。 Soko wa samukunai desu ka.",
+      "sourceText": "There, is it not cold?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_016",
+      "targetText": "そこは静かですか。",
+      "katakana": null,
+      "phoneticReading": "そこはしずかですか。 Soko wa shizuka desu ka.",
+      "sourceText": "There, is it quiet?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_017",
+      "targetText": "あそこにコンビニがあります。",
+      "katakana": null,
+      "phoneticReading": "あそこにコンビニがあります。 Asoko ni konbini ga arimasu.",
+      "sourceText": "Over there, a convenience store is.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🏪"
+      ]
+    },
+    {
+      "id": "part_n5_018",
+      "targetText": "あそこに駅があります。",
+      "katakana": null,
+      "phoneticReading": "あそこにえきがあります。 Asoko ni eki ga arimasu.",
+      "sourceText": "Over there, a station is.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🚉"
+      ]
+    },
+    {
+      "id": "part_n5_019",
+      "targetText": "トイレはどこですか。",
+      "katakana": null,
+      "phoneticReading": "トイレはどこですか。 Toire wa doko desu ka.",
+      "sourceText": "The restroom, where is it?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_020",
+      "targetText": "駅はどこですか。",
+      "katakana": null,
+      "phoneticReading": "えきはどこですか。 Eki wa doko desu ka.",
+      "sourceText": "The station, where is it?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🚉"
+      ]
+    },
+    {
+      "id": "part_n5_021",
+      "targetText": "どれが好きですか。",
+      "katakana": null,
+      "phoneticReading": "どれがすきですか。 Dore ga suki desu ka.",
+      "sourceText": "Which one, is liked?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "❤️"
+      ]
+    },
+    {
+      "id": "part_n5_022",
+      "targetText": "どのペンを使いますか。",
+      "katakana": null,
+      "phoneticReading": "どのペンをつかいますか。 Dono pen o tsukaimasu ka.",
+      "sourceText": "Which pen, will you use?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🖊️"
+      ]
+    },
+    {
+      "id": "part_n5_023",
+      "targetText": "私は学生です。",
+      "katakana": null,
+      "phoneticReading": "わたしはがくせいです。 Watashi wa gakusei desu.",
+      "sourceText": "I, am a student.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🎒"
+      ]
+    },
+    {
+      "id": "part_n5_024",
+      "targetText": "友達は日本人です。",
+      "katakana": null,
+      "phoneticReading": "ともだちはにほんじんです。 Tomodachi wa nihonjin desu.",
+      "sourceText": "My friend, is Japanese.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖",
+        "👥"
+      ]
+    },
+    {
+      "id": "part_n5_025",
+      "targetText": "お茶は飲みます。",
+      "katakana": null,
+      "phoneticReading": "おちゃはのみます。 Ocha wa nomimasu.",
+      "sourceText": "Tea, I drink.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🍵",
+        "🥤"
+      ]
+    },
+    {
+      "id": "part_n5_026",
+      "targetText": "肉は食べません。",
+      "katakana": null,
+      "phoneticReading": "にくはたべません。 Niku wa tabemasen.",
+      "sourceText": "Meat, I do not eat.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🥩",
+        "🍽️"
+      ]
+    },
+    {
+      "id": "part_n5_027",
+      "targetText": "毎朝七時に起きます。",
+      "katakana": null,
+      "phoneticReading": "まいあさしちじにおきます。 Maiasa shichiji ni okimasu.",
+      "sourceText": "Every morning, at seven I wake up.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_028",
+      "targetText": "毎晩十一時に寝ます。",
+      "katakana": null,
+      "phoneticReading": "まいばんじゅういちじにねます。 Maiban jūichiji ni nemasu.",
+      "sourceText": "Every night, at eleven I sleep.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "😴"
+      ]
+    },
+    {
+      "id": "part_n5_029",
+      "targetText": "明日東京に行きます。",
+      "katakana": null,
+      "phoneticReading": "あしたとうきょうにいきます。 Ashita Tōkyō ni ikimasu.",
+      "sourceText": "Tomorrow, to Tokyo I go.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_030",
+      "targetText": "今日京都に行きます。",
+      "katakana": null,
+      "phoneticReading": "きょうきょうとにいきます。 Kyō Kyōto ni ikimasu.",
+      "sourceText": "Today, to Kyoto I go.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_031",
+      "targetText": "ここに名前を書いてください。",
+      "katakana": null,
+      "phoneticReading": "ここになまえをかいてください。 Koko ni namae o kaite kudasai.",
+      "sourceText": "Here, please write your name.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_032",
+      "targetText": "ここに荷物を置いてください。",
+      "katakana": null,
+      "phoneticReading": "ここににもつをおいてください。 Koko ni nimotsu o oite kudasai.",
+      "sourceText": "Here, please place your luggage.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_033",
+      "targetText": "部屋に猫がいます。",
+      "katakana": null,
+      "phoneticReading": "へやにねこがいます。 Heya ni neko ga imasu.",
+      "sourceText": "In the room, a cat is.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🐱",
+        "🛋️"
+      ]
+    },
+    {
+      "id": "part_n5_034",
+      "targetText": "机の上に本があります。",
+      "katakana": null,
+      "phoneticReading": "つくえのうえにほんがあります。 Tsukue no ue ni hon ga arimasu.",
+      "sourceText": "On the desk, a book is.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖",
+        "🪵"
+      ]
+    },
+    {
+      "id": "part_n5_035",
+      "targetText": "友達に会います。",
+      "katakana": null,
+      "phoneticReading": "ともだちにあいます。 Tomodachi ni aimasu.",
+      "sourceText": "A friend, I meet.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "👥"
+      ]
+    },
+    {
+      "id": "part_n5_036",
+      "targetText": "先生に聞きます。",
+      "katakana": null,
+      "phoneticReading": "せんせいにききます。 Sensei ni kikimasu.",
+      "sourceText": "The teacher, I ask.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🧑‍🏫"
+      ]
+    },
+    {
+      "id": "part_n5_037",
+      "targetText": "友達にプレゼントをあげます。",
+      "katakana": null,
+      "phoneticReading": "ともだちにプレゼントをあげます。 Tomodachi ni purezento o agemasu.",
+      "sourceText": "To a friend, a present I give.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "👥"
+      ]
+    },
+    {
+      "id": "part_n5_038",
+      "targetText": "家族に写真を送ります。",
+      "katakana": null,
+      "phoneticReading": "かぞくにしゃしんをおくります。 Kazoku ni shashin o okurimasu.",
+      "sourceText": "To family, photos I send.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🏠",
+        "📸"
+      ]
+    },
+    {
+      "id": "part_n5_039",
+      "targetText": "カフェへお茶を飲みに行きます。",
+      "katakana": null,
+      "phoneticReading": "カフェへおちゃをのみにいきます。 Kafe e ocha o nomi ni ikimasu.",
+      "sourceText": "To the cafe, tea to drink, I go.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "☕",
+        "🍵",
+        "🥤"
+      ]
+    },
+    {
+      "id": "part_n5_040",
+      "targetText": "デパートへ服を買いに行きます。",
+      "katakana": null,
+      "phoneticReading": "デパートへふくをかいにいきます。 Depāto e fuku o kai ni ikimasu.",
+      "sourceText": "To the department store, clothes to buy, I go.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🏪",
+        "👕"
+      ]
+    },
+    {
+      "id": "part_n5_041",
+      "targetText": "カフェで本を読みます。",
+      "katakana": null,
+      "phoneticReading": "カフェでほんをよみます。 Kafe de hon o yomimasu.",
+      "sourceText": "At the cafe, a book I read.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "☕",
+        "📖"
+      ]
+    },
+    {
+      "id": "part_n5_042",
+      "targetText": "部屋でテレビを見ます。",
+      "katakana": null,
+      "phoneticReading": "へやでテレビをみます。 Heya de terebi o mimasu.",
+      "sourceText": "In the room, TV I watch.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🛋️"
+      ]
+    },
+    {
+      "id": "part_n5_043",
+      "targetText": "ペンで書きます。",
+      "katakana": null,
+      "phoneticReading": "ペンでかきます。 Pen de kakimasu.",
+      "sourceText": "With a pen, I write.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🖊️"
+      ]
+    },
+    {
+      "id": "part_n5_044",
+      "targetText": "はさみで切ります。",
+      "katakana": null,
+      "phoneticReading": "はさみできります。 Hasami de kirimasu.",
+      "sourceText": "With scissors, I cut.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "✂️"
+      ]
+    },
+    {
+      "id": "part_n5_045",
+      "targetText": "日本語で話しましょう。",
+      "katakana": null,
+      "phoneticReading": "にほんごではなしましょう。 Nihongo de hanashimashō.",
+      "sourceText": "In Japanese, let's speak.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖"
+      ]
+    },
+    {
+      "id": "part_n5_046",
+      "targetText": "英語で話しましょう。",
+      "katakana": null,
+      "phoneticReading": "えいごではなしましょう。 Eigo de hanashimashō.",
+      "sourceText": "In English, let's speak.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_047",
+      "targetText": "地下鉄で行きます。",
+      "katakana": null,
+      "phoneticReading": "ちかてつでいきます。 Chikatetsu de ikimasu.",
+      "sourceText": "By subway, I go.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🚇"
+      ]
+    },
+    {
+      "id": "part_n5_048",
+      "targetText": "バスで帰ります。",
+      "katakana": null,
+      "phoneticReading": "バスでかえります。 Basu de kaerimasu.",
+      "sourceText": "By bus, I return.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🚌"
+      ]
+    },
+    {
+      "id": "part_n5_049",
+      "targetText": "水を飲みます。",
+      "katakana": null,
+      "phoneticReading": "みずをのみます。 Mizu o nomimasu.",
+      "sourceText": "Water, I drink.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "💧",
+        "🥤"
+      ]
+    },
+    {
+      "id": "part_n5_050",
+      "targetText": "パンを食べます。",
+      "katakana": null,
+      "phoneticReading": "パンをたべます。 Pan o tabemasu.",
+      "sourceText": "Bread, I eat.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🍞",
+        "🍽️"
+      ]
+    },
+    {
+      "id": "part_n5_051",
+      "targetText": "道を渡ります。",
+      "katakana": null,
+      "phoneticReading": "みちをわたります。 Michi o watarimasu.",
+      "sourceText": "Across the street, I cross.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_052",
+      "targetText": "橋を渡ります。",
+      "katakana": null,
+      "phoneticReading": "はしをわたります。 Hashi o watarimasu.",
+      "sourceText": "Across the bridge, I cross.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_053",
+      "targetText": "毎朝公園を走ります。",
+      "katakana": null,
+      "phoneticReading": "まいあさこうえんをはしります。 Maiasa kōen o hashirimasu.",
+      "sourceText": "Every morning, through the park I run.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🏞️"
+      ]
+    },
+    {
+      "id": "part_n5_054",
+      "targetText": "空を鳥が飛びます。",
+      "katakana": null,
+      "phoneticReading": "そらをとりがとびます。 Sora o tori ga tobimasu.",
+      "sourceText": "Through the sky, a bird flies.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🐦"
+      ]
+    },
+    {
+      "id": "part_n5_055",
+      "targetText": "次の駅で電車を降ります。",
+      "katakana": null,
+      "phoneticReading": "つぎのえきででんしゃをおります。 Tsugi no eki de densha o orimasu.",
+      "sourceText": "At the next station, the train I get off.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🚆",
+        "🚉"
+      ]
+    },
+    {
+      "id": "part_n5_056",
+      "targetText": "ここでバスを降ります。",
+      "katakana": null,
+      "phoneticReading": "ここでバスをおります。 Koko de basu o orimasu.",
+      "sourceText": "Here, the bus I get off.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🚌"
+      ]
+    },
+    {
+      "id": "part_n5_057",
+      "targetText": "八時に家を出ます。",
+      "katakana": null,
+      "phoneticReading": "はちじにいえをでます。 Hachiji ni ie o demasu.",
+      "sourceText": "At eight, home I leave.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🏠"
+      ]
+    },
+    {
+      "id": "part_n5_058",
+      "targetText": "七時に部屋を出ます。",
+      "katakana": null,
+      "phoneticReading": "しちじにへやをでます。 Shichiji ni heya o demasu.",
+      "sourceText": "At seven, the room I leave.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🛋️"
+      ]
+    },
+    {
+      "id": "part_n5_059",
+      "targetText": "雨が降っています。",
+      "katakana": null,
+      "phoneticReading": "あめがふっています。 Ame ga futte imasu.",
+      "sourceText": "Rain, is falling.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🌧️"
+      ]
+    },
+    {
+      "id": "part_n5_060",
+      "targetText": "雪が降っています。",
+      "katakana": null,
+      "phoneticReading": "ゆきがふっています。 Yuki ga futte imasu.",
+      "sourceText": "Snow, is falling.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "❄️"
+      ]
+    },
+    {
+      "id": "part_n5_061",
+      "targetText": "猫が鳴いています。",
+      "katakana": null,
+      "phoneticReading": "ねこがないています。 Neko ga naite imasu.",
+      "sourceText": "A cat, is meowing.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🐱"
+      ]
+    },
+    {
+      "id": "part_n5_062",
+      "targetText": "犬が鳴いています。",
+      "katakana": null,
+      "phoneticReading": "いぬがないています。 Inu ga naite imasu.",
+      "sourceText": "A dog, is barking.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🐶"
+      ]
+    },
+    {
+      "id": "part_n5_063",
+      "targetText": "時間があります。",
+      "katakana": null,
+      "phoneticReading": "じかんがあります。 Jikan ga arimasu.",
+      "sourceText": "Time, I have.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "⏰"
+      ]
+    },
+    {
+      "id": "part_n5_064",
+      "targetText": "お金があります。",
+      "katakana": null,
+      "phoneticReading": "おかねがあります。 Okane ga arimasu.",
+      "sourceText": "Money, I have.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "💰"
+      ]
+    },
+    {
+      "id": "part_n5_065",
+      "targetText": "日本語が分かります。",
+      "katakana": null,
+      "phoneticReading": "にほんごがわかります。 Nihongo ga wakarimasu.",
+      "sourceText": "Japanese, I understand.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖"
+      ]
+    },
+    {
+      "id": "part_n5_066",
+      "targetText": "英語が分かります。",
+      "katakana": null,
+      "phoneticReading": "えいごがわかります。 Eigo ga wakarimasu.",
+      "sourceText": "English, I understand.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_067",
+      "targetText": "これは私の鍵です。",
+      "katakana": null,
+      "phoneticReading": "これはわたしのかぎです。 Kore wa watashi no kagi desu.",
+      "sourceText": "This, is my key.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🔑"
+      ]
+    },
+    {
+      "id": "part_n5_068",
+      "targetText": "あれは友達の車です。",
+      "katakana": null,
+      "phoneticReading": "あれはともだちのくるまです。 Are wa tomodachi no kuruma desu.",
+      "sourceText": "That over there, is my friend's car.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🚗",
+        "👥"
+      ]
+    },
+    {
+      "id": "part_n5_069",
+      "targetText": "日本の車を買いました。",
+      "katakana": null,
+      "phoneticReading": "にほんのくるまをかいました。 Nihon no kuruma o kaimashita.",
+      "sourceText": "A Japanese car, I bought.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🚗",
+        "📖"
+      ]
+    },
+    {
+      "id": "part_n5_070",
+      "targetText": "日本のカメラを買いました。",
+      "katakana": null,
+      "phoneticReading": "にほんのカメラをかいました。 Nihon no kamera o kaimashita.",
+      "sourceText": "A Japanese camera, I bought.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖",
+        "📷"
+      ]
+    },
+    {
+      "id": "part_n5_071",
+      "targetText": "机の上に本があります。",
+      "katakana": null,
+      "phoneticReading": "つくえのうえにほんがあります。 Tsukue no ue ni hon ga arimasu.",
+      "sourceText": "On the desk, a book is.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖",
+        "🪵"
+      ]
+    },
+    {
+      "id": "part_n5_072",
+      "targetText": "椅子の上に猫がいます。",
+      "katakana": null,
+      "phoneticReading": "いすのうえにねこがいます。 Isu no ue ni neko ga imasu.",
+      "sourceText": "On the chair, a cat is.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🐱",
+        "🪑"
+      ]
+    },
+    {
+      "id": "part_n5_073",
+      "targetText": "ここから歩きます。",
+      "katakana": null,
+      "phoneticReading": "ここからあるきます。 Koko kara arukimasu.",
+      "sourceText": "From here, I walk.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_074",
+      "targetText": "家から歩きます。",
+      "katakana": null,
+      "phoneticReading": "いえからあるきます。 Ie kara arukimasu.",
+      "sourceText": "From home, I walk.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🏠"
+      ]
+    },
+    {
+      "id": "part_n5_075",
+      "targetText": "九時から働きます。",
+      "katakana": null,
+      "phoneticReading": "くじからはたらきます。 Kuji kara hatarakimasu.",
+      "sourceText": "From nine, I work.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_076",
+      "targetText": "八時から勉強します。",
+      "katakana": null,
+      "phoneticReading": "はちじからべんきょうします。 Hachiji kara benkyō shimasu.",
+      "sourceText": "From eight, I study.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_077",
+      "targetText": "寒いから、窓を閉めます。",
+      "katakana": null,
+      "phoneticReading": "さむいから、まどをしめます。 Samui kara, mado o shimemasu.",
+      "sourceText": "Because it's cold, the window I close.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🪟"
+      ]
+    },
+    {
+      "id": "part_n5_078",
+      "targetText": "暗いから、電気を点けます。",
+      "katakana": null,
+      "phoneticReading": "くらいから、でんきをつけます。 Kurai kara, denki o tsukemasu.",
+      "sourceText": "Because it's dark, the light I turn on.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "💡"
+      ]
+    },
+    {
+      "id": "part_n5_079",
+      "targetText": "駅まで歩きます。",
+      "katakana": null,
+      "phoneticReading": "えきまであるきます。 Eki made arukimasu.",
+      "sourceText": "As far as the station, I walk.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🚉"
+      ]
+    },
+    {
+      "id": "part_n5_080",
+      "targetText": "公園まで歩きます。",
+      "katakana": null,
+      "phoneticReading": "こうえんまであるきます。 Kōen made arukimasu.",
+      "sourceText": "As far as the park, I walk.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🏞️"
+      ]
+    },
+    {
+      "id": "part_n5_081",
+      "targetText": "五時まで勉強します。",
+      "katakana": null,
+      "phoneticReading": "ごじまでべんきょうします。 Goji made benkyō shimasu.",
+      "sourceText": "Until five, I study.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_082",
+      "targetText": "六時まで働きます。",
+      "katakana": null,
+      "phoneticReading": "ろくじまではたらきます。 Rokuji made hatarakimasu.",
+      "sourceText": "Until six, I work.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_083",
+      "targetText": "友達と話します。",
+      "katakana": null,
+      "phoneticReading": "ともだちとはなします。 Tomodachi to hanashimasu.",
+      "sourceText": "With a friend, I talk.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "👥"
+      ]
+    },
+    {
+      "id": "part_n5_084",
+      "targetText": "先生と話します。",
+      "katakana": null,
+      "phoneticReading": "せんせいとはなします。 Sensei to hanashimasu.",
+      "sourceText": "With the teacher, I talk.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🧑‍🏫"
+      ]
+    },
+    {
+      "id": "part_n5_085",
+      "targetText": "パンと水を買いました。",
+      "katakana": null,
+      "phoneticReading": "パンとみずをかいました。 Pan to mizu o kaimashita.",
+      "sourceText": "Bread and water, I bought.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "💧",
+        "🍞"
+      ]
+    },
+    {
+      "id": "part_n5_086",
+      "targetText": "傘と鍵を持ちました。",
+      "katakana": null,
+      "phoneticReading": "かさとかぎをもちました。 Kasa to kagi o mochimashita.",
+      "sourceText": "An umbrella and key, I took.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🔑",
+        "☂️"
+      ]
+    },
+    {
+      "id": "part_n5_087",
+      "targetText": "私も行きます。",
+      "katakana": null,
+      "phoneticReading": "わたしもいきます。 Watashi mo ikimasu.",
+      "sourceText": "I too, will go.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_088",
+      "targetText": "私も食べます。",
+      "katakana": null,
+      "phoneticReading": "わたしもたべます。 Watashi mo tabemasu.",
+      "sourceText": "I too, will eat.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🍽️"
+      ]
+    },
+    {
+      "id": "part_n5_089",
+      "targetText": "ここに座ってもいいですか。",
+      "katakana": null,
+      "phoneticReading": "ここにすわってもいいですか。 Koko ni suwatte mo ii desu ka.",
+      "sourceText": "Here, is it okay if I sit?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_090",
+      "targetText": "写真を撮ってもいいですか。",
+      "katakana": null,
+      "phoneticReading": "しゃしんをとってもいいですか。 Shashin o totte mo ii desu ka.",
+      "sourceText": "Photos, is it okay if I take?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📸"
+      ]
+    },
+    {
+      "id": "part_n5_091",
+      "targetText": "私たちは一緒に行きます。",
+      "katakana": null,
+      "phoneticReading": "わたしたちはいっしょにいきます。 Watashitachi wa issho ni ikimasu.",
+      "sourceText": "We, together will go.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0
+    },
+    {
+      "id": "part_n5_092",
+      "targetText": "私たちは学生です。",
+      "katakana": null,
+      "phoneticReading": "わたしたちはがくせいです。 Watashitachi wa gakusei desu.",
+      "sourceText": "We, are students.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🎒"
+      ]
+    },
+    {
+      "id": "part_n5_093",
+      "targetText": "あの人たちは学生です。",
+      "katakana": null,
+      "phoneticReading": "あのひとたちはがくせいです。 Ano hito-tachi wa gakusei desu.",
+      "sourceText": "Those people over there, are students.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🎒"
+      ]
+    },
+    {
+      "id": "part_n5_094",
+      "targetText": "あの人たちは日本語を話します。",
+      "katakana": null,
+      "phoneticReading": "あのひとたちはにほんごをはなします。 Ano hito-tachi wa nihongo o hanashimasu.",
+      "sourceText": "Those people over there, Japanese speak.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖"
+      ]
+    },
+    {
+      "id": "part_n5_095",
+      "targetText": "私は猫が好きです。",
+      "katakana": null,
+      "phoneticReading": "わたしはねこがすきです。 Watashi wa neko ga suki desu.",
+      "sourceText": "As for me, cats are liked.",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "🐱",
+        "❤️"
+      ]
+    },
+    {
+      "id": "part_n5_096",
+      "targetText": "日本料理が好きですか。",
+      "katakana": null,
+      "phoneticReading": "にほんりょうりがすきですか。 Nihon ryōri ga suki desu ka.",
+      "sourceText": "Japanese food, is it liked?",
+      "targetAudioPath": null,
+      "comprehensionScore": 0,
+      "speakingScore": 0,
+      "totalReps": 0,
+      "emojis": [
+        "📖",
+        "❤️"
+      ]
+    }
+  ]
+}
