@@ -3,8 +3,14 @@ import 'package:language_islands_app/core/services/audio_playback_service.dart';
 import 'package:language_islands_app/core/services/azure_tts_service.dart';
 import 'package:language_islands_app/core/services/pip_service.dart';
 import 'package:language_islands_app/data/repositories/collection_repository.dart';
+import 'package:language_islands_app/data/repositories/language_settings_repository.dart';
 import 'package:language_islands_app/data/repositories/schedule_repository.dart';
 import 'package:language_islands_app/data/repositories/user_metrics_repository.dart';
+
+final languageSettingsRepositoryProvider =
+    Provider<LanguageSettingsRepository>((ref) {
+  return LanguageSettingsRepository();
+});
 
 final collectionRepositoryProvider = Provider<CollectionRepository>((ref) {
   return CollectionRepository();

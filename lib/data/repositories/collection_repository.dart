@@ -79,6 +79,17 @@ class CollectionRepository {
     _cache = next;
   }
 
+  Future<void> updateCollection(SentenceCollection collection) async {
+    final all = await loadAll();
+    final index = all.indexWhere((c) => c.id == collection.id);
+    if (index >= 0) {
+      final next = List<SentenceCollection>.from(all);
+      next[index] = collection;
+      _cache = next;
+    }
+    await _writeCollection(collection);
+  }
+
   Future<SentenceCollection> updateCollectionFromJson(
     String collectionId,
     String jsonStr,

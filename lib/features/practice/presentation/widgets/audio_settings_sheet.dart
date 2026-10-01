@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/audio_translation_mode.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
+import 'package:language_islands_app/features/collections/presentation/language_management_dialog.dart';
+import 'package:language_islands_app/features/collections/providers/language_settings_controller.dart';
 import 'package:language_islands_app/features/practice/playback_speed.dart';
 import 'package:language_islands_app/features/practice/providers/practice_session_notifier.dart';
 import 'package:language_islands_app/features/practice/providers/practice_session_state.dart';
@@ -87,10 +90,29 @@ class _AudioSettingsSheetContent extends ConsumerWidget {
           const Divider(height: 1),
           // Scrollable Settings Body
           Flexible(
-            child: ListView(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-              children: [
-                // 1. Tryb lektora tłumaczenia
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                // 1. Język lektora tłumaczenia
+                _SectionTitle(
+                  title: 'JĘZYK LEKTORA TŁUMACZENIA',
+                  subtitle:
+                      'Wybierz język, w jakim lektor czyta tłumaczenie (z odblokowanych globalnie).',
+                  icon: Icons.language_rounded,
+                  iconColor: AppTheme.sakuraPrimary,
+                ),
+                const SizedBox(height: 10),
+                _TranslationLanguageSelector(
+                  currentLanguageCode: session.translationLanguage,
+                  onChanged: notifier.setTranslationLanguage,
+                  onManageLanguages: () => showLanguageManagementDialog(context),
+                ),
+
+                const SizedBox(height: 22),
+
+                // 2. Tryb lektora tłumaczenia
                 _SectionTitle(
                   title: 'TRYB LEKTORA TŁUMACZENIA',
                   subtitle:
@@ -108,7 +130,7 @@ class _AudioSettingsSheetContent extends ConsumerWidget {
 
                 const SizedBox(height: 22),
 
-                // 2. Liczba powtórzeń zdania (targetReps)
+                // 3. Liczba powtórzeń zdania (targetReps)
                 _SectionTitle(
                   title: 'POWTÓRZENIA ZDANIA DOCELOWEGO (1 – 5)',
                   subtitle:
@@ -124,7 +146,7 @@ class _AudioSettingsSheetContent extends ConsumerWidget {
 
                 const SizedBox(height: 22),
 
-                // 3. Pauza między językami (Audio Recall Buffer)
+                // 4. Pauza między językami (Audio Recall Buffer)
                 _SectionTitle(
                   title: 'PAUZA MIĘDZY JĘZYKAMI (ACTIVE RECALL BUFFER)',
                   subtitle:
@@ -146,7 +168,7 @@ class _AudioSettingsSheetContent extends ConsumerWidget {
 
                 const SizedBox(height: 22),
 
-                // 4. Pauza między powtórzeniami tego samego zdania
+                // 5. Pauza między powtórzeniami tego samego zdania
                 _SectionTitle(
                   title: 'PAUZA MIĘDZY POWTÓRZENIAMI DOCELOWYMI',
                   subtitle:
@@ -168,7 +190,7 @@ class _AudioSettingsSheetContent extends ConsumerWidget {
 
                 const SizedBox(height: 22),
 
-                // 5. Pauza między zdaniami
+                // 6. Pauza między zdaniami
                 _SectionTitle(
                   title: 'PAUZA PRZED NASTĘPNYM ZDANIEM',
                   subtitle:
@@ -190,10 +212,10 @@ class _AudioSettingsSheetContent extends ConsumerWidget {
 
                 const SizedBox(height: 22),
 
-                // 6. Prędkość odtwarzania
+                // 7. Prędkość odtwarzania
                 _SectionTitle(
                   title: 'PRĘDKOŚĆ ODTWARZANIA',
-                  subtitle: 'Mnożnik tempa mowy (0.75x – 1.25x).',
+                  subtitle: 'Mnożnik tempa mowy (0.7x – 1.2x).',
                   icon: Icons.speed_rounded,
                   iconColor: AppTheme.sakuraPrimary,
                 ),
@@ -205,6 +227,7 @@ class _AudioSettingsSheetContent extends ConsumerWidget {
               ],
             ),
           ),
+        ),
         ],
       ),
     );
@@ -571,6 +594,122 @@ class _SliderSettingTile extends StatelessWidget {
   }
 }
 
+class _TranslationLanguageSelector extends ConsumerWidget {
+  const _TranslationLanguageSelector({
+    required this.currentLanguageCode,
+    required this.onChanged,
+    required this.onManageLanguages,
+  });
+
+  final String currentLanguageCode;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onManageLanguages;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unlockedLanguages = ref.watch(unlockedLanguagesProvider);
+    final languages = unlockedLanguages.isNotEmpty
+        ? unlockedLanguages
+        : [AppLanguage.supportedLanguages[0], AppLanguage.supportedLanguages[1]];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: languages.map((lang) {
+            final isSelected =
+                lang.code.toLowerCase() == currentLanguageCode.toLowerCase();
+            return Material(
+              color: isSelected
+                  ? AppTheme.sakuraPrimary.withValues(alpha: 0.18)
+                  : AppTheme.surfaceElevated,
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
+                onTap: () => onChanged(lang.code),
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 9,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppTheme.sakuraPrimary
+                          : AppTheme.surfaceBorder,
+                      width: isSelected ? 1.5 : 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        lang.flagEmoji,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${lang.name} (${lang.voiceDisplayName})',
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppTheme.textLight
+                              : AppTheme.textMuted,
+                          fontSize: 12,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                      ),
+                      if (isSelected) ...[
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          size: 15,
+                          color: AppTheme.sakuraPrimary,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: onManageLanguages,
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(
+                  Icons.settings_outlined,
+                  size: 14,
+                  color: AppTheme.sakuraMuted,
+                ),
+                SizedBox(width: 5),
+                Text(
+                  'Odblokuj lub zablokuj języki globalnie',
+                  style: TextStyle(
+                    color: AppTheme.sakuraMuted,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _PlaybackSpeedSelector extends StatelessWidget {
   const _PlaybackSpeedSelector({
     required this.currentSpeed,
@@ -580,14 +719,33 @@ class _PlaybackSpeedSelector extends StatelessWidget {
   final double currentSpeed;
   final ValueChanged<double> onChanged;
 
-  static const List<double> _speeds = [0.75, 0.9, 1.0, 1.1, 1.25];
+  static const List<double> _speeds = [0.7, 0.8, 0.9, 1.0, 1.2];
+
+  static double _closestSpeed(double target, List<double> speeds) {
+    var best = speeds.first;
+    var minDiff = (target - best).abs();
+    for (final s in speeds) {
+      final diff = (target - s).abs();
+      if (diff < minDiff) {
+        minDiff = diff;
+        best = s;
+      }
+    }
+    return best;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final directMatch = _speeds.any((s) => (currentSpeed - s).abs() < 0.049);
+    final closest = _closestSpeed(currentSpeed, _speeds);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: _speeds.map((speed) {
-        final isSelected = (currentSpeed - speed).abs() < 0.04;
+        final isSelected = directMatch
+            ? (currentSpeed - speed).abs() < 0.049
+            : closest == speed;
+
         return Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -605,8 +763,9 @@ class _PlaybackSpeedSelector extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isSelected
-                          ? AppTheme.sakuraPrimary
+                          ? AppTheme.sakuraAccent
                           : AppTheme.surfaceBorder,
+                      width: isSelected ? 1.5 : 1.0,
                     ),
                   ),
                   alignment: Alignment.center,

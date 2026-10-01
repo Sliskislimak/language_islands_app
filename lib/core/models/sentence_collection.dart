@@ -10,6 +10,7 @@ class SentenceCollection {
     required this.tags,
     required this.isCustomIsland,
     required this.sentences,
+    this.translationLanguage,
   });
 
   final String id;
@@ -18,6 +19,7 @@ class SentenceCollection {
   final List<String> tags;
   final bool isCustomIsland;
   final List<Sentence> sentences;
+  final String? translationLanguage;
 
   SentenceCollection copyWith({
     String? id,
@@ -26,6 +28,8 @@ class SentenceCollection {
     List<String>? tags,
     bool? isCustomIsland,
     List<Sentence>? sentences,
+    String? translationLanguage,
+    bool clearTranslationLanguage = false,
   }) {
     return SentenceCollection(
       id: id ?? this.id,
@@ -34,6 +38,9 @@ class SentenceCollection {
       tags: tags ?? this.tags,
       isCustomIsland: isCustomIsland ?? this.isCustomIsland,
       sentences: sentences ?? this.sentences,
+      translationLanguage: clearTranslationLanguage
+          ? null
+          : (translationLanguage ?? this.translationLanguage),
     );
   }
 
@@ -68,6 +75,12 @@ class SentenceCollection {
       cefrLevel: _cefrLevel(map['cefrLevel']),
       tags: _tags(map['tags']),
       isCustomIsland: map['isCustomIsland'] == true,
+      translationLanguage: _optionalString(
+        map['translationLanguage'] ??
+            map['translationLang'] ??
+            map['sourceLanguage'] ??
+            map['sourceLang'],
+      ),
       sentences: [
         for (final item in rawSentences)
           if (item is Map<String, dynamic>)
@@ -83,7 +96,7 @@ class SentenceCollection {
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    final map = <String, dynamic>{
       'id': id,
       'title': title,
       'cefrLevel': cefrLevel,
@@ -91,6 +104,10 @@ class SentenceCollection {
       'isCustomIsland': isCustomIsland,
       'sentences': [for (final sentence in sentences) sentence.toMap()],
     };
+    if (translationLanguage != null && translationLanguage!.trim().isNotEmpty) {
+      map['translationLanguage'] = translationLanguage!.trim();
+    }
+    return map;
   }
 
   String toJsonString({bool pretty = true}) {
@@ -99,6 +116,11 @@ class SentenceCollection {
       return const JsonEncoder.withIndent('  ').convert(map);
     }
     return jsonEncode(map);
+  }
+
+  static String? _optionalString(Object? value) {
+    if (value is String && value.trim().isNotEmpty) return value.trim();
+    return null;
   }
 
   static String _cefrLevel(Object? value) {

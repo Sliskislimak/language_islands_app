@@ -54,7 +54,11 @@ class AzureTtsService {
 
   /// Ensures translation audio exists (either pre-recorded or synthesized on-demand).
   /// Returns null if unavailable so the player can gracefully fallback to target-only.
-  Future<String?> ensureTranslationAudio(Sentence sentence) async {
+  Future<String?> ensureTranslationAudio(
+    Sentence sentence, {
+    String? voiceName,
+    String? locale,
+  }) async {
     if (sentence.translationAudioPath != null) {
       final explicit = File(sentence.translationAudioPath!);
       if (await explicit.exists()) {
@@ -62,7 +66,10 @@ class AzureTtsService {
       }
     }
 
-    final cachePath = await _translationCacheFilePath(sentence.id);
+    final effectiveVoice = voiceName ?? ApiConstants.polishVoiceName;
+    final effectiveLocale = locale ?? 'pl-PL';
+
+    final cachePath = await _translationCacheFilePath(sentence.id, effectiveVoice);
     final cacheFile = File(cachePath);
     if (await cacheFile.exists()) {
       return cachePath;
@@ -73,11 +80,13 @@ class AzureTtsService {
         sentenceId: sentence.id,
         sourceText: sentence.sourceText,
         destination: cacheFile,
+        voiceName: effectiveVoice,
+        locale: effectiveLocale,
       );
       return cachePath;
     } catch (e) {
       debugPrint(
-        'Nie udało się wygenerować lektora tłumaczenia dla "${sentence.id}": $e',
+        'Nie udało się wygenerować lektora tłumaczenia dla "${sentence.id}" ($effectiveVoice): $e',
       );
       return null;
     }
@@ -129,12 +138,14 @@ class AzureTtsService {
     required String sentenceId,
     required String sourceText,
     required File destination,
+    String voiceName = ApiConstants.polishVoiceName,
+    String locale = 'pl-PL',
   }) async {
     // 1. Primary: Free Edge TTS (no API key required)
     try {
       final comm = Communicate(
         text: sourceText,
-        voice: ApiConstants.polishVoiceName,
+        voice: voiceName,
       );
       final bytes = await comm.toBytes();
       if (bytes.isNotEmpty) {
@@ -144,13 +155,15 @@ class AzureTtsService {
       }
     } catch (e) {
       debugPrint(
-        'Edge TTS translation synthesis failed for "$sentenceId": $e',
+        'Edge TTS translation synthesis failed for "$sentenceId" ($voiceName): $e',
       );
       if (isAzureConfigured) {
         return _fetchAndSaveTranslationAudioViaAzure(
           sentenceId: sentenceId,
           sourceText: sourceText,
           destination: destination,
+          voiceName: voiceName,
+          locale: locale,
         );
       }
       rethrow;
@@ -161,6 +174,8 @@ class AzureTtsService {
         sentenceId: sentenceId,
         sourceText: sourceText,
         destination: destination,
+        voiceName: voiceName,
+        locale: locale,
       );
     }
 
@@ -217,11 +232,17 @@ class AzureTtsService {
     required String sentenceId,
     required String sourceText,
     required File destination,
+    required String voiceName,
+    required String locale,
   }) async {
     final uri = Uri.parse(
       'https://${ApiConstants.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1',
     );
-    final ssml = _buildTranslationSsml(sourceText);
+    final ssml = _buildTranslationSsml(
+      sourceText,
+      voiceName: voiceName,
+      locale: locale,
+    );
 
     final response = await _client.post(
       uri,
@@ -260,10 +281,14 @@ class AzureTtsService {
 </speak>''';
   }
 
-  String _buildTranslationSsml(String sourceText) {
+  String _buildTranslationSsml(
+    String sourceText, {
+    String voiceName = ApiConstants.polishVoiceName,
+    String locale = 'pl-PL',
+  }) {
     return '''
-<speak version="1.0" xml:lang="pl-PL">
-  <voice name="${ApiConstants.polishVoiceName}">${_escapeXml(sourceText)}</voice>
+<speak version="1.0" xml:lang="$locale">
+  <voice name="$voiceName">${_escapeXml(sourceText)}</voice>
 </speak>''';
   }
 
@@ -282,10 +307,20 @@ class AzureTtsService {
     return p.join(docs.path, 'audio_cache', 'target_$safeId.mp3');
   }
 
-  static Future<String> _translationCacheFilePath(String sentenceId) async {
+  static Future<String> _translationCacheFilePath(
+    String sentenceId, [
+    String? voiceName,
+  ]) async {
     final docs = await getApplicationDocumentsDirectory();
     final safeId = sentenceId.replaceAll(RegExp(r'[^\w\-.]'), '_');
-    return p.join(docs.path, 'audio_cache', 'translation_$safeId.mp3');
+    final voicePrefix = voiceName != null
+        ? '${voiceName.replaceAll(RegExp(r'[^\w\-.]'), '_')}_'
+        : '';
+    return p.join(
+      docs.path,
+      'audio_cache',
+      'translation_$voicePrefix$safeId.mp3',
+    );
   }
 
   void dispose() {

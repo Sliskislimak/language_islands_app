@@ -135,7 +135,7 @@ class _PlaybackSpeedPickerSheetState extends State<_PlaybackSpeedPickerSheet> {
               spacing: 8,
               runSpacing: 8,
               children: PlaybackSpeed.presets.map((preset) {
-                final selected = _speed == preset;
+                final selected = (_speed - preset).abs() < 0.01;
                 return Material(
                   color: selected
                       ? AppTheme.sakuraPrimary

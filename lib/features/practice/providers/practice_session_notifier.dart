@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
@@ -10,6 +11,7 @@ import 'package:language_islands_app/core/services/audio_playback_service.dart';
 import 'package:language_islands_app/core/services/audio_session_bootstrap.dart';
 import 'package:language_islands_app/core/services/pip_service.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
+import 'package:language_islands_app/features/collections/providers/language_settings_controller.dart';
 import 'package:language_islands_app/features/metrics/providers/metrics_controller.dart';
 import 'package:language_islands_app/features/practice/pause_between_reps.dart';
 import 'package:language_islands_app/features/practice/playback_speed.dart';
@@ -54,10 +56,22 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
   }
 
   void startSession(SentenceCollection collection) {
+    final unlocked = ref.read(unlockedLanguagesProvider);
+    String initialLang = 'en';
+    if (collection.translationLanguage != null &&
+        unlocked.any((l) => l.code == collection.translationLanguage)) {
+      initialLang = collection.translationLanguage!;
+    } else if (unlocked.any((l) => l.code == 'en')) {
+      initialLang = 'en';
+    } else if (unlocked.isNotEmpty) {
+      initialLang = unlocked.first.code;
+    }
+
     state = PracticeSessionState(
       collection: collection,
       mode: PracticeMode.shadowing,
       activeSentenceId: collection.sentences.firstOrNull?.id,
+      translationLanguage: initialLang,
     );
   }
 
@@ -463,6 +477,22 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     state = current.copyWith(
       audioTranslationMode: current.audioTranslationMode.next,
     );
+  }
+
+  Future<void> setTranslationLanguage(String langCode) async {
+    final current = state;
+    if (current == null) return;
+    if (current.translationLanguage == langCode) return;
+
+    state = current.copyWith(translationLanguage: langCode);
+
+    final updatedCollection = current.collection.copyWith(
+      translationLanguage: langCode,
+    );
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.updateCollection(updatedCollection);
+    state = state?.copyWith(collection: updatedCollection);
+    ref.invalidate(collectionsControllerProvider);
   }
 
   void setTargetReps(int reps) {
@@ -912,7 +942,14 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final tts = ref.read(azureTtsServiceProvider);
     final repo = ref.read(collectionRepositoryProvider);
 
-    final path = await tts.ensureTranslationAudio(sentence);
+    final lang = AppLanguage.fromCode(current.translationLanguage) ??
+        AppLanguage.defaultLanguage;
+
+    final path = await tts.ensureTranslationAudio(
+      sentence,
+      voiceName: lang.voiceName,
+      locale: lang.locale,
+    );
     if (path != null && path != sentence.translationAudioPath) {
       final withPath = sentence.copyWith(translationAudioPath: path);
       await repo.updateSentence(current.collection.id, withPath);

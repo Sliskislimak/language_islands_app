@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
-import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
 import 'package:language_islands_app/features/collections/presentation/edit_collection_json_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/import_collection_dialog.dart';
+import 'package:language_islands_app/features/collections/presentation/language_management_dialog.dart';
+import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
 import 'package:language_islands_app/features/info/presentation/screens/philosophy_screen.dart';
 import 'package:language_islands_app/features/info/presentation/screens/study_plans_screen.dart';
 import 'package:language_islands_app/features/metrics/presentation/screens/daily_history_screen.dart';
@@ -65,6 +67,14 @@ class CollectionsScreen extends ConsumerWidget {
             },
             icon: const Icon(Icons.insights_rounded),
           ),
+          IconButton(
+            tooltip: 'Zarządzanie językami w aplikacji',
+            onPressed: () => showLanguageManagementDialog(context),
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: AppTheme.textLight,
+            ),
+          ),
           PopupMenuButton<_CollectionsMenuAction>(
             tooltip: 'Więcej',
             icon: const Icon(Icons.more_vert_rounded),
@@ -79,9 +89,18 @@ class CollectionsScreen extends ConsumerWidget {
                   );
                 case _CollectionsMenuAction.importJson:
                   _openImportDialog(context, ref);
+                case _CollectionsMenuAction.languageManagement:
+                  showLanguageManagementDialog(context);
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: _CollectionsMenuAction.languageManagement,
+                child: _PopupMenuRow(
+                  icon: Icons.language_rounded,
+                  label: 'Zarządzanie językami',
+                ),
+              ),
               const PopupMenuItem(
                 value: _CollectionsMenuAction.philosophy,
                 child: _PopupMenuRow(
@@ -300,7 +319,18 @@ class _CollectionTile extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              _ChipLabel(text: collection.cefrLevel),
+              Row(
+                children: [
+                  _ChipLabel(text: collection.cefrLevel),
+                  if (collection.translationLanguage != null) ...[
+                    const SizedBox(width: 6),
+                    _ChipLabel(
+                      text:
+                          '${AppLanguage.fromCode(collection.translationLanguage)?.flagEmoji ?? '🌐'} ${AppLanguage.fromCode(collection.translationLanguage)?.name ?? collection.translationLanguage!.toUpperCase()}',
+                    ),
+                  ],
+                ],
+              ),
               if (collection.tags.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Wrap(
@@ -397,7 +427,7 @@ class _MessagePanel extends StatelessWidget {
   }
 }
 
-enum _CollectionsMenuAction { philosophy, importJson }
+enum _CollectionsMenuAction { philosophy, importJson, languageManagement }
 
 class _PopupMenuRow extends StatelessWidget {
   const _PopupMenuRow({required this.icon, required this.label});

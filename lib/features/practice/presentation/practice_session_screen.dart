@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
@@ -636,10 +637,19 @@ class _AudioSettingsChip extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = session.audioTranslationMode;
     final isModeActive = mode != AudioTranslationMode.disabled;
+    final lang = AppLanguage.fromCode(session.translationLanguage) ??
+        AppLanguage.defaultLanguage;
+
+    final tooltip = isModeActive
+        ? 'Lektor tłumaczenia: ${lang.flagEmoji} ${lang.name} (${lang.voiceDisplayName}) · ${mode.label} (kliknij, aby dostosować audio)'
+        : 'Lektor tłumaczenia: ${mode.label} (kliknij, aby dostosować audio)';
+
+    final label = isModeActive
+        ? '${lang.flagEmoji} ${mode.shortLabel}'
+        : mode.shortLabel;
 
     return Tooltip(
-      message:
-          'Lektor tłumaczenia: ${mode.label} (kliknij, aby dostosować audio)',
+      message: tooltip,
       child: Material(
         color: isModeActive
             ? AppTheme.sakuraAccent.withValues(alpha: 0.15)
@@ -673,7 +683,7 @@ class _AudioSettingsChip extends ConsumerWidget {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  mode.shortLabel,
+                  label,
                   style: TextStyle(
                     color:
                         isModeActive ? AppTheme.textLight : AppTheme.textMuted,
