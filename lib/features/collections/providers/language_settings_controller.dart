@@ -65,3 +65,24 @@ class LanguageSettingsController extends AsyncNotifier<Set<String>> {
     state = AsyncData(next);
   }
 }
+
+final defaultTranslationLanguageProvider =
+    AsyncNotifierProvider<DefaultTranslationLanguageController, String>(
+  DefaultTranslationLanguageController.new,
+);
+
+class DefaultTranslationLanguageController extends AsyncNotifier<String> {
+  @override
+  Future<String> build() async {
+    final repo = ref.read(languageSettingsRepositoryProvider);
+    return repo.loadDefaultTranslationLanguage();
+  }
+
+  Future<void> setLanguage(String code) async {
+    final repo = ref.read(languageSettingsRepositoryProvider);
+    await repo.saveDefaultTranslationLanguage(code);
+    state = AsyncData(code);
+    ref.invalidate(languageSettingsControllerProvider);
+  }
+}
+

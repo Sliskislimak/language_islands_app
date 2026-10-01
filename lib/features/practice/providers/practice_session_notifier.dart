@@ -11,7 +11,6 @@ import 'package:language_islands_app/core/services/audio_playback_service.dart';
 import 'package:language_islands_app/core/services/audio_session_bootstrap.dart';
 import 'package:language_islands_app/core/services/pip_service.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
-import 'package:language_islands_app/features/collections/providers/language_settings_controller.dart';
 import 'package:language_islands_app/features/metrics/providers/metrics_controller.dart';
 import 'package:language_islands_app/features/practice/pause_between_reps.dart';
 import 'package:language_islands_app/features/practice/playback_speed.dart';
@@ -56,15 +55,12 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
   }
 
   void startSession(SentenceCollection collection) {
-    final unlocked = ref.read(unlockedLanguagesProvider);
-    String initialLang = 'en';
+    final repo = ref.read(languageSettingsRepositoryProvider);
+    final defaultLang = repo.currentDefaultTranslationLanguage;
+    String initialLang = defaultLang;
     if (collection.translationLanguage != null &&
-        unlocked.any((l) => l.code == collection.translationLanguage)) {
-      initialLang = collection.translationLanguage!;
-    } else if (unlocked.any((l) => l.code == 'en')) {
-      initialLang = 'en';
-    } else if (unlocked.isNotEmpty) {
-      initialLang = unlocked.first.code;
+        collection.translationLanguage!.trim().isNotEmpty) {
+      initialLang = collection.translationLanguage!.trim().toLowerCase();
     }
 
     state = PracticeSessionState(

@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_islands_app/core/models/app_language.dart';
-import 'package:language_islands_app/core/models/audio_translation_mode.dart';
-import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
 import 'package:language_islands_app/features/collections/presentation/collections_screen.dart';
-import 'package:language_islands_app/features/collections/presentation/language_management_dialog.dart';
+import 'package:language_islands_app/features/collections/presentation/select_translation_voice_dialog.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
 import 'package:language_islands_app/features/collections/providers/language_settings_controller.dart';
 import 'package:language_islands_app/features/practice/playback_speed.dart';
@@ -58,6 +56,20 @@ class _FakeLanguageSettingsController extends LanguageSettingsController {
   }
 }
 
+class _FakeDefaultTranslationLanguageController
+    extends DefaultTranslationLanguageController {
+  String _code = 'en';
+
+  @override
+  Future<String> build() async => _code;
+
+  @override
+  Future<void> setLanguage(String code) async {
+    _code = code;
+    state = AsyncData(code);
+  }
+}
+
 void main() {
   group('AppLanguage and Global Language Unlocking', () {
     test('AppLanguage contains English, Polish, Japanese and other major languages', () {
@@ -78,36 +90,74 @@ void main() {
     });
   });
 
-  group('CollectionsScreen Language Settings Entrypoints', () {
-    testWidgets('shows gear icon and more-vert option for language management', (tester) async {
+  group('CollectionsScreen Translation Voice Entrypoints', () {
+    testWidgets('shows voice button in AppBar and under more-vert (3 dots)', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             collectionsControllerProvider.overrideWith(_FakeCollectionsController.new),
             languageSettingsControllerProvider.overrideWith(_FakeLanguageSettingsController.new),
+            defaultTranslationLanguageProvider
+                .overrideWith(_FakeDefaultTranslationLanguageController.new),
           ],
           child: const MaterialApp(home: CollectionsScreen()),
         ),
       );
       await tester.pumpAndSettle();
 
-      // Gear icon in AppBar
-      expect(find.byTooltip('Zarządzanie językami w aplikacji'), findsOneWidget);
+      // Voice button in AppBar
+      expect(find.byTooltip('Głos lektora tłumaczenia'), findsWidgets);
 
-      // Tap gear icon to open dialog
-      await tester.tap(find.byTooltip('Zarządzanie językami w aplikacji'));
+      // Open 3-dots popup menu
+      await tester.tap(find.byTooltip('Więcej opcji'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Zarządzanie językami'), findsOneWidget);
-      expect(find.text('Odblokuj języki do wyboru w listach słówek'), findsOneWidget);
+      // Voice option under 3 dots menu
+      expect(find.text('Głos lektora tłumaczenia'), findsOneWidget);
+      expect(find.text('Import JSON'), findsOneWidget);
+
+      // Tap voice option under 3 dots
+      await tester.tap(find.text('Głos lektora tłumaczenia'));
+      await tester.pumpAndSettle();
+
+      // Voice dialog opened
+      expect(find.byType(SelectTranslationVoiceDialog), findsOneWidget);
+      expect(find.text('Wybierz głos do czytania tłumaczeń zdań'), findsOneWidget);
       expect(find.text('Angielski'), findsOneWidget);
       expect(find.text('Polski'), findsOneWidget);
 
       // Close dialog
-      await tester.tap(find.text('Gotowe'));
+      await tester.tap(find.text('Zamknij'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Zarządzanie językami'), findsNothing);
+      expect(find.byType(SelectTranslationVoiceDialog), findsNothing);
+    });
+
+    testWidgets('shows voice button and 3-dots options on collection card', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            collectionsControllerProvider.overrideWith(_FakeCollectionsController.new),
+            languageSettingsControllerProvider.overrideWith(_FakeLanguageSettingsController.new),
+            defaultTranslationLanguageProvider
+                .overrideWith(_FakeDefaultTranslationLanguageController.new),
+          ],
+          child: const MaterialApp(home: CollectionsScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Collection card shows language chip
+      expect(find.textContaining('Angielski (Jenny)'), findsOneWidget);
+
+      // Card has 3-dots menu
+      expect(find.byTooltip('Więcej opcji wyspy'), findsOneWidget);
+      await tester.tap(find.byTooltip('Więcej opcji wyspy'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Głos lektora tłumaczenia'), findsOneWidget);
+      expect(find.text('Edytuj JSON wyspy'), findsOneWidget);
+      expect(find.text('Kopiuj JSON wyspy'), findsOneWidget);
     });
   });
 
@@ -132,6 +182,8 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           languageSettingsControllerProvider.overrideWith(_FakeLanguageSettingsController.new),
+          defaultTranslationLanguageProvider
+              .overrideWith(_FakeDefaultTranslationLanguageController.new),
         ],
       );
       addTearDown(container.dispose);
@@ -183,7 +235,7 @@ void main() {
       // State is now 0.7
       expect(container.read(practiceSessionProvider)!.playbackSpeed, equals(0.7));
 
-      // Verify the 0.7x button is highlighted with pink color (AppTheme.sakuraPrimary or sakuraAccent)
+      // Verify the 0.7x button is highlighted with pink color (AppTheme.sakuraPrimary)
       final material07 = tester.widget<Material>(
         find.ancestor(
           of: find.text('0.7x'),

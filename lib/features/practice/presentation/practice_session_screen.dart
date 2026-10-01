@@ -5,6 +5,7 @@ import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
+import 'package:language_islands_app/features/collections/presentation/select_translation_voice_dialog.dart';
 import 'package:language_islands_app/features/practice/playback_speed.dart';
 import 'package:language_islands_app/features/practice/presentation/screens/focus_mode_screen.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/audio_settings_sheet.dart';
@@ -153,14 +154,112 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
               },
             ),
           IconButton(
+            tooltip: 'Głos lektora tłumaczenia',
+            icon: const Icon(
+              Icons.record_voice_over_rounded,
+              color: AppTheme.sakuraPrimary,
+            ),
+            onPressed: () => showSelectTranslationVoiceDialog(
+              context,
+              collection: collection,
+            ),
+          ),
+          IconButton(
             tooltip: 'Ustawienia odtwarzacza & lektora audio',
             icon: const Icon(Icons.tune_rounded, color: AppTheme.textLight),
             onPressed: () => showAudioSettingsSheet(context, ref),
           ),
-          IconButton(
-            tooltip: 'Eksportuj kolekcję (JSON)',
-            icon: const Icon(Icons.file_download_outlined, color: AppTheme.textLight),
-            onPressed: () => _openExportDialog(context, collection),
+          PopupMenuButton<_PracticeSessionMenuAction>(
+            tooltip: 'Więcej opcji',
+            icon: const Icon(Icons.more_vert_rounded, color: AppTheme.textLight),
+            color: AppTheme.surfaceElevated,
+            onSelected: (action) {
+              switch (action) {
+                case _PracticeSessionMenuAction.translationVoice:
+                  showSelectTranslationVoiceDialog(
+                    context,
+                    collection: collection,
+                  );
+                case _PracticeSessionMenuAction.audioSettings:
+                  showAudioSettingsSheet(context, ref);
+                case _PracticeSessionMenuAction.exportJson:
+                  _openExportDialog(context, collection);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: _PracticeSessionMenuAction.translationVoice,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.record_voice_over_rounded,
+                      size: 20,
+                      color: AppTheme.sakuraPrimary,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Głos lektora tłumaczenia',
+                        style: TextStyle(
+                          color: AppTheme.textLight,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: _PracticeSessionMenuAction.audioSettings,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      size: 20,
+                      color: AppTheme.textMuted,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Ustawienia odtwarzacza',
+                        style: TextStyle(
+                          color: AppTheme.textLight,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: _PracticeSessionMenuAction.exportJson,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.file_download_outlined,
+                      size: 20,
+                      color: AppTheme.textMuted,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Eksportuj JSON',
+                        style: TextStyle(
+                          color: AppTheme.textLight,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
         bottom: PreferredSize(
@@ -862,4 +961,10 @@ class _ExportCollectionDialog extends StatelessWidget {
       ],
     );
   }
+}
+
+enum _PracticeSessionMenuAction {
+  translationVoice,
+  audioSettings,
+  exportJson,
 }

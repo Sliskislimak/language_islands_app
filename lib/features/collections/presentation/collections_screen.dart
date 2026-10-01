@@ -7,7 +7,9 @@ import 'package:language_islands_app/core/theme/app_theme.dart';
 import 'package:language_islands_app/features/collections/presentation/edit_collection_json_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/import_collection_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/language_management_dialog.dart';
+import 'package:language_islands_app/features/collections/presentation/select_translation_voice_dialog.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
+import 'package:language_islands_app/features/collections/providers/language_settings_controller.dart';
 import 'package:language_islands_app/features/info/presentation/screens/philosophy_screen.dart';
 import 'package:language_islands_app/features/info/presentation/screens/study_plans_screen.dart';
 import 'package:language_islands_app/features/metrics/presentation/screens/daily_history_screen.dart';
@@ -31,6 +33,15 @@ class CollectionsScreen extends ConsumerWidget {
         backgroundColor: AppTheme.bgDark,
         actions: [
           IconButton(
+            key: const ValueKey('appbar_voice_settings_button'),
+            tooltip: 'Głos lektora tłumaczenia',
+            onPressed: () => showSelectTranslationVoiceDialog(context),
+            icon: const Icon(
+              Icons.record_voice_over_rounded,
+              color: AppTheme.sakuraPrimary,
+            ),
+          ),
+          IconButton(
             tooltip: 'Twój Plan i Harmonogram Dnia',
             onPressed: () {
               Navigator.of(context).push(
@@ -41,64 +52,68 @@ class CollectionsScreen extends ConsumerWidget {
             },
             icon: const Icon(
               Icons.calendar_today_rounded,
-              color: AppTheme.sakuraPrimary,
-            ),
-          ),
-          IconButton(
-            tooltip: 'Historia i Dziennik Dnia',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const DailyHistoryScreen(),
-                ),
-              );
-            },
-            icon: const Icon(
-              Icons.auto_stories_rounded,
-              color: AppTheme.textLight,
-            ),
-          ),
-          IconButton(
-            tooltip: 'Biegłość',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const MetricsScreen()),
-              );
-            },
-            icon: const Icon(Icons.insights_rounded),
-          ),
-          IconButton(
-            tooltip: 'Zarządzanie językami w aplikacji',
-            onPressed: () => showLanguageManagementDialog(context),
-            icon: const Icon(
-              Icons.settings_outlined,
               color: AppTheme.textLight,
             ),
           ),
           PopupMenuButton<_CollectionsMenuAction>(
-            tooltip: 'Więcej',
+            tooltip: 'Więcej opcji',
             icon: const Icon(Icons.more_vert_rounded),
             color: AppTheme.surfaceElevated,
             onSelected: (action) {
               switch (action) {
+                case _CollectionsMenuAction.translationVoice:
+                  showSelectTranslationVoiceDialog(context);
+                case _CollectionsMenuAction.importJson:
+                  _openImportDialog(context, ref);
+                case _CollectionsMenuAction.dailyHistory:
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const DailyHistoryScreen(),
+                    ),
+                  );
+                case _CollectionsMenuAction.metrics:
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const MetricsScreen(),
+                    ),
+                  );
                 case _CollectionsMenuAction.philosophy:
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const PhilosophyScreen(),
                     ),
                   );
-                case _CollectionsMenuAction.importJson:
-                  _openImportDialog(context, ref);
                 case _CollectionsMenuAction.languageManagement:
                   showLanguageManagementDialog(context);
               }
             },
             itemBuilder: (context) => [
               const PopupMenuItem(
-                value: _CollectionsMenuAction.languageManagement,
+                value: _CollectionsMenuAction.translationVoice,
                 child: _PopupMenuRow(
-                  icon: Icons.language_rounded,
-                  label: 'Zarządzanie językami',
+                  icon: Icons.record_voice_over_rounded,
+                  label: 'Głos lektora tłumaczenia',
+                ),
+              ),
+              const PopupMenuItem(
+                value: _CollectionsMenuAction.importJson,
+                child: _PopupMenuRow(
+                  icon: Icons.upload_file_outlined,
+                  label: 'Import JSON',
+                ),
+              ),
+              const PopupMenuItem(
+                value: _CollectionsMenuAction.dailyHistory,
+                child: _PopupMenuRow(
+                  icon: Icons.auto_stories_rounded,
+                  label: 'Historia i Dziennik Dnia',
+                ),
+              ),
+              const PopupMenuItem(
+                value: _CollectionsMenuAction.metrics,
+                child: _PopupMenuRow(
+                  icon: Icons.insights_rounded,
+                  label: 'Biegłość i statystyki',
                 ),
               ),
               const PopupMenuItem(
@@ -109,10 +124,10 @@ class CollectionsScreen extends ConsumerWidget {
                 ),
               ),
               const PopupMenuItem(
-                value: _CollectionsMenuAction.importJson,
+                value: _CollectionsMenuAction.languageManagement,
                 child: _PopupMenuRow(
-                  icon: Icons.upload_file_outlined,
-                  label: 'Import JSON',
+                  icon: Icons.settings_outlined,
+                  label: 'Odblokowane języki',
                 ),
               ),
             ],
@@ -188,7 +203,7 @@ class CollectionsScreen extends ConsumerWidget {
   }
 }
 
-class _CollectionTile extends StatelessWidget {
+class _CollectionTile extends ConsumerWidget {
   const _CollectionTile({
     required this.collection,
     required this.onEditJson,
@@ -197,8 +212,31 @@ class _CollectionTile extends StatelessWidget {
   final SentenceCollection collection;
   final VoidCallback onEditJson;
 
+  void _copyCollectionJson(BuildContext context) {
+    Clipboard.setData(
+      ClipboardData(
+        text: collection.toJsonString(pretty: true),
+      ),
+    );
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Skopiowano JSON wyspy "${collection.title}" do schowka!',
+        ),
+        backgroundColor: AppTheme.surfaceElevated,
+        duration: const Duration(milliseconds: 1400),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final defaultLang =
+        ref.watch(defaultTranslationLanguageProvider).valueOrNull ?? 'en';
+    final langCode = collection.translationLanguage ?? defaultLang;
+    final lang = AppLanguage.fromCode(langCode);
     final stats = collection.stats;
     final statsLabel =
         '${stats.sentenceCount} zdań'
@@ -261,29 +299,34 @@ class _CollectionTile extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Tooltip(
+                        message: 'Głos lektora tłumaczenia',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTap: () => showSelectTranslationVoiceDialog(
+                              context,
+                              collection: collection,
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(5),
+                              child: Icon(
+                                Icons.record_voice_over_rounded,
+                                size: 18,
+                                color: AppTheme.sakuraPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Tooltip(
                         message: 'Kopiuj JSON wyspy',
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(6),
-                            onTap: () {
-                              Clipboard.setData(
-                                ClipboardData(
-                                  text: collection.toJsonString(pretty: true),
-                                ),
-                              );
-                              ScaffoldMessenger.of(context).clearSnackBars();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Skopiowano JSON wyspy "${collection.title}" do schowka!',
-                                  ),
-                                  backgroundColor: AppTheme.surfaceElevated,
-                                  duration: const Duration(milliseconds: 1400),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            },
+                            onTap: () => _copyCollectionJson(context),
                             child: const Padding(
                               padding: EdgeInsets.all(5),
                               child: Icon(
@@ -295,7 +338,7 @@ class _CollectionTile extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 2),
                       Tooltip(
                         message: 'Edytuj JSON wyspy (wklej nowy)',
                         child: Material(
@@ -307,12 +350,57 @@ class _CollectionTile extends StatelessWidget {
                               padding: EdgeInsets.all(5),
                               child: Icon(
                                 Icons.edit_note_rounded,
-                                size: 22,
-                                color: AppTheme.sakuraPrimary,
+                                size: 20,
+                                color: AppTheme.textMuted,
                               ),
                             ),
                           ),
                         ),
+                      ),
+                      PopupMenuButton<_CollectionTileAction>(
+                        tooltip: 'Więcej opcji wyspy',
+                        icon: const Icon(
+                          Icons.more_vert_rounded,
+                          size: 20,
+                          color: AppTheme.textMuted,
+                        ),
+                        color: AppTheme.surfaceElevated,
+                        onSelected: (action) {
+                          switch (action) {
+                            case _CollectionTileAction.changeVoice:
+                              showSelectTranslationVoiceDialog(
+                                context,
+                                collection: collection,
+                              );
+                            case _CollectionTileAction.editJson:
+                              onEditJson();
+                            case _CollectionTileAction.copyJson:
+                              _copyCollectionJson(context);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: _CollectionTileAction.changeVoice,
+                            child: _PopupMenuRow(
+                              icon: Icons.record_voice_over_rounded,
+                              label: 'Głos lektora tłumaczenia',
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: _CollectionTileAction.editJson,
+                            child: _PopupMenuRow(
+                              icon: Icons.edit_note_rounded,
+                              label: 'Edytuj JSON wyspy',
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: _CollectionTileAction.copyJson,
+                            child: _PopupMenuRow(
+                              icon: Icons.copy_rounded,
+                              label: 'Kopiuj JSON wyspy',
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -322,13 +410,21 @@ class _CollectionTile extends StatelessWidget {
               Row(
                 children: [
                   _ChipLabel(text: collection.cefrLevel),
-                  if (collection.translationLanguage != null) ...[
-                    const SizedBox(width: 6),
-                    _ChipLabel(
-                      text:
-                          '${AppLanguage.fromCode(collection.translationLanguage)?.flagEmoji ?? '🌐'} ${AppLanguage.fromCode(collection.translationLanguage)?.name ?? collection.translationLanguage!.toUpperCase()}',
+                  const SizedBox(width: 6),
+                  Tooltip(
+                    message: 'Kliknij, aby zmienić głos lektora tłumaczenia',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(4),
+                      onTap: () => showSelectTranslationVoiceDialog(
+                        context,
+                        collection: collection,
+                      ),
+                      child: _ChipLabel(
+                        text:
+                            '🔊 ${lang?.flagEmoji ?? '🌐'} ${lang?.name ?? langCode.toUpperCase()} (${lang?.voiceDisplayName ?? 'Głos'})',
+                      ),
                     ),
-                  ],
+                  ),
                 ],
               ),
               if (collection.tags.isNotEmpty) ...[
@@ -427,7 +523,20 @@ class _MessagePanel extends StatelessWidget {
   }
 }
 
-enum _CollectionsMenuAction { philosophy, importJson, languageManagement }
+enum _CollectionsMenuAction {
+  translationVoice,
+  importJson,
+  dailyHistory,
+  metrics,
+  philosophy,
+  languageManagement,
+}
+
+enum _CollectionTileAction {
+  changeVoice,
+  editJson,
+  copyJson,
+}
 
 class _PopupMenuRow extends StatelessWidget {
   const _PopupMenuRow({required this.icon, required this.label});
@@ -438,12 +547,16 @@ class _PopupMenuRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 20, color: AppTheme.textMuted),
         const SizedBox(width: 12),
-        Text(
-          label,
-          style: const TextStyle(color: AppTheme.textLight, fontSize: 14),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(color: AppTheme.textLight, fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );

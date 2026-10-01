@@ -53,6 +53,87 @@ class LanguageSettingsRepository {
     }
   }
 
+  String? _cachedDefaultTranslationLanguage;
+
+  String get currentDefaultTranslationLanguage =>
+      _cachedDefaultTranslationLanguage ?? 'en';
+
+  Future<String> loadDefaultTranslationLanguage() async {
+    if (_cachedDefaultTranslationLanguage != null) {
+      return _cachedDefaultTranslationLanguage!;
+    }
+
+    final file = await _settingsFile();
+    if (!await file.exists()) {
+      _cachedDefaultTranslationLanguage = 'en';
+      return 'en';
+    }
+
+    try {
+      final raw = await file.readAsString();
+      if (raw.trim().isEmpty) {
+        _cachedDefaultTranslationLanguage = 'en';
+        return 'en';
+      }
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic> &&
+          decoded['defaultTranslationLanguage'] is String) {
+        final code = (decoded['defaultTranslationLanguage'] as String)
+            .trim()
+            .toLowerCase();
+        if (AppLanguage.fromCode(code) != null) {
+          _cachedDefaultTranslationLanguage = code;
+          return code;
+        }
+      }
+    } catch (_) {}
+
+    _cachedDefaultTranslationLanguage = 'en';
+    return 'en';
+  }
+
+  Future<void> saveDefaultTranslationLanguage(String code) async {
+    final normalized = code.trim().toLowerCase();
+    if (AppLanguage.fromCode(normalized) == null) {
+      throw ArgumentError('Nieobsługiwany kod języka: $code');
+    }
+
+    _cachedDefaultTranslationLanguage = normalized;
+
+    final file = await _settingsFile();
+    Map<String, dynamic> data = {};
+    if (await file.exists()) {
+      try {
+        final raw = await file.readAsString();
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) {
+          data = decoded;
+        }
+      } catch (_) {}
+    }
+
+    data['defaultTranslationLanguage'] = normalized;
+    data['updatedAt'] = DateTime.now().toIso8601String();
+
+    // Ensure this language is in unlockedLanguages
+    final unlocked = await loadUnlockedLanguages();
+    if (!unlocked.contains(normalized)) {
+      final nextUnlocked = Set<String>.from(unlocked)..add(normalized);
+      _cachedUnlocked = nextUnlocked;
+      data['unlockedLanguages'] = nextUnlocked.toList()..sort();
+    }
+
+    await file.parent.create(recursive: true);
+    final jsonStr = const JsonEncoder.withIndent('  ').convert(data);
+
+    final tmp = File('${file.path}.tmp');
+    await tmp.writeAsString(jsonStr, flush: true);
+    if (await file.exists()) {
+      await file.delete();
+    }
+    await tmp.rename(file.path);
+  }
+
   Future<Set<String>> _resetToDefaults() async {
     final defaults = Set<String>.from(AppLanguage.defaultUnlockedCodes);
     await _persist(defaults);
@@ -76,11 +157,24 @@ class LanguageSettingsRepository {
 
   Future<void> _persist(Set<String> codes) async {
     final file = await _settingsFile();
+    Map<String, dynamic> data = {};
+    if (await file.exists()) {
+      try {
+        final raw = await file.readAsString();
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) {
+          data = decoded;
+        }
+      } catch (_) {}
+    }
+
+    data['unlockedLanguages'] = codes.toList()..sort();
+    data['updatedAt'] = DateTime.now().toIso8601String();
+    if (!data.containsKey('defaultTranslationLanguage')) {
+      data['defaultTranslationLanguage'] = _cachedDefaultTranslationLanguage ?? 'en';
+    }
+
     await file.parent.create(recursive: true);
-    final data = {
-      'unlockedLanguages': codes.toList()..sort(),
-      'updatedAt': DateTime.now().toIso8601String(),
-    };
     final jsonStr = const JsonEncoder.withIndent('  ').convert(data);
 
     final tmp = File('${file.path}.tmp');

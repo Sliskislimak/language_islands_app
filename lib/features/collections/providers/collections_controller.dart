@@ -40,4 +40,27 @@ class CollectionsController extends AsyncNotifier<List<SentenceCollection>> {
     await repo.deleteCollection(id);
     ref.invalidateSelf();
   }
+
+  Future<void> setTranslationLanguageForCollection(
+    String collectionId,
+    String langCode,
+  ) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    final collection = await repo.getById(collectionId);
+    if (collection != null) {
+      final updated = collection.copyWith(translationLanguage: langCode);
+      await repo.updateCollection(updated);
+      ref.invalidateSelf();
+    }
+  }
+
+  Future<void> setTranslationLanguageForAllCollections(String langCode) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    final collections = await repo.loadAll();
+    for (final col in collections) {
+      final updated = col.copyWith(translationLanguage: langCode);
+      await repo.updateCollection(updated);
+    }
+    ref.invalidateSelf();
+  }
 }
