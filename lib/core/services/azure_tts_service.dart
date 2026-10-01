@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:edge_tts/edge_tts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:language_islands_app/core/constants/api_constants.dart';
@@ -7,8 +8,13 @@ import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-/// Synthesizes Japanese target audio and Polish base translation audio via Azure Speech REST API.
-/// Cached files are never re-fetched when they already exist on disk.
+/// Alias for [AzureTtsService], reflecting Edge TTS as primary engine.
+typedef EdgeTtsService = AzureTtsService;
+
+/// Synthesizes Japanese target audio and Polish base translation audio via
+/// free Microsoft Edge Neural TTS (with optional Azure Speech REST API fallback).
+///
+/// Cached files are saved locally and never re-fetched once stored on disk.
 class AzureTtsService {
   AzureTtsService({http.Client? client}) : _client = client ?? http.Client();
 
@@ -16,7 +22,11 @@ class AzureTtsService {
 
   static const String _outputFormat = 'audio-16khz-128kbitrate-mono-mp3';
 
-  bool get isConfigured =>
+  /// Edge TTS requires no API keys, so the service is always configured.
+  bool get isConfigured => true;
+
+  /// Whether Azure Speech credentials are configured.
+  bool get isAzureConfigured =>
       ApiConstants.azureSubscriptionKey.isNotEmpty &&
       ApiConstants.azureSubscriptionKey != 'TWOJ_KLUCZ_AZURE';
 
@@ -58,13 +68,6 @@ class AzureTtsService {
       return cachePath;
     }
 
-    if (!isConfigured) {
-      debugPrint(
-        'Azure TTS nie jest skonfigurowane dla lektora tłumaczenia zdania "${sentence.id}".',
-      );
-      return null;
-    }
-
     try {
       await _fetchAndSaveTranslationAudio(
         sentenceId: sentence.id,
@@ -85,8 +88,96 @@ class AzureTtsService {
     required String targetText,
     required File destination,
   }) async {
-    _assertAzureConfigured();
+    // 1. Primary: Free Edge TTS (no API key required)
+    try {
+      final comm = Communicate(
+        text: targetText,
+        voice: ApiConstants.japaneseVoiceName,
+      );
+      final bytes = await comm.toBytes();
+      if (bytes.isNotEmpty) {
+        await destination.parent.create(recursive: true);
+        await destination.writeAsBytes(bytes, flush: true);
+        return destination;
+      }
+    } catch (e) {
+      debugPrint(
+        'Edge TTS target synthesis failed for "$sentenceId": $e',
+      );
+      if (isAzureConfigured) {
+        return _fetchAndSaveTargetAudioViaAzure(
+          sentenceId: sentenceId,
+          targetText: targetText,
+          destination: destination,
+        );
+      }
+      rethrow;
+    }
 
+    if (isAzureConfigured) {
+      return _fetchAndSaveTargetAudioViaAzure(
+        sentenceId: sentenceId,
+        targetText: targetText,
+        destination: destination,
+      );
+    }
+
+    throw StateError('Błąd syntezy audio: brak danych audio z Edge TTS.');
+  }
+
+  Future<File> _fetchAndSaveTranslationAudio({
+    required String sentenceId,
+    required String sourceText,
+    required File destination,
+  }) async {
+    // 1. Primary: Free Edge TTS (no API key required)
+    try {
+      final comm = Communicate(
+        text: sourceText,
+        voice: ApiConstants.polishVoiceName,
+      );
+      final bytes = await comm.toBytes();
+      if (bytes.isNotEmpty) {
+        await destination.parent.create(recursive: true);
+        await destination.writeAsBytes(bytes, flush: true);
+        return destination;
+      }
+    } catch (e) {
+      debugPrint(
+        'Edge TTS translation synthesis failed for "$sentenceId": $e',
+      );
+      if (isAzureConfigured) {
+        return _fetchAndSaveTranslationAudioViaAzure(
+          sentenceId: sentenceId,
+          sourceText: sourceText,
+          destination: destination,
+        );
+      }
+      rethrow;
+    }
+
+    if (isAzureConfigured) {
+      return _fetchAndSaveTranslationAudioViaAzure(
+        sentenceId: sentenceId,
+        sourceText: sourceText,
+        destination: destination,
+      );
+    }
+
+    throw StateError(
+      'Błąd syntezy tłumaczenia: brak danych audio z Edge TTS.',
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Azure Fallback Implementation
+  // ---------------------------------------------------------------------------
+
+  Future<File> _fetchAndSaveTargetAudioViaAzure({
+    required String sentenceId,
+    required String targetText,
+    required File destination,
+  }) async {
     final uri = Uri.parse(
       'https://${ApiConstants.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1',
     );
@@ -104,6 +195,12 @@ class AzureTtsService {
     );
 
     if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        throw HttpException(
+          'Błąd autoryzacji Azure Speech (HTTP 401): Klucz API w api_constants.dart wygasł lub został unieważniony.',
+          uri: uri,
+        );
+      }
       throw HttpException(
         'Azure TTS failed for sentence "$sentenceId" '
         '(HTTP ${response.statusCode}): ${response.body}',
@@ -116,13 +213,11 @@ class AzureTtsService {
     return destination;
   }
 
-  Future<File> _fetchAndSaveTranslationAudio({
+  Future<File> _fetchAndSaveTranslationAudioViaAzure({
     required String sentenceId,
     required String sourceText,
     required File destination,
   }) async {
-    _assertAzureConfigured();
-
     final uri = Uri.parse(
       'https://${ApiConstants.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1',
     );
@@ -140,6 +235,12 @@ class AzureTtsService {
     );
 
     if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        throw HttpException(
+          'Błąd autoryzacji Azure Speech dla lektora (HTTP 401): Klucz API w api_constants.dart wygasł lub został unieważniony.',
+          uri: uri,
+        );
+      }
       throw HttpException(
         'Azure Translation TTS failed for sentence "$sentenceId" '
         '(HTTP ${response.statusCode}): ${response.body}',
@@ -173,15 +274,6 @@ class AzureTtsService {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&apos;');
-  }
-
-  static void _assertAzureConfigured() {
-    if (ApiConstants.azureSubscriptionKey == 'TWOJ_KLUCZ_AZURE' ||
-        ApiConstants.azureSubscriptionKey.isEmpty) {
-      throw StateError(
-        'Skonfiguruj klucz Azure w lib/core/constants/api_constants.dart.',
-      );
-    }
   }
 
   static Future<String> _cacheFilePath(String sentenceId) async {

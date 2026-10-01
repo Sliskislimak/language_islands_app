@@ -262,12 +262,38 @@ class _SessionContentColumn extends ConsumerWidget {
             width: double.infinity,
             color: AppTheme.surfaceBorder,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              session!.audioError!,
-              style: const TextStyle(
-                color: AppTheme.yellowPrompt,
-                fontSize: 12,
-              ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: AppTheme.yellowPrompt,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    session!.audioError!,
+                    style: const TextStyle(
+                      color: AppTheme.yellowPrompt,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: AppTheme.textMuted,
+                    size: 16,
+                  ),
+                  tooltip: 'Zamknij',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  splashRadius: 14,
+                  onPressed: () => ref
+                      .read(practiceSessionProvider.notifier)
+                      .clearAudioError(),
+                ),
+              ],
             ),
           ),
         _SmartReviewHeader(session: session),

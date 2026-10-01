@@ -157,6 +157,12 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     state = current.copyWith(activeAudioChannel: channel);
   }
 
+  void clearAudioError() {
+    final current = state;
+    if (current == null) return;
+    state = current.copyWith(clearAudioError: true);
+  }
+
   Future<void> rateSentence(Sentence sentence, int stars) async {
     final current = state;
     if (current == null) return;
