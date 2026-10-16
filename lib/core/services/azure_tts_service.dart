@@ -4,6 +4,7 @@ import 'package:edge_tts/edge_tts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:language_islands_app/core/constants/api_constants.dart';
+import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -30,7 +31,12 @@ class AzureTtsService {
       ApiConstants.azureSubscriptionKey.isNotEmpty &&
       ApiConstants.azureSubscriptionKey != 'TWOJ_KLUCZ_AZURE';
 
-  Future<String> ensureTargetAudio(Sentence sentence) async {
+  Future<String> ensureTargetAudio(
+    Sentence sentence, {
+    String? targetLanguageCode,
+    String? voiceName,
+    String? locale,
+  }) async {
     if (sentence.targetAudioPath != null) {
       final explicit = File(sentence.targetAudioPath!);
       if (await explicit.exists()) {
@@ -38,7 +44,15 @@ class AzureTtsService {
       }
     }
 
-    final cachePath = await _cacheFilePath(sentence.id);
+    final effectiveLang = AppLanguage.fromCode(targetLanguageCode);
+    final effectiveVoice = voiceName ??
+        effectiveLang?.voiceName ??
+        ApiConstants.japaneseVoiceName;
+    final effectiveLocale = locale ??
+        effectiveLang?.locale ??
+        'ja-JP';
+
+    final cachePath = await _cacheFilePath(sentence.id, effectiveVoice);
     final cacheFile = File(cachePath);
     if (await cacheFile.exists()) {
       return cachePath;
@@ -48,8 +62,37 @@ class AzureTtsService {
       sentenceId: sentence.id,
       targetText: sentence.targetText,
       destination: cacheFile,
+      voiceName: effectiveVoice,
+      locale: effectiveLocale,
     );
     return cachePath;
+  }
+
+  /// Synthesizes standalone Japanese text (e.g. Kana character, Kanji compound word)
+  /// using free Edge Neural TTS and caches to disk.
+  Future<String?> synthesizeJapaneseText(String text, {String? key}) async {
+    final safeKey = (key ?? text).replaceAll(RegExp(r'[^\w\-.]'), '_');
+    final docs = await getApplicationDocumentsDirectory();
+    final cacheFile = File(p.join(docs.path, 'audio_cache', 'jp_$safeKey.mp3'));
+    if (await cacheFile.exists()) {
+      return cacheFile.path;
+    }
+
+    try {
+      final comm = Communicate(
+        text: text,
+        voice: ApiConstants.japaneseVoiceName,
+      );
+      final bytes = await comm.toBytes();
+      if (bytes.isNotEmpty) {
+        await cacheFile.parent.create(recursive: true);
+        await cacheFile.writeAsBytes(bytes, flush: true);
+        return cacheFile.path;
+      }
+    } catch (e) {
+      debugPrint('synthesizeJapaneseText failed for "$text": $e');
+    }
+    return null;
   }
 
   /// Ensures translation audio exists (either pre-recorded or synthesized on-demand).
@@ -96,12 +139,14 @@ class AzureTtsService {
     required String sentenceId,
     required String targetText,
     required File destination,
+    String voiceName = ApiConstants.japaneseVoiceName,
+    String locale = 'ja-JP',
   }) async {
     // 1. Primary: Free Edge TTS (no API key required)
     try {
       final comm = Communicate(
         text: targetText,
-        voice: ApiConstants.japaneseVoiceName,
+        voice: voiceName,
       );
       final bytes = await comm.toBytes();
       if (bytes.isNotEmpty) {
@@ -111,13 +156,15 @@ class AzureTtsService {
       }
     } catch (e) {
       debugPrint(
-        'Edge TTS target synthesis failed for "$sentenceId": $e',
+        'Edge TTS target synthesis failed for "$sentenceId" ($voiceName): $e',
       );
       if (isAzureConfigured) {
         return _fetchAndSaveTargetAudioViaAzure(
           sentenceId: sentenceId,
           targetText: targetText,
           destination: destination,
+          voiceName: voiceName,
+          locale: locale,
         );
       }
       rethrow;
@@ -128,6 +175,8 @@ class AzureTtsService {
         sentenceId: sentenceId,
         targetText: targetText,
         destination: destination,
+        voiceName: voiceName,
+        locale: locale,
       );
     }
 
@@ -192,11 +241,13 @@ class AzureTtsService {
     required String sentenceId,
     required String targetText,
     required File destination,
+    String voiceName = ApiConstants.japaneseVoiceName,
+    String locale = 'ja-JP',
   }) async {
     final uri = Uri.parse(
       'https://${ApiConstants.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1',
     );
-    final ssml = _buildSsml(targetText);
+    final ssml = _buildSsml(targetText, voiceName: voiceName, locale: locale);
 
     final response = await _client.post(
       uri,
@@ -274,10 +325,14 @@ class AzureTtsService {
     return destination;
   }
 
-  String _buildSsml(String targetText) {
+  String _buildSsml(
+    String targetText, {
+    String voiceName = ApiConstants.japaneseVoiceName,
+    String locale = 'ja-JP',
+  }) {
     return '''
-<speak version="1.0" xml:lang="ja-JP">
-  <voice name="${ApiConstants.japaneseVoiceName}">${_escapeXml(targetText)}</voice>
+<speak version="1.0" xml:lang="$locale">
+  <voice name="$voiceName">${_escapeXml(targetText)}</voice>
 </speak>''';
   }
 
@@ -301,9 +356,20 @@ class AzureTtsService {
         .replaceAll("'", '&apos;');
   }
 
-  static Future<String> _cacheFilePath(String sentenceId) async {
+  static Future<String> _cacheFilePath(
+    String sentenceId, [
+    String? voiceName,
+  ]) async {
     final docs = await getApplicationDocumentsDirectory();
     final safeId = sentenceId.replaceAll(RegExp(r'[^\w\-.]'), '_');
+    if (voiceName != null && voiceName != ApiConstants.japaneseVoiceName) {
+      final voicePrefix = voiceName.replaceAll(RegExp(r'[^\w\-.]'), '_');
+      return p.join(
+        docs.path,
+        'audio_cache',
+        'target_${voicePrefix}_$safeId.mp3',
+      );
+    }
     return p.join(docs.path, 'audio_cache', 'target_$safeId.mp3');
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
@@ -448,6 +449,11 @@ class _LandscapeExerciseViewState extends ConsumerState<LandscapeExerciseView> {
     final isTargetActive = activeChannel.isTarget;
     final isTranslationActive = activeChannel.isTranslation;
     final isRecallHidden = mode == PracticeMode.recall && !isRevealed;
+    final session = ref.watch(practiceSessionProvider);
+    final targetLang = session?.targetLanguage != null
+        ? AppLanguage.find(session!.targetLanguage)
+        : null;
+    final targetLangName = targetLang?.name ?? 'Japoński';
 
     return Center(
       child: Column(
@@ -458,7 +464,7 @@ class _LandscapeExerciseViewState extends ConsumerState<LandscapeExerciseView> {
 
           // If Active Recall is unrevealed, conceal Rows 1-3 with a placeholder and reveal trigger
           if (isRecallHidden) ...[
-            _buildConcealedRecallBlock(sentence, mode),
+            _buildConcealedRecallBlock(sentence, mode, targetLangName),
           ] else ...[
             // ROW 1: Japanese original text (Kanji / Kana) - Primary Target Script
             _AutoFitRow(
@@ -552,7 +558,11 @@ class _LandscapeExerciseViewState extends ConsumerState<LandscapeExerciseView> {
             isHighlighted: isTranslationActive,
             badgeText: isTranslationActive
                 ? 'Lektor tłumaczenia (PL)'
-                : (isRecallHidden ? 'Pytanie (Przypomnij sobie japoński)' : null),
+                : (isRecallHidden
+                    ? (targetLangName == 'Japoński'
+                        ? 'Pytanie (Przypomnij sobie japoński)'
+                        : 'Pytanie (Przypomnij sobie ${targetLangName.toLowerCase()})')
+                    : null),
             badgeColor: isTranslationActive
                 ? AppTheme.yellowPrompt
                 : AppTheme.textMuted,
@@ -566,13 +576,17 @@ class _LandscapeExerciseViewState extends ConsumerState<LandscapeExerciseView> {
   }
 
   /// Concealed block shown during Active Recall before answer is revealed.
-  Widget _buildConcealedRecallBlock(Sentence sentence, PracticeMode mode) {
+  Widget _buildConcealedRecallBlock(
+    Sentence sentence,
+    PracticeMode mode, [
+    String targetLangName = 'Japoński',
+  ]) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          '• • •   [ Japoński ukryty ]   • • •',
-          style: TextStyle(
+        Text(
+          '• • •   [ $targetLangName ukryty ]   • • •',
+          style: const TextStyle(
             color: AppTheme.textMuted,
             fontSize: 16,
             fontWeight: FontWeight.w500,

@@ -441,6 +441,7 @@ class _SessionContentColumn extends ConsumerWidget {
                             .updateSentenceNotes(sentence.id, notes),
                         activeAudioChannel: session?.activeAudioChannel ??
                             ActiveAudioChannel.none,
+                        targetLanguageCode: session?.targetLanguage,
                       ),
                     );
                   },

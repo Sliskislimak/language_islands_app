@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/audio_translation_mode.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
@@ -53,6 +54,7 @@ class SentenceCardWidget extends StatefulWidget {
     required this.onRate,
     this.onSaveNotes,
     this.activeAudioChannel = ActiveAudioChannel.none,
+    this.targetLanguageCode,
   });
 
   final Sentence sentence;
@@ -65,6 +67,7 @@ class SentenceCardWidget extends StatefulWidget {
   final ValueChanged<int> onRate;
   final ValueChanged<String>? onSaveNotes;
   final ActiveAudioChannel activeAudioChannel;
+  final String? targetLanguageCode;
 
   @override
   State<SentenceCardWidget> createState() => _SentenceCardWidgetState();
@@ -208,6 +211,7 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
                 activeAudioChannel: widget.isActive
                     ? widget.activeAudioChannel
                     : ActiveAudioChannel.none,
+                targetLanguageCode: widget.targetLanguageCode,
               ),
               const SizedBox(height: 10),
               Row(
@@ -682,12 +686,14 @@ class _TextSection extends StatelessWidget {
     required this.currentMode,
     required this.isRevealed,
     this.activeAudioChannel = ActiveAudioChannel.none,
+    this.targetLanguageCode,
   });
 
   final Sentence sentence;
   final PracticeMode currentMode;
   final bool isRevealed;
   final ActiveAudioChannel activeAudioChannel;
+  final String? targetLanguageCode;
 
   bool get _showRecallPromptOnly =>
       currentMode == PracticeMode.recall && !isRevealed;
@@ -746,6 +752,7 @@ class _TextSection extends StatelessWidget {
       katakanaFontSize: 15,
       romajiFontSize: 13,
       activeAudioChannel: activeAudioChannel,
+      targetLanguageCode: targetLanguageCode,
     );
   }
 }
@@ -763,6 +770,7 @@ class JapaneseReadingColumn extends StatelessWidget {
     this.showSource = false,
     this.enableCopy = true,
     this.activeAudioChannel = ActiveAudioChannel.none,
+    this.targetLanguageCode,
   });
 
   final Sentence sentence;
@@ -775,6 +783,7 @@ class JapaneseReadingColumn extends StatelessWidget {
   final bool showSource;
   final bool enableCopy;
   final ActiveAudioChannel activeAudioChannel;
+  final String? targetLanguageCode;
 
   @override
   Widget build(BuildContext context) {
@@ -784,6 +793,10 @@ class JapaneseReadingColumn extends StatelessWidget {
         : CrossAxisAlignment.start;
     final isTargetActive = activeAudioChannel.isTarget;
     final isTranslationActive = activeAudioChannel.isTranslation;
+    final targetLang = targetLanguageCode != null
+        ? AppLanguage.find(targetLanguageCode!)
+        : null;
+    final targetLangName = targetLang?.name ?? 'Japoński';
 
     final targetChildren = <Widget>[
       _readingLine(
@@ -802,7 +815,7 @@ class JapaneseReadingColumn extends StatelessWidget {
                 ]
               : null,
         ),
-        copyMessage: 'Skopiowano tekst japoński',
+        copyMessage: 'Skopiowano tekst ${targetLangName == 'Japoński' ? 'japoński' : 'docelowy'}',
       ),
     ];
 
@@ -872,16 +885,16 @@ class JapaneseReadingColumn extends StatelessWidget {
           if (isTargetActive) ...[
             Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(
+              children: [
+                const Icon(
                   Icons.volume_up_rounded,
                   size: 16,
                   color: AppTheme.sakuraPrimary,
                 ),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Text(
-                  'Japoński (Audio docelowe)',
-                  style: TextStyle(
+                  '$targetLangName (Audio docelowe)',
+                  style: const TextStyle(
                     color: AppTheme.sakuraPrimary,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,

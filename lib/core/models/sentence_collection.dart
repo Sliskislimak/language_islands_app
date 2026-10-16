@@ -11,6 +11,9 @@ class SentenceCollection {
     required this.isCustomIsland,
     required this.sentences,
     this.translationLanguage,
+    this.targetLanguage,
+    this.remoteSourceUrl,
+    this.lastSyncedAt,
   });
 
   final String id;
@@ -20,6 +23,19 @@ class SentenceCollection {
   final bool isCustomIsland;
   final List<Sentence> sentences;
   final String? translationLanguage;
+  final String? targetLanguage;
+  final String? remoteSourceUrl;
+  final DateTime? lastSyncedAt;
+
+  String get effectiveTargetLanguage =>
+      (targetLanguage != null && targetLanguage!.trim().isNotEmpty)
+          ? targetLanguage!.trim().toLowerCase()
+          : 'ja';
+
+  String get effectiveTranslationLanguage =>
+      (translationLanguage != null && translationLanguage!.trim().isNotEmpty)
+          ? translationLanguage!.trim().toLowerCase()
+          : 'en';
 
   SentenceCollection copyWith({
     String? id,
@@ -30,6 +46,12 @@ class SentenceCollection {
     List<Sentence>? sentences,
     String? translationLanguage,
     bool clearTranslationLanguage = false,
+    String? targetLanguage,
+    bool clearTargetLanguage = false,
+    String? remoteSourceUrl,
+    bool clearRemoteSourceUrl = false,
+    DateTime? lastSyncedAt,
+    bool clearLastSyncedAt = false,
   }) {
     return SentenceCollection(
       id: id ?? this.id,
@@ -41,6 +63,15 @@ class SentenceCollection {
       translationLanguage: clearTranslationLanguage
           ? null
           : (translationLanguage ?? this.translationLanguage),
+      targetLanguage: clearTargetLanguage
+          ? null
+          : (targetLanguage ?? this.targetLanguage),
+      remoteSourceUrl: clearRemoteSourceUrl
+          ? null
+          : (remoteSourceUrl ?? this.remoteSourceUrl),
+      lastSyncedAt: clearLastSyncedAt
+          ? null
+          : (lastSyncedAt ?? this.lastSyncedAt),
     );
   }
 
@@ -69,18 +100,39 @@ class SentenceCollection {
       throw FormatException('Collection "$id" is missing a sentences array.');
     }
 
+    final rawTarget = _optionalString(
+      map['targetLanguage'] ??
+          map['targetLang'] ??
+          map['learningLanguage'] ??
+          map['learningLang'],
+    );
+    final rawTranslation = _optionalString(
+      map['translationLanguage'] ??
+          map['translationLang'] ??
+          map['sourceLanguage'] ??
+          map['sourceLang'],
+    );
+    final rawRemoteUrl = _optionalString(
+      map['remoteSourceUrl'] ??
+          map['remoteUrl'] ??
+          map['sourceUrl'] ??
+          map['syncUrl'],
+    );
+    DateTime? parsedSync;
+    if (map['lastSyncedAt'] != null) {
+      parsedSync = DateTime.tryParse(map['lastSyncedAt'].toString());
+    }
+
     return SentenceCollection(
       id: id,
       title: title,
       cefrLevel: _cefrLevel(map['cefrLevel']),
       tags: _tags(map['tags']),
       isCustomIsland: map['isCustomIsland'] == true,
-      translationLanguage: _optionalString(
-        map['translationLanguage'] ??
-            map['translationLang'] ??
-            map['sourceLanguage'] ??
-            map['sourceLang'],
-      ),
+      targetLanguage: rawTarget ?? 'ja',
+      translationLanguage: rawTranslation,
+      remoteSourceUrl: rawRemoteUrl,
+      lastSyncedAt: parsedSync,
       sentences: [
         for (final item in rawSentences)
           if (item is Map<String, dynamic>)
@@ -104,8 +156,17 @@ class SentenceCollection {
       'isCustomIsland': isCustomIsland,
       'sentences': [for (final sentence in sentences) sentence.toMap()],
     };
+    if (targetLanguage != null && targetLanguage!.trim().isNotEmpty) {
+      map['targetLanguage'] = targetLanguage!.trim();
+    }
     if (translationLanguage != null && translationLanguage!.trim().isNotEmpty) {
       map['translationLanguage'] = translationLanguage!.trim();
+    }
+    if (remoteSourceUrl != null && remoteSourceUrl!.trim().isNotEmpty) {
+      map['remoteSourceUrl'] = remoteSourceUrl!.trim();
+    }
+    if (lastSyncedAt != null) {
+      map['lastSyncedAt'] = lastSyncedAt!.toIso8601String();
     }
     return map;
   }

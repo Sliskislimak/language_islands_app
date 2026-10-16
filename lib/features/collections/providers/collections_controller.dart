@@ -63,4 +63,73 @@ class CollectionsController extends AsyncNotifier<List<SentenceCollection>> {
     }
     ref.invalidateSelf();
   }
+
+  Future<void> setTargetLanguageForCollection(
+    String collectionId,
+    String langCode,
+  ) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    final collection = await repo.getById(collectionId);
+    if (collection != null) {
+      final updated = collection.copyWith(targetLanguage: langCode);
+      await repo.updateCollection(updated);
+      ref.invalidateSelf();
+    }
+  }
+
+  Future<void> setTargetLanguageForAllCollections(String langCode) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    final collections = await repo.loadAll();
+    for (final col in collections) {
+      final updated = col.copyWith(targetLanguage: langCode);
+      await repo.updateCollection(updated);
+    }
+    ref.invalidateSelf();
+  }
+
+  Future<void> setRemoteUrlForCollection(
+    String collectionId,
+    String? url,
+  ) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    final collection = await repo.getById(collectionId);
+    if (collection != null) {
+      final updated = collection.copyWith(
+        remoteSourceUrl: url,
+        clearRemoteSourceUrl: url == null || url.trim().isEmpty,
+      );
+      await repo.updateCollection(updated);
+      ref.invalidateSelf();
+    }
+  }
+
+  Future<void> importFromUrl(
+    String url, {
+    String? title,
+    String? apiKey,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final remoteRepo = ref.read(remoteDatabaseRepositoryProvider);
+      final collectionRepo = ref.read(collectionRepositoryProvider);
+
+      final collections = await remoteRepo.fetchCollectionsFromUrl(url, apiKey: apiKey);
+      if (collections.isEmpty) {
+        throw StateError('Nie znaleziono żadnych kolekcji pod podanym adresem URL.');
+      }
+
+      for (var col in collections) {
+        if (title != null && title.trim().isNotEmpty && collections.length == 1) {
+          col = col.copyWith(title: title.trim());
+        }
+        await collectionRepo.updateCollection(
+          col.copyWith(
+            remoteSourceUrl: url,
+            lastSyncedAt: DateTime.now(),
+          ),
+        );
+      }
+      return collectionRepo.loadAll();
+    });
+  }
 }

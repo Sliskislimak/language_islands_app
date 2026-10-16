@@ -56,18 +56,18 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
   void startSession(SentenceCollection collection) {
     final repo = ref.read(languageSettingsRepositoryProvider);
-    final defaultLang = repo.currentDefaultTranslationLanguage;
-    String initialLang = defaultLang;
-    if (collection.translationLanguage != null &&
-        collection.translationLanguage!.trim().isNotEmpty) {
-      initialLang = collection.translationLanguage!.trim().toLowerCase();
-    }
+    final defaultTransLang = repo.currentDefaultTranslationLanguage;
+    final defaultTargetLang = repo.currentDefaultTargetLanguage;
+
+    final initialTargetLang = collection.targetLanguage ?? defaultTargetLang;
+    final initialTransLang = collection.translationLanguage ?? defaultTransLang;
 
     state = PracticeSessionState(
       collection: collection,
       mode: PracticeMode.shadowing,
       activeSentenceId: collection.sentences.firstOrNull?.id,
-      translationLanguage: initialLang,
+      targetLanguage: initialTargetLang,
+      translationLanguage: initialTransLang,
     );
   }
 
@@ -484,6 +484,22 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
 
     final updatedCollection = current.collection.copyWith(
       translationLanguage: langCode,
+    );
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.updateCollection(updatedCollection);
+    state = state?.copyWith(collection: updatedCollection);
+    ref.invalidate(collectionsControllerProvider);
+  }
+
+  Future<void> setTargetLanguage(String langCode) async {
+    final current = state;
+    if (current == null) return;
+    if (current.targetLanguage == langCode) return;
+
+    state = current.copyWith(targetLanguage: langCode);
+
+    final updatedCollection = current.collection.copyWith(
+      targetLanguage: langCode,
     );
     final repo = ref.read(collectionRepositoryProvider);
     await repo.updateCollection(updatedCollection);
@@ -919,14 +935,25 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final tts = ref.read(azureTtsServiceProvider);
     final repo = ref.read(collectionRepositoryProvider);
 
-    final path = await tts.ensureTargetAudio(sentence);
-    final withPath = sentence.copyWith(targetAudioPath: path);
-    await repo.updateSentence(current.collection.id, withPath);
+    final lang = AppLanguage.fromCode(current.targetLanguage) ??
+        AppLanguage.fromCode('ja') ??
+        AppLanguage.defaultLanguage;
 
-    final refreshed =
-        await repo.getById(current.collection.id) ?? current.collection;
-    state = state!.copyWith(collection: refreshed);
-    ref.invalidate(collectionsControllerProvider);
+    final path = await tts.ensureTargetAudio(
+      sentence,
+      targetLanguageCode: lang.code,
+      voiceName: lang.voiceName,
+      locale: lang.locale,
+    );
+    if (path != sentence.targetAudioPath) {
+      final withPath = sentence.copyWith(targetAudioPath: path);
+      await repo.updateSentence(current.collection.id, withPath);
+
+      final refreshed =
+          await repo.getById(current.collection.id) ?? current.collection;
+      state = state?.copyWith(collection: refreshed);
+      ref.invalidate(collectionsControllerProvider);
+    }
 
     return path;
   }

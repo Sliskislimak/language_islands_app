@@ -3,9 +3,21 @@ import 'package:language_islands_app/core/services/audio_playback_service.dart';
 import 'package:language_islands_app/core/services/azure_tts_service.dart';
 import 'package:language_islands_app/core/services/pip_service.dart';
 import 'package:language_islands_app/data/repositories/collection_repository.dart';
+import 'package:language_islands_app/data/repositories/kanji_repository.dart';
 import 'package:language_islands_app/data/repositories/language_settings_repository.dart';
+import 'package:language_islands_app/data/repositories/remote_database_repository.dart';
 import 'package:language_islands_app/data/repositories/schedule_repository.dart';
 import 'package:language_islands_app/data/repositories/user_metrics_repository.dart';
+
+final remoteDatabaseRepositoryProvider = Provider<RemoteDatabaseRepository>((ref) {
+  final repo = RemoteDatabaseRepository();
+  ref.onDispose(repo.dispose);
+  return repo;
+});
+
+final kanjiRepositoryProvider = Provider<KanjiRepository>((ref) {
+  return KanjiRepository();
+});
 
 final languageSettingsRepositoryProvider =
     Provider<LanguageSettingsRepository>((ref) {

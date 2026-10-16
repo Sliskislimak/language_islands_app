@@ -4,12 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
+import 'package:language_islands_app/features/collections/presentation/add_sentence_for_friend_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/edit_collection_json_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/import_collection_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/language_management_dialog.dart';
+import 'package:language_islands_app/features/collections/presentation/remote_sync_dialog.dart';
+import 'package:language_islands_app/features/collections/presentation/select_target_language_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/select_translation_voice_dialog.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
 import 'package:language_islands_app/features/collections/providers/language_settings_controller.dart';
+import 'package:language_islands_app/features/collections/providers/remote_sync_controller.dart';
 import 'package:language_islands_app/features/info/presentation/screens/philosophy_screen.dart';
 import 'package:language_islands_app/features/info/presentation/screens/study_plans_screen.dart';
 import 'package:language_islands_app/features/metrics/presentation/screens/daily_history_screen.dart';
@@ -33,12 +37,28 @@ class CollectionsScreen extends ConsumerWidget {
         backgroundColor: AppTheme.bgDark,
         actions: [
           IconButton(
+            tooltip: 'Język nauki (docelowy)',
+            onPressed: () => showSelectTargetLanguageDialog(context),
+            icon: const Icon(
+              Icons.school_rounded,
+              color: AppTheme.sakuraPrimary,
+            ),
+          ),
+          IconButton(
             key: const ValueKey('appbar_voice_settings_button'),
             tooltip: 'Głos lektora tłumaczenia',
             onPressed: () => showSelectTranslationVoiceDialog(context),
             icon: const Icon(
               Icons.record_voice_over_rounded,
               color: AppTheme.sakuraPrimary,
+            ),
+          ),
+          IconButton(
+            tooltip: 'Zdalna baza zdań / Synchronizacja',
+            onPressed: () => showRemoteSyncDialog(context),
+            icon: const Icon(
+              Icons.cloud_sync_rounded,
+              color: AppTheme.greenMatcha,
             ),
           ),
           IconButton(
@@ -61,8 +81,14 @@ class CollectionsScreen extends ConsumerWidget {
             color: AppTheme.surfaceElevated,
             onSelected: (action) {
               switch (action) {
+                case _CollectionsMenuAction.addSentenceForFriend:
+                  showAddSentenceForFriendDialog(context);
+                case _CollectionsMenuAction.targetLanguage:
+                  showSelectTargetLanguageDialog(context);
                 case _CollectionsMenuAction.translationVoice:
                   showSelectTranslationVoiceDialog(context);
+                case _CollectionsMenuAction.remoteSync:
+                  showRemoteSyncDialog(context);
                 case _CollectionsMenuAction.importJson:
                   _openImportDialog(context, ref);
                 case _CollectionsMenuAction.dailyHistory:
@@ -89,10 +115,31 @@ class CollectionsScreen extends ConsumerWidget {
             },
             itemBuilder: (context) => [
               const PopupMenuItem(
+                value: _CollectionsMenuAction.addSentenceForFriend,
+                child: _PopupMenuRow(
+                  icon: Icons.send_rounded,
+                  label: 'Dla Przyjaciela / Wyślij zwrot',
+                ),
+              ),
+              const PopupMenuItem(
+                value: _CollectionsMenuAction.targetLanguage,
+                child: _PopupMenuRow(
+                  icon: Icons.school_rounded,
+                  label: 'Język nauki (docelowy)',
+                ),
+              ),
+              const PopupMenuItem(
                 value: _CollectionsMenuAction.translationVoice,
                 child: _PopupMenuRow(
                   icon: Icons.record_voice_over_rounded,
                   label: 'Głos lektora tłumaczenia',
+                ),
+              ),
+              const PopupMenuItem(
+                value: _CollectionsMenuAction.remoteSync,
+                child: _PopupMenuRow(
+                  icon: Icons.cloud_sync_rounded,
+                  label: 'Zdalna baza zdań / Synchronizacja',
                 ),
               ),
               const PopupMenuItem(
@@ -133,6 +180,18 @@ class CollectionsScreen extends ConsumerWidget {
             ],
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        key: const ValueKey('fab_add_sentence_for_friend'),
+        backgroundColor: AppTheme.sakuraPrimary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.send_rounded),
+        label: const Text(
+          'Dla Przyjaciela / Wyślij',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        tooltip: 'Wyślij nowy zwrot dla przyjaciela (GitHub Gist) / 友だちへフレーズを送る',
+        onPressed: () => showAddSentenceForFriendDialog(context),
       ),
       body: collectionsAsync.when(
         loading: () => const Center(
@@ -231,12 +290,85 @@ class _CollectionTile extends ConsumerWidget {
     );
   }
 
+  Future<void> _openSetRemoteUrlDialog(
+    BuildContext context,
+    WidgetRef ref,
+    SentenceCollection collection,
+  ) async {
+    final controller =
+        TextEditingController(text: collection.remoteSourceUrl ?? '');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        title: const Text(
+          'URL zdalnej bazy dla kolekcji',
+          style: TextStyle(color: AppTheme.textLight, fontSize: 16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Wprowadź bezpośredni adres URL (REST API, GitHub Gist, JSON), z którego aplikacja ma pobierać i aktualizować zdania dla tej kolekcji:',
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              style: const TextStyle(color: AppTheme.textLight, fontSize: 13),
+              decoration: const InputDecoration(
+                hintText: 'https://...',
+                hintStyle: TextStyle(color: AppTheme.textMuted),
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Anuluj'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.sakuraPrimary,
+              foregroundColor: AppTheme.bgDark,
+            ),
+            child: const Text('Zapisz'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref
+          .read(collectionsControllerProvider.notifier)
+          .setRemoteUrlForCollection(collection.id, controller.text.trim());
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Zapisano URL zdalnej bazy dla kolekcji.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final defaultLang =
         ref.watch(defaultTranslationLanguageProvider).valueOrNull ?? 'en';
     final langCode = collection.translationLanguage ?? defaultLang;
     final lang = AppLanguage.fromCode(langCode);
+
+    final defaultTarget =
+        ref.watch(defaultTargetLanguageProvider).valueOrNull ?? 'ja';
+    final targetLangCode = collection.targetLanguage ?? defaultTarget;
+    final targetLang = AppLanguage.fromCode(targetLangCode);
+
     final stats = collection.stats;
     final statsLabel =
         '${stats.sentenceCount} zdań'
@@ -365,13 +497,34 @@ class _CollectionTile extends ConsumerWidget {
                           color: AppTheme.textMuted,
                         ),
                         color: AppTheme.surfaceElevated,
-                        onSelected: (action) {
+                        onSelected: (action) async {
                           switch (action) {
+                            case _CollectionTileAction.changeTargetLanguage:
+                              showSelectTargetLanguageDialog(
+                                context,
+                                collection: collection,
+                              );
                             case _CollectionTileAction.changeVoice:
                               showSelectTranslationVoiceDialog(
                                 context,
                                 collection: collection,
                               );
+                            case _CollectionTileAction.syncRemote:
+                              final res = await ref
+                                  .read(remoteDatabaseConfigProvider.notifier)
+                                  .syncNow(
+                                    overrideUrl: collection.remoteSourceUrl,
+                                  );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(res.message),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
+                            case _CollectionTileAction.setRemoteUrl:
+                              await _openSetRemoteUrlDialog(context, ref, collection);
                             case _CollectionTileAction.editJson:
                               onEditJson();
                             case _CollectionTileAction.copyJson:
@@ -380,10 +533,33 @@ class _CollectionTile extends ConsumerWidget {
                         },
                         itemBuilder: (context) => [
                           const PopupMenuItem(
+                            value: _CollectionTileAction.changeTargetLanguage,
+                            child: _PopupMenuRow(
+                              icon: Icons.school_rounded,
+                              label: 'Język nauki (docelowy)',
+                            ),
+                          ),
+                          const PopupMenuItem(
                             value: _CollectionTileAction.changeVoice,
                             child: _PopupMenuRow(
                               icon: Icons.record_voice_over_rounded,
                               label: 'Głos lektora tłumaczenia',
+                            ),
+                          ),
+                          if (collection.remoteSourceUrl != null &&
+                              collection.remoteSourceUrl!.isNotEmpty)
+                            const PopupMenuItem(
+                              value: _CollectionTileAction.syncRemote,
+                              child: _PopupMenuRow(
+                                icon: Icons.cloud_sync_rounded,
+                                label: 'Synchronizuj z bazą zdalną',
+                              ),
+                            ),
+                          const PopupMenuItem(
+                            value: _CollectionTileAction.setRemoteUrl,
+                            child: _PopupMenuRow(
+                              icon: Icons.link_rounded,
+                              label: 'Ustaw URL zdalnej bazy',
                             ),
                           ),
                           const PopupMenuItem(
@@ -407,10 +583,26 @@ class _CollectionTile extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   _ChipLabel(text: collection.cefrLevel),
-                  const SizedBox(width: 6),
+                  Tooltip(
+                    message: 'Kliknij, aby zmienić język nauki (docelowy)',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(4),
+                      onTap: () => showSelectTargetLanguageDialog(
+                        context,
+                        collection: collection,
+                      ),
+                      child: _ChipLabel(
+                        text:
+                            '🎯 ${targetLang?.flagEmoji ?? '🇯🇵'} ${targetLang?.name ?? targetLangCode.toUpperCase()}',
+                      ),
+                    ),
+                  ),
                   Tooltip(
                     message: 'Kliknij, aby zmienić głos lektora tłumaczenia',
                     child: InkWell(
@@ -425,6 +617,34 @@ class _CollectionTile extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  if (collection.remoteSourceUrl != null &&
+                      collection.remoteSourceUrl!.isNotEmpty)
+                    Tooltip(
+                      message:
+                          'Kolekcja połączona z bazą zdalną (kliknij, aby zsynchronizować)',
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(4),
+                        onTap: () async {
+                          final res = await ref
+                              .read(remoteDatabaseConfigProvider.notifier)
+                              .syncNow(
+                                overrideUrl: collection.remoteSourceUrl,
+                              );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(res.message),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
+                        child: const _ChipLabel(
+                          text: '☁️ Baza zdalna',
+                          muted: true,
+                        ),
+                      ),
+                    ),
                 ],
               ),
               if (collection.tags.isNotEmpty) ...[
@@ -524,7 +744,10 @@ class _MessagePanel extends StatelessWidget {
 }
 
 enum _CollectionsMenuAction {
+  addSentenceForFriend,
+  targetLanguage,
   translationVoice,
+  remoteSync,
   importJson,
   dailyHistory,
   metrics,
@@ -533,7 +756,10 @@ enum _CollectionsMenuAction {
 }
 
 enum _CollectionTileAction {
+  changeTargetLanguage,
   changeVoice,
+  syncRemote,
+  setRemoteUrl,
   editJson,
   copyJson,
 }

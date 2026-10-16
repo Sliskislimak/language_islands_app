@@ -114,7 +114,7 @@ class AppLanguage {
     ),
   ];
 
-  static const List<String> defaultUnlockedCodes = ['en', 'pl'];
+  static const List<String> defaultUnlockedCodes = ['en', 'pl', 'ja'];
 
   static AppLanguage? fromCode(String? code) {
     if (code == null || code.trim().isEmpty) return null;
@@ -127,7 +127,12 @@ class AppLanguage {
     return null;
   }
 
+  static AppLanguage? find(String? code) => fromCode(code);
+
   static AppLanguage defaultLanguage = supportedLanguages.first;
+  static AppLanguage get polish => fromCode('pl')!;
+  static AppLanguage get japanese => fromCode('ja')!;
+  static AppLanguage get english => fromCode('en')!;
 
   @override
   bool operator ==(Object other) =>

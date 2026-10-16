@@ -46,6 +46,7 @@ class PracticeSessionState {
     this.pipTranslationSize = PipTranslationSize.small,
     this.pipTranslationUnderPhonetics = true,
     this.translationLanguage = 'en',
+    this.targetLanguage = 'ja',
   });
 
   final SentenceCollection collection;
@@ -54,6 +55,7 @@ class PracticeSessionState {
   final Set<String> revealedSentenceIds;
   final String? audioError;
   final String translationLanguage;
+  final String targetLanguage;
 
   final bool isPlayingContinuous;
   final int repsPerSentence;
@@ -151,6 +153,7 @@ class PracticeSessionState {
     PipTranslationSize? pipTranslationSize,
     bool? pipTranslationUnderPhonetics,
     String? translationLanguage,
+    String? targetLanguage,
   }) {
     return PracticeSessionState(
       collection: collection ?? this.collection,
@@ -188,6 +191,7 @@ class PracticeSessionState {
       pipTranslationUnderPhonetics:
           pipTranslationUnderPhonetics ?? this.pipTranslationUnderPhonetics,
       translationLanguage: translationLanguage ?? this.translationLanguage,
+      targetLanguage: targetLanguage ?? this.targetLanguage,
     );
   }
 }

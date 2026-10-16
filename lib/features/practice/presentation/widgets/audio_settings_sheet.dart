@@ -224,6 +224,22 @@ class _AudioSettingsSheetContent extends ConsumerWidget {
                   currentSpeed: session.playbackSpeed,
                   onChanged: notifier.setPlaybackSpeed,
                 ),
+
+                const SizedBox(height: 22),
+
+                // 8. Język nauki (docelowy)
+                _SectionTitle(
+                  title: 'JĘZYK NAUKI (DOCELOWY)',
+                  subtitle:
+                      'Język zdania i nagrania docelowego (np. polski dla znajomej z Japonii lub japoński).',
+                  icon: Icons.track_changes_rounded,
+                  iconColor: AppTheme.sakuraAccent,
+                ),
+                const SizedBox(height: 10),
+                _TargetLanguageSelector(
+                  currentTargetCode: session.targetLanguage,
+                  onChanged: notifier.setTargetLanguage,
+                ),
               ],
             ),
           ),
@@ -706,6 +722,88 @@ class _TranslationLanguageSelector extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _TargetLanguageSelector extends StatelessWidget {
+  const _TargetLanguageSelector({
+    required this.currentTargetCode,
+    required this.onChanged,
+  });
+
+  final String currentTargetCode;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final targets = [
+      AppLanguage.japanese,
+      AppLanguage.polish,
+      AppLanguage.english,
+    ];
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: targets.map((lang) {
+        final isSelected =
+            lang.code.toLowerCase() == currentTargetCode.toLowerCase();
+        return Material(
+          color: isSelected
+              ? AppTheme.sakuraAccent.withValues(alpha: 0.18)
+              : AppTheme.surfaceElevated,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+            onTap: () => onChanged(lang.code),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 9,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isSelected
+                      ? AppTheme.sakuraAccent
+                      : AppTheme.surfaceBorder,
+                  width: isSelected ? 1.5 : 1.0,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    lang.flagEmoji,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    lang.name,
+                    style: TextStyle(
+                      color: isSelected
+                          ? AppTheme.textLight
+                          : AppTheme.textMuted,
+                      fontSize: 12,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                  if (isSelected) ...[
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 15,
+                      color: AppTheme.sakuraAccent,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

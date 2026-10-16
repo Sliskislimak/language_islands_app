@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:language_islands_app/core/services/audio_session_bootstrap.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
-import 'package:language_islands_app/features/collections/presentation/collections_screen.dart';
+import 'package:language_islands_app/features/main/presentation/main_navigation_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +28,7 @@ class LanguageIslandsApp extends StatelessWidget {
       title: 'Language Islands',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.japaneseDarkTheme,
-      home: const CollectionsScreen(),
+      home: const MainNavigationScreen(),
     );
   }
 }

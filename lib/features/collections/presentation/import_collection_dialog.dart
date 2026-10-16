@@ -19,27 +19,28 @@ ZASADY TWORZENIA ZDAŃ:
 WYMAGANY FORMAT JSON (zwróć TYLKO czysty kod JSON bez znaczników markdown):
 {
   "id": "unikalne_id_kolekcji_np_verbs_a1_part1",
-  "title": "Tytuł kolekcji (np. 100 najczęstszych czasowników - Część 1)",
+  "title": "Tytuł kolekcji (np. Polskie powitania dla przyjaciółki / 100 czasowników)",
   "cefrLevel": "A1",
-  "tags": ["czasowniki", "koniugacje", "codzienne"],
+  "tags": ["codzienne", "podstawy"],
+  "targetLanguage": "pl",
+  "translationLanguage": "ja",
   "isCustomIsland": false,
   "sentences": [
     {
       "id": "unikalne_id_zdania_1",
-      "targetText": "毎朝コーヒーを飲みます。",
-      "katakana": "コーヒー",
-      "phoneticReading": "Maiasa kōhī o nomimasu.",
-      "sourceText": "Piję kawę każdego ranka.",
-      "notes": "Konstrukcja: 毎朝 (każdego ranka) + コーヒー (kawa) + partykuła を (biernik) + 飲みます (pić w formie grzecznej masu).",
-      "emojis": ["☕"]
+      "targetText": "Cześć! Jak się masz?",
+      "phoneticReading": "Czeszć! Jak shye masz?",
+      "sourceText": "こんにちは！お元気ですか？",
+      "notes": "Podstawowe przywitanie. Odpowiedź: Dobrze, dziękuję.",
+      "emojis": ["👋", "😊"]
     },
     {
       "id": "unikalne_id_zdania_2",
-      "targetText": "猫は病院の前にいます。",
-      "phoneticReading": "Neko wa byōin no mae ni imasu.",
-      "sourceText": "Kot jest przed szpitalem.",
-      "notes": "Neko (kot) + wa + byōin (szpital) + no mae ni (przed) + imasu (jest dla istot żywych).",
-      "emojis": ["🐱", "🏥"]
+      "targetText": "Dziękuję bardzo za pomoc.",
+      "phoneticReading": "Dzyenkuye bardzo za pomots.",
+      "sourceText": "手伝ってくれてどうもありがとう。",
+      "notes": "Bardzo uprzejme podziękowanie.",
+      "emojis": ["🙏"]
     }
   ]
 }
