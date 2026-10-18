@@ -13,13 +13,13 @@ const translations = {
     navFaq: "FAQ",
 
     // Hero
-    heroBadge: "🌸 日本の友だちへ贈る特別ガイド",
+    heroBadge: "🌸 こはるちゃんへ贈る特別ガイド",
     heroTitle: "iPhoneで始める<br><span class=\"highlight\">ポーランド語 & 日本語</span> 相互学習",
     heroDesc: "公式App Storeにはない、私たち2人だけの特製語学学習アプリ「Language Islands」。SideStoreを使ってiPhoneに無料でインストールし、毎日フレーズを交換しながら楽しく学べるまでの全手順をまとめました。",
     
     // Personal Letter
-    letterHeader: "💌 Jakubからのメッセージ",
-    letterBody: "「こんにちは！私たちが一緒にポーランド語と日本語を学び合えるアプリを作りました。私のアプリにはあなたが教えてくれた日本語が表示され、あなたのアプリには私が作ったポーランド語（ネイティブ音声＆カタカナ発音付き）が届きます！最初の設定だけ少し手順がありますが、このページを見ながら進めれば大丈夫です。一緒に頑張りましょう！」",
+    letterHeader: "💌 Jakubからこはるちゃんへ",
+    letterBody: "「こはるちゃん、こんにちは！私たちが一緒にポーランド語と日本語を学び合えるアプリを作りました。私のアプリにはこはるちゃんが教えてくれた日本語が表示され、こはるちゃんのアプリには私が作ったポーランド語（ネイティブ音声＆カタカナ発音付き）が届きます！最初の設定だけ少し手順がありますが、このページを見ながら進めれば大丈夫です。一緒に頑張ろうね！」",
     letterSign: "— Jakub より",
 
     // Checklist Progress
@@ -31,7 +31,7 @@ const translations = {
 
     // Two-Way Learning Box
     twoWayTitle: "アプリで実現する2人の学習交換",
-    twoWayFriendTitle: "あなた (Friend in Japan)",
+    twoWayFriendTitle: "こはるちゃん (Koharu)",
     twoWayFriendTarget: "🇵🇱 ポーランド語を学習",
     twoWayFriendF1: "ネイティブのポーランド語音声（Marek / Zofia）",
     twoWayFriendF2: "難しい発音も安心な「カタカナ読み補助」",
@@ -40,9 +40,9 @@ const translations = {
 
     twoWayJakubTitle: "Jakub (Poland)",
     twoWayJakubTarget: "🇯🇵 日本語を学習",
-    twoWayJakubF1: "あなたが送信した日常の日本語を練習",
+    twoWayJakubF1: "こはるちゃんが送信した日常の日本語を練習",
     twoWayJakubF2: "漢字・カタカナ・ローマ字対応",
-    twoWayJakubF3: "あなたが学ぶためのポーランド語文を作成して送信",
+    twoWayJakubF3: "こはるちゃんが学ぶためのポーランド語文を作成して送信",
 
     twoWayCenterBadge: "Gistで双方向同期",
 
@@ -135,19 +135,19 @@ const translations = {
     syncStep3: "3. 以下の「共有URL」をコピーして、入力欄に貼り付けます。",
     copyGistBtn: "Gist URLをコピー",
     syncStep4: "4. <strong>「起動時に自動同期」</strong>（Auto-sync on startup）のスイッチをONにします。",
-    syncStep5: "5. <strong>「今すぐ同期」</strong>（Synchronizuj teraz）をタップします。これでJakubが作ったポーランド語レッスンが一気に届きます！",
+    syncStep5: "5. <strong>「今すぐ同期」</strong>（Synchronizuj teraz）をタップします。これでJakubがこはるちゃんのために作ったポーランド語レッスンが一気に届きます！",
 
-    sendPhraseTitle: "2. あなたからJakubへ「日本語フレーズ」を送る方法",
+    sendPhraseTitle: "2. こはるちゃんからJakubへ「日本語フレーズ」を送る方法",
     sendIntro: "Jakubに勉強してほしい日常会話や好きな表現をいつでも送れます！",
-    sendStep1: "1. アプリ上部の <strong>紙飛行機 / ハートアイコン</strong> またはメニュー「︙」から <strong>「Dla Przyjaciela / Wyślij zwrot」</strong> をタップします。",
-    sendStep2: "2. 上部の切替タブが <strong>「日本語 (Dla Jakuba / 友だちへ)」</strong> になっていることを確認します。",
+    sendStep1: "1. アプリ上部の <strong>紙飛行機 / ハートアイコン</strong> またはメニュー「︙」から <strong>「Dla Jakuba / Jakubへフレーズを送る」</strong> をタップします。",
+    sendStep2: "2. 上部の切替タブが <strong>「日本語 (Dla Jakuba)」</strong> になっていることを確認します。",
     sendStep3: "3. 以下の4項目を入力します：",
     sendF1: "・ <strong>1. 日本語（漢字・ひらがな）</strong>：例「これ、すごく美味しいよ！」",
     sendF2: "・ <strong>2. カタカナ読み</strong>：例「コレ、スゴク オイシイ ヨ！」",
     sendF3: "・ <strong>3. ローマ字</strong>：例「Kore, sugoku oishii yo!」",
     sendF4: "・ <strong>4. 意味・メモ</strong>：例「To jest naprawdę pyszne!」やシチュエーション",
     sendStep4: "4. <strong>「送信 / 送る」</strong> ボタンをタップします！",
-    sendResult: "これだけで共有データベースに送信され、Jakubがアプリを開いたときに自動的にあなたの日本語フレーズが学習リストに加わります！🌸",
+    sendResult: "これだけで共有データベースに送信され、Jakubがアプリを開いたときに自動的にこはるちゃんの日本語フレーズが学習リストに加わります！🌸",
 
     // Mockup Section
     mockupTitle: "アプリの画面プレビュー",
@@ -182,7 +182,7 @@ const translations = {
     resSideServerMacDesc: "Mac用初期インストーラー",
 
     // Footer
-    footerNote: "Jakubと友だちのための特製語学学習プロジェクト",
+    footerNote: "JakubとKoharuのための特製語学学習プロジェクト",
     footerCopy: "© 2026 Language Islands • All rights reserved."
   },
 
@@ -196,12 +196,12 @@ const translations = {
     navExchange: "Exchange Sentences",
     navFaq: "FAQ",
 
-    heroBadge: "🌸 Special Guide for My Friend in Japan",
+    heroBadge: "🌸 Special Guide for Koharu",
     heroTitle: "Learn <span class=\"highlight\">Polish & Japanese</span><br>Together on iPhone",
     heroDesc: "A custom language exchange app built exclusively for the two of us. Step-by-step instructions on how to install 'Language Islands' via SideStore on your iPhone for free, configure Polish learning, and exchange daily sentences seamlessly.",
 
-    letterHeader: "💌 A message from Jakub",
-    letterBody: "\"Hello! I built this application so we can learn Polish and Japanese together. In my app, I practice the Japanese sentences you give me. In your app, you receive the Polish sentences I prepare with native neural audio and Katakana phonetic guides! It only takes a few minutes to set up, and this guide walks you through every step. Let's do our best!\"",
+    letterHeader: "💌 A message from Jakub to Koharu",
+    letterBody: "\"Hello Koharu! I built this application so we can learn Polish and Japanese together. In my app, I practice the Japanese sentences you give me. In your app, you receive the Polish sentences I prepare with native neural audio and Katakana phonetic guides! It only takes a few minutes to set up, and this guide walks you through every step. Let's do our best!\"",
     letterSign: "— From Jakub",
 
     progressTitle: "Setup Completion Progress",
@@ -211,7 +211,7 @@ const translations = {
     step4Check: "4. Connect Shared Gist Database",
 
     twoWayTitle: "Our Two-Way Language Exchange",
-    twoWayFriendTitle: "You (Friend in Japan)",
+    twoWayFriendTitle: "Koharu (Japan)",
     twoWayFriendTarget: "🇵🇱 Learning Polish",
     twoWayFriendF1: "Native Polish neural audio (Marek / Zofia)",
     twoWayFriendF2: "Katakana phonetic reading guide for tricky Polish sounds",
@@ -220,9 +220,9 @@ const translations = {
 
     twoWayJakubTitle: "Jakub (Poland)",
     twoWayJakubTarget: "🇯🇵 Learning Japanese",
-    twoWayJakubF1: "Practices everyday Japanese sentences sent by you",
+    twoWayJakubF1: "Practices everyday Japanese sentences sent by Koharu",
     twoWayJakubF2: "Kanji, Katakana & Romaji support",
-    twoWayJakubF3: "Creates Polish sentences for you to study",
+    twoWayJakubF3: "Creates Polish sentences for Koharu to study",
 
     twoWayCenterBadge: "Gist Two-Way Sync",
 
@@ -310,19 +310,19 @@ const translations = {
     syncStep3: "3. Copy the Gist URL below and paste it into the URL field.",
     copyGistBtn: "Copy Gist URL",
     syncStep4: "4. Turn ON <strong>'Auto-sync on startup'</strong>.",
-    syncStep5: "5. Tap <strong>'Synchronizuj teraz' (Sync now)</strong> to download all Polish lessons from Jakub!",
+    syncStep5: "5. Tap <strong>'Synchronizuj teraz' (Sync now)</strong> to download all Polish lessons Jakub prepared for Koharu!",
 
-    sendPhraseTitle: "2. How to Send Japanese Sentences to Jakub",
+    sendPhraseTitle: "2. How Koharu Sends Japanese Sentences to Jakub",
     sendIntro: "Whenever you think of a useful Japanese expression, you can send it to Jakub in 1 tap!",
-    sendStep1: "1. Tap the <strong>Send / Heart icon</strong> or menu '︙' -> <strong>'Dla Przyjaciela / Wyślij zwrot'</strong>.",
-    sendStep2: "2. Make sure the tab is set to <strong>'日本語 (Dla Jakuba / 友だちへ)'</strong>.",
+    sendStep1: "1. Tap the <strong>Send / Heart icon</strong> or menu '︙' -> <strong>'Dla Jakuba / Jakubへフレーズを送る'</strong>.",
+    sendStep2: "2. Make sure the tab is set to <strong>'日本語 (Dla Jakuba)'</strong>.",
     sendStep3: "3. Enter the 4 fields:",
     sendF1: "• <strong>1. Japanese (Kanji/Kana)</strong>: e.g. これ、すごく美味しいよ！",
     sendF2: "• <strong>2. Katakana Reading</strong>: e.g. コレ、スゴク オイシイ ヨ！",
     sendF3: "• <strong>3. Romaji</strong>: e.g. Kore, sugoku oishii yo!",
     sendF4: "• <strong>4. Meaning / Notes</strong>: e.g. 'To jest naprawdę pyszne!'",
     sendStep4: "4. Tap <strong>'送信 / Send'</strong>!",
-    sendResult: "The sentence is saved to the shared database. When Jakub opens his app, your Japanese sentence appears in his daily study queue! 🌸",
+    sendResult: "The sentence is saved to the shared database. When Jakub opens his app, Koharu's Japanese sentence appears in his daily study queue! 🌸",
 
     mockupTitle: "Interactive App Preview",
     mockTab1: "Practice Card (Polish)",
@@ -353,7 +353,7 @@ const translations = {
     resSideServerMac: "SideServer (macOS)",
     resSideServerMacDesc: "One-time installer for macOS",
 
-    footerNote: "Custom language exchange app for Jakub & his friend in Japan",
+    footerNote: "Custom language exchange app for Jakub & Koharu",
     footerCopy: "© 2026 Language Islands • All rights reserved."
   },
 
@@ -367,12 +367,12 @@ const translations = {
     navExchange: "Wymiana zdań",
     navFaq: "FAQ",
 
-    heroBadge: "🌸 Przewodnik dla mojej przyjaciółki z Japonii",
+    heroBadge: "🌸 Przewodnik dla Koharu",
     heroTitle: "Wspólna nauka <span class=\"highlight\">polskiego i japońskiego</span><br>na iPhone",
     heroDesc: "Aplikacja stworzona specjalnie dla nas do wzajemnej nauki języków. Kompletna instrukcja krok po kroku: jak za darmo zainstalować aplikację na iPhone za pomocą SideStore, jak ustawić naukę języka polskiego i jak przesyłać sobie nawzajem zdania.",
 
-    letterHeader: "💌 Wiadomość od Jakuba",
-    letterBody: "„Cześć! Stworzyłem tę aplikację, abyśmy mogli wspólnie uczyć się polskiego i japońskiego. W mojej aplikacji ćwiczę japońskie zdania, które mi przesyłasz, a w Twojej aplikacji pojawiają się zdania po polsku z polskim lektorem i transkrypcją w katakanie! Pierwsza konfiguracja zajmuje tylko chwilę — przygotowałem tę stronę, aby poprowadzić Cię krok po kroku. Damy radę!”",
+    letterHeader: "💌 Wiadomość od Jakuba dla Koharu",
+    letterBody: "„Cześć Koharu! Stworzyłem tę aplikację, abyśmy mogli wspólnie uczyć się polskiego i japońskiego. W mojej aplikacji ćwiczę japońskie zdania, które mi przesyłasz, a w Twojej aplikacji pojawiają się zdania po polsku z polskim lektorem i transkrypcją w katakanie! Pierwsza konfiguracja zajmuje tylko chwilę — przygotowałem tę stronę, aby poprowadzić Cię krok po kroku. Damy radę!”",
     letterSign: "— Jakub",
 
     progressTitle: "Postęp konfiguracji",
@@ -382,7 +382,7 @@ const translations = {
     step4Check: "4. Połączenie wspólnej bazy (Gist)",
 
     twoWayTitle: "Dwukierunkowa wymiana zdań",
-    twoWayFriendTitle: "Przyjaciółka (Japonia)",
+    twoWayFriendTitle: "Koharu (Japonia)",
     twoWayFriendTarget: "🇵🇱 Uczy się polskiego",
     twoWayFriendF1: "Polski lektor neuralny (Marek / Zofia)",
     twoWayFriendF2: "Wymowa w katakanie pod każdym zdaniem",
@@ -391,9 +391,9 @@ const translations = {
 
     twoWayJakubTitle: "Jakub (Polska)",
     twoWayJakubTarget: "🇯🇵 Uczy się japońskiego",
-    twoWayJakubF1: "Ćwiczy japońskie zdania przesłane przez Ciebie",
+    twoWayJakubF1: "Ćwiczy japońskie zdania przesłane przez Koharu",
     twoWayJakubF2: "Kanji, kana, katakana i romaji",
-    twoWayJakubF3: "Przygotowuje zdania po polsku z wyjaśnieniami",
+    twoWayJakubF3: "Przygotowuje zdania po polsku dla Koharu",
 
     twoWayCenterBadge: "Synchronizacja przez Gist",
 
@@ -481,19 +481,19 @@ const translations = {
     syncStep3: "3. Wklej poniższy adres URL wspólnego Gista:",
     copyGistBtn: "Kopiuj adres Gist URL",
     syncStep4: "4. Włącz opcję <strong>'Automatyczna synchronizacja przy starcie'</strong>.",
-    syncStep5: "5. Kliknij <strong>'Synchronizuj teraz'</strong>, aby pobrać lekcje polskiego przygotowane przez Jakuba!",
+    syncStep5: "5. Kliknij <strong>'Synchronizuj teraz'</strong>, aby pobrać lekcje polskiego przygotowane przez Jakuba dla Koharu!",
 
-    sendPhraseTitle: "2. Jak wysyłać zdania po japońsku dla Jakuba",
+    sendPhraseTitle: "2. Jak Koharu wysyła zdania po japońsku dla Jakuba",
     sendIntro: "Gdy chcesz przekazać Jakubowi przydatny japoński zwrot:",
-    sendStep1: "1. Kliknij ikonę serca/wysyłania lub menu '︙' -> <strong>'Dla Przyjaciela / Wyślij zwrot'</strong>.",
-    sendStep2: "2. Wybierz zakładkę <strong>'日本語 (Dla Jakuba / 友だちへ)'</strong>.",
+    sendStep1: "1. Kliknij ikonę serca/wysyłania lub menu '︙' -> <strong>'Dla Koharu / Wyślij zwrot'</strong>.",
+    sendStep2: "2. Wybierz zakładkę <strong>'日本語 (Dla Jakuba)'</strong>.",
     sendStep3: "3. Wypełnij pola:",
     sendF1: "• <strong>1. Japoński (Kanji/Kana)</strong>: np. これ、すごく美味しいよ！",
     sendF2: "• <strong>2. Wymowa w katakanie</strong>: np. コレ、スゴク オイシイ ヨ！",
     sendF3: "• <strong>3. Rōmaji</strong>: np. Kore, sugoku oishii yo!",
     sendF4: "• <strong>4. Znaczenie / Notatki</strong>: np. 'To jest naprawdę pyszne!'",
     sendStep4: "4. Kliknij przycisk <strong>'Wyślij'</strong>!",
-    sendResult: "Zdanie trafi do wspólnej bazy, a Jakub zobaczy je w swojej aplikacji do nauki japońskiego! 🌸",
+    sendResult: "Zdanie trafi do wspólnej bazy, a Jakub zobaczy japońskie zdanie od Koharu w swojej aplikacji! 🌸",
 
     mockupTitle: "Podgląd ekranów aplikacji",
     mockTab1: "Karta nauki polskiego",
@@ -524,7 +524,7 @@ const translations = {
     resSideServerMac: "SideServer (macOS)",
     resSideServerMacDesc: "Instalator na macOS",
 
-    footerNote: "Aplikacja do wspólnej nauki języków dla Jakuba i Przyjaciółki",
+    footerNote: "Aplikacja do wspólnej nauki języków dla Jakuba i Koharu",
     footerCopy: "© 2026 Language Islands • Wszelkie prawa zastrzeżone."
   }
 };
