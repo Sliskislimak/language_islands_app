@@ -103,7 +103,7 @@
           <div class="checklist">
             <label class="checklist-item">
               <input type="checkbox" id="check1">
-              <span class="checklist-label" data-i18n="step1Check">1. WireGuard & SideStore 導入</span>
+              <span class="checklist-label" data-i18n="step1Check">1. LocalDevVPN & SideStore 導入</span>
             </label>
             <label class="checklist-item">
               <input type="checkbox" id="check2">
@@ -177,8 +177,8 @@
         <div class="callout callout-note">
           <div class="callout-icon">📶</div>
           <div>
-            <strong data-i18n="sec1Feature1Title">PC不要で更新可能</strong><br>
-            <span data-i18n="sec1Feature1Desc">従来のAltStoreと違い、最初の1回だけPCを使えば、以後はiPhone内のWireGuard VPNを使ってどこでもワイヤレス更新できます。</span>
+            <strong data-i18n="sec1Feature1Title">PC不要でワイヤレス更新</strong><br>
+            <span data-i18n="sec1Feature1Desc">最初の1回だけPCを使えば、以後はiPhone内のLocalDevVPNを使ってどこでもワイヤレス更新できます（iTunesやiCloudのインストールも一切不要です！）。</span>
           </div>
         </div>
       </div>
@@ -190,7 +190,7 @@
         <div class="section-tag" data-i18n="sec2Tag">STEP 1</div>
         <h2 class="section-title" data-i18n="sec2Title">SideStoreの初期セットアップ（最初の1回のみ）</h2>
         <p class="section-intro" data-i18n="sec2Desc">
-          初回のみ、パソコン（Windows または Mac）を使ってSideStoreをiPhoneに転送します。約10〜15分で完了します。
+          初回のみ、パソコン（Windows または Mac）を使ってSideStoreをiPhoneに転送します。iTunesやiCloudは不要で、約10分で完了します。
         </p>
 
         <!-- Prerequisites -->
@@ -198,35 +198,32 @@
           <h3 style="font-size: 1.15rem; margin-bottom: 12px;" data-i18n="prepTitle">準備するもの</h3>
           <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.95rem;">
             <li>📱 <span data-i18n="prepItem1">お使いのiPhone（iOS 14以降、iOS 16/17/18対応）</span></li>
-            <li>💻 <span data-i18n="prepItem2">パソコン（Windows または Mac）※初回1回のみ使用</span></li>
+            <li>💻 <span data-i18n="prepItem2">パソコン（Windows または Mac）※初回1回のみ使用（iTunes/iCloudは不要！）</span></li>
             <li>🔌 <span data-i18n="prepItem3">iPhoneとPCを繋ぐUSBケーブル</span></li>
             <li>🆔 <span data-i18n="prepItem4">Apple ID（普段お使いのものでOK）</span></li>
           </ul>
         </div>
 
         <div class="steps-stack">
-          <!-- Step 1.1: WireGuard -->
+          <!-- Step 1.1: LocalDevVPN -->
           <div class="step-card">
             <div class="step-card-header">
               <div class="step-number">1</div>
-              <div class="step-card-title" data-i18n="step11Title">iPhoneでWireGuardをインストール＆設定</div>
+              <div class="step-card-title" data-i18n="step11Title">iPhoneに「LocalDevVPN」をインストール（App Store）</div>
             </div>
             <div class="step-card-body">
-              <p data-i18n="step11Desc">SideStoreがiPhone単体でアプリを更新できるように、仮想VPN「WireGuard」を使用します。</p>
+              <p data-i18n="step11Desc">SideStoreがiPhone単体でアプリをワイヤレス更新できるように、App Store公式の「LocalDevVPN」を使用します。設定ファイルのダウンロードは不要です！</p>
               
               <div class="btn-group">
-                <a href="https://apps.apple.com/app/wireguard/id1451114298" target="_blank" rel="noopener" class="btn-primary" data-i18n="wireguardAppStoreBtn">
-                  App StoreでWireGuardを入手 ↗
-                </a>
-                <a href="https://github.com/SideStore/SideStore/releases/latest/download/SideStore.conf" download class="btn-secondary" data-i18n="downloadConfBtn">
-                  SideStore.conf をダウンロード ↓
+                <a href="https://apps.apple.com/app/localdevvpn/id6755608044" target="_blank" rel="noopener" class="btn-primary" data-i18n="vpnAppStoreBtn">
+                  App StoreでLocalDevVPNを入手 ↗
                 </a>
               </div>
 
               <div class="callout callout-tip" style="margin-top: 14px;">
                 <div class="callout-icon">💡</div>
-                <div data-i18n="wireguardNote">
-                  ダウンロード後、WireGuardアプリを開き「トンネルの追加」→「ファイルからインポート」で「SideStore.conf」を選択して有効化（緑色のON）にしてください。
+                <div data-i18n="vpnConnectNote">
+                  インストール後、LocalDevVPNを開いて「Connect」をタップし、iOSのVPN構成追加ポップアップで「許可」を選択してパスコードを入力します。
                 </div>
               </div>
             </div>
@@ -251,11 +248,11 @@
             </div>
           </div>
 
-          <!-- Step 1.3: SideServer on PC/Mac -->
+          <!-- Step 1.3: iloader on PC/Mac -->
           <div class="step-card">
             <div class="step-card-header">
               <div class="step-number">3</div>
-              <div class="step-card-title" data-i18n="step13Title">パソコンでのSideServerインストール</div>
+              <div class="step-card-title" data-i18n="step13Title">パソコンで「iloader」を使ってSideStoreを導入</div>
             </div>
             <div class="step-card-body">
               <div class="tab-container">
@@ -270,28 +267,28 @@
 
                 <!-- Windows Instructions -->
                 <div class="tab-content active" id="tabWin">
-                  <p data-i18n="winStep1">1. Apple公式サイトから <strong>iTunes</strong> と <strong>iCloud</strong>（※Microsoft Store版ではなく、必ずスタンドアロン版）をインストールします。</p>
-                  <p data-i18n="winStep2">2. <strong>SideServer for Windows</strong> をダウンロードして解凍し、起動します。</p>
-                  <p data-i18n="winStep3">3. iPhoneをUSBケーブルでPCに接続し、iPhone画面で「このコンピュータを信頼する」をタップします。</p>
-                  <p data-i18n="winStep4">4. タスクバー右下のSideServerアイコンをクリックし、「Install SideStore」からお使いのiPhoneを選択し、Apple IDとパスワードを入力します。</p>
+                  <p data-i18n="winStep1">1. <strong>iloader (Windows版 .msi)</strong> をダウンロードしてインストールします（<strong>iTunesやiCloudのインストールは一切不要です！</strong>）。</p>
+                  <p data-i18n="winStep2">2. iPhoneをUSBケーブルでPCに接続し、iPhone画面で「このコンピュータを信頼する」をタップします。</p>
+                  <p data-i18n="winStep3">3. iloaderを起動し、お使いの<strong>Apple ID</strong>でサインインします（※メールアドレスの大文字・小文字は正確に入力してください）。</p>
+                  <p data-i18n="winStep4">4. 接続されたiPhoneを選択し、<strong>「Install SideStore (Stable)」</strong>をクリックします。自動的にSideStoreがiPhoneに転送されます！</p>
                   
                   <div class="btn-group">
-                    <a href="https://github.com/SideStore/SideServer-Windows/releases/latest" target="_blank" rel="noopener" class="btn-secondary">
-                      SideServer for Windows を入手 ↗
+                    <a href="https://github.com/nab138/iloader/releases/latest/download/iloader-windows-x64.msi" target="_blank" rel="noopener" class="btn-secondary">
+                      iloader for Windows (.msi) を入手 ↗
                     </a>
                   </div>
                 </div>
 
                 <!-- Mac Instructions -->
                 <div class="tab-content" id="tabMac">
-                  <p data-i18n="macStep1">1. <strong>SideServer for macOS</strong> をダウンロードし、「アプリケーション」フォルダへ移動します。</p>
-                  <p data-i18n="macStep2">2. SideServerを起動し、メニューバーのアイコンをクリックします。</p>
-                  <p data-i18n="macStep3">3. iPhoneをケーブルでMacに接続し、Finderで「信頼」をクリックします。</p>
-                  <p data-i18n="macStep4">4. SideServerメニューから「Install SideStore」を選択し、Apple IDを入力します。</p>
+                  <p data-i18n="macStep1">1. <strong>iloader (macOS版 .dmg)</strong> をダウンロードし、「アプリケーション」フォルダへ移動して起動します（iTunes/iCloud不要）。</p>
+                  <p data-i18n="macStep2">2. iPhoneをケーブルでMacに接続し、FinderまたはiPhone画面で「信頼」をタップします。</p>
+                  <p data-i18n="macStep3">3. iloaderでお使いの<strong>Apple ID</strong>でサインインします（※メールアドレスは大文字・小文字を区別します）。</p>
+                  <p data-i18n="macStep4">4. 接続されたiPhoneを選択し、<strong>「Install SideStore (Stable)」</strong>をクリックします。</p>
 
                   <div class="btn-group">
-                    <a href="https://github.com/SideStore/SideServer/releases/latest" target="_blank" rel="noopener" class="btn-secondary">
-                      SideServer for macOS を入手 ↗
+                    <a href="https://github.com/nab138/iloader/releases/latest/download/iloader-darwin-universal.dmg" target="_blank" rel="noopener" class="btn-secondary">
+                      iloader for macOS (.dmg) を入手 ↗
                     </a>
                   </div>
                 </div>
@@ -324,10 +321,10 @@
           <div class="step-card">
             <div class="step-card-header">
               <div class="step-number">5</div>
-              <div class="step-card-title" data-i18n="step15Title">SideStoreの初期起動＆ペアリングファイル</div>
+              <div class="step-card-title" data-i18n="step15Title">SideStoreの初期起動＆セットアップ完了</div>
             </div>
             <div class="step-card-body">
-              <p data-i18n="step15Desc">WireGuardでVPNをON（有効）にした状態でSideStoreを開きます。画面の指示に従ってペアリングファイルを選択し、Apple IDでサインインします。</p>
+              <p data-i18n="step15Desc"><strong>LocalDevVPN</strong>を開いて「Connect」をタップした状態で、<strong>SideStore</strong>を開きます。Apple IDでサインインし、「My Apps」画面の<strong>「7 DAYS」</strong>カウンターをタップして初回の更新を完了させます。</p>
             </div>
           </div>
         </div>
@@ -356,7 +353,7 @@
         <div class="step-card">
           <div class="step-card-body">
             <p data-i18n="appInstallStep1">1. iPhoneのSafariで上記の「Runner.ipa をダウンロード」ボタンをタップします。</p>
-            <p data-i18n="appInstallStep2">2. <strong>WireGuard</strong> アプリを開き、VPNが <strong>ON（有効）</strong> になっていることを確認します。</p>
+            <p data-i18n="appInstallStep2">2. <strong>LocalDevVPN</strong> アプリを開き、接続中（Connected / 画面上のVPNアイコン）になっていることを確認します。</p>
             <p data-i18n="appInstallStep3">3. <strong>SideStore</strong> を開き、下の「My Apps」タブを表示します。</p>
             <p data-i18n="appInstallStep4">4. 左上の <strong>「＋」</strong> アイコンをタップし、先ほどダウンロードした <code>Runner.ipa</code> を選択します。</p>
             <p data-i18n="appInstallStep5">5. インストールが進行し、完了するとiPhoneのホーム画面に <strong>Language Islands</strong> のアイコンが追加されます！🎉</p>
@@ -365,7 +362,7 @@
               <div class="callout-icon">💡</div>
               <div>
                 <strong data-i18n="weeklyRefreshTitle">💡 週に1回のリフレッシュについて（5秒で完了）</strong><br>
-                <span data-i18n="weeklyRefreshDesc">無料のApple IDで入れたアプリは7日間の有効期限があります。期限が切れる前に、iPhoneで「WireGuardのVPNをON」にし、「SideStoreを開いて Refresh All を押す」だけで自動延長されます（PCはもう不要です！）。</span>
+                <span data-i18n="weeklyRefreshDesc">無料のApple IDで入れたアプリは7日間の有効期限があります。期限が切れる前に、iPhoneで「LocalDevVPNをON」にし、「SideStoreを開いて Refresh All を押す」だけで自動延長されます（PCはもう不要です！）。</span>
               </div>
             </div>
           </div>
@@ -606,11 +603,11 @@
           <!-- FAQ 1 -->
           <div class="faq-item">
             <button class="faq-question">
-              <span data-i18n="faqQ1">SideStoreで「Cannot connect to SideServer / Device」と出ます</span>
+              <span data-i18n="faqQ1">SideStoreで「Cannot connect to SideServer / Device」などの接続エラーが出ます</span>
               <span class="faq-icon">▼</span>
             </button>
             <div class="faq-answer" data-i18n="faqA1">
-              WireGuardアプリを開き、VPNが有効（緑色のスイッチON）になっていることを確認してください。VPNが切れているとSideStoreは動作しません。
+              LocalDevVPNアプリを開き、VPNが接続中（Connected / 画面上にVPNアイコン表示）になっていることを確認してください。VPNが切れているとSideStoreは動作しません。
             </div>
           </div>
 
@@ -643,7 +640,7 @@
               <span class="faq-icon">▼</span>
             </button>
             <div class="faq-answer" data-i18n="faqA4">
-              消えません！学習データや送った文もすべてiPhone内に安全に残ります。WireGuardをONにしてSideStoreで「Refresh All」を押せば、いつでもすぐに復活します。
+              消えません！学習データや送った文もすべてiPhone内に安全に残ります。LocalDevVPNをONにしてSideStoreで「Refresh All」を押せば、いつでもすぐに復活します。
             </div>
           </div>
 
@@ -668,27 +665,15 @@
         <h2 class="section-title" data-i18n="resourceTitle">ダウンロード＆リンク集</h2>
 
         <div class="resource-grid">
-          <!-- WireGuard -->
+          <!-- LocalDevVPN -->
           <div class="resource-card">
             <div>
               <div class="resource-icon">🛡️</div>
-              <div class="resource-title" data-i18n="resWireguardTitle">WireGuard (iOS)</div>
-              <div class="resource-desc" data-i18n="resWireguardDesc">SideStore動作に必須の公式VPNアプリ</div>
+              <div class="resource-title" data-i18n="resVpnTitle">LocalDevVPN (iOS)</div>
+              <div class="resource-desc" data-i18n="resVpnDesc">App Store公式のSideStore用VPNアプリ（設定ファイル不要）</div>
             </div>
-            <a href="https://apps.apple.com/app/wireguard/id1451114298" target="_blank" rel="noopener" class="btn-secondary">
+            <a href="https://apps.apple.com/app/localdevvpn/id6755608044" target="_blank" rel="noopener" class="btn-secondary">
               App Store ↗
-            </a>
-          </div>
-
-          <!-- SideStore.conf -->
-          <div class="resource-card">
-            <div>
-              <div class="resource-icon">⚙️</div>
-              <div class="resource-title" data-i18n="resConfTitle">SideStore.conf</div>
-              <div class="resource-desc" data-i18n="resConfDesc">WireGuard用設定ファイル（ダウンロードして読み込み）</div>
-            </div>
-            <a href="https://github.com/SideStore/SideStore/releases/latest/download/SideStore.conf" download class="btn-secondary">
-              ダウンロード ↓
             </a>
           </div>
 
@@ -704,27 +689,27 @@
             </a>
           </div>
 
-          <!-- SideServer Windows -->
+          <!-- iloader Windows -->
           <div class="resource-card">
             <div>
               <div class="resource-icon">💻</div>
-              <div class="resource-title" data-i18n="resSideServerWin">SideServer (Windows)</div>
-              <div class="resource-desc" data-i18n="resSideServerWinDesc">Windows用初期インストーラー</div>
+              <div class="resource-title" data-i18n="resIloaderWin">iloader (Windows)</div>
+              <div class="resource-desc" data-i18n="resIloaderWinDesc">iTunes/iCloud不要の最新インストーラー (.msi)</div>
             </div>
-            <a href="https://github.com/SideStore/SideServer-Windows/releases/latest" target="_blank" rel="noopener" class="btn-secondary">
-              GitHub Releases ↗
+            <a href="https://github.com/nab138/iloader/releases/latest/download/iloader-windows-x64.msi" target="_blank" rel="noopener" class="btn-secondary">
+              iloader (.msi) ↗
             </a>
           </div>
 
-          <!-- SideServer Mac -->
+          <!-- iloader Mac -->
           <div class="resource-card">
             <div>
               <div class="resource-icon">🍎</div>
-              <div class="resource-title" data-i18n="resSideServerMac">SideServer (macOS)</div>
-              <div class="resource-desc" data-i18n="resSideServerMacDesc">Mac用初期インストーラー</div>
+              <div class="resource-title" data-i18n="resIloaderMac">iloader (macOS)</div>
+              <div class="resource-desc" data-i18n="resIloaderMacDesc">Mac用公式インストーラー (.dmg)</div>
             </div>
-            <a href="https://github.com/SideStore/SideServer/releases/latest" target="_blank" rel="noopener" class="btn-secondary">
-              GitHub Releases ↗
+            <a href="https://github.com/nab138/iloader/releases/latest/download/iloader-darwin-universal.dmg" target="_blank" rel="noopener" class="btn-secondary">
+              iloader (.dmg) ↗
             </a>
           </div>
         </div>
