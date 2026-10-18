@@ -132,24 +132,32 @@ const translations = {
     sec5Title: "文の共有・送受信設定（Gistでつながる）",
     sec5Desc: "あなたとJakubのアプリをGitHub Gistで連携させます。これであなたが送った日本語がJakubのアプリに届き、Jakubが作ったポーランド語があなたのアプリに届きます！",
     
-    syncSetupTitle: "1. 共有データベース（Gist）の接続",
+    syncSetupTitle: "1. 共有データベース（Gist）の接続・受信設定",
     syncStep1: "1. アプリ右上の <strong>「︙」</strong> メニューをタップします。",
     syncStep2: "2. <strong>「Zdalna baza zdań / Synchronizacja」</strong>（雲の同期アイコン）をタップします。",
-    syncStep3: "3. 以下の「共有URL」をコピーして、入力欄に貼り付けます。",
+    syncStep3: "3. <strong>「Adres URL bazy danych / JSON」</strong> の入力欄を設定します：",
+    syncQuickBtnTitle: "【最速・ワンタップ入力】",
+    syncQuickBtnDesc: "URL入力欄のすぐ下にある紫色のボタン <code>✨ Wstaw domyślny wspólny Gist (Jakub & Przyjaciółka)</code> をタップするだけで、共有Gistのアドレスが一瞬で自動入力されます！",
+    syncManualHint: "または、以下の共有URLをコピーして直接貼り付けることもできます：",
     copyGistBtn: "Gist URLをコピー",
+    syncApiKeyHintTitle: "【Klucz API / Token autoryzacji 欄について】",
+    syncApiKeyHint: "Jakubからのレッスンを受信・閲覧・同期するだけなら、この欄は <strong>【空欄（空っぽ）】</strong> のままで大丈夫です！（パスワード不要で誰でもダウンロードできます）",
     syncStep4: "4. <strong>「起動時に自動同期」</strong>（Auto-sync on startup）のスイッチをONにします。",
-    syncStep5: "5. <strong>「今すぐ同期」</strong>（Synchronizuj teraz）をタップします。これでJakubがこはるちゃんのために作ったポーランド語レッスンが一気に届きます！",
+    syncStep5: "5. <strong>「今すぐ同期」</strong>（Synchronizuj teraz）をタップします。これでJakubがこはるちゃんのために作ったポーランド語レッスンが一気に届きます！🎉",
 
     sendPhraseTitle: "2. こはるちゃんからJakubへ「日本語フレーズ」を送る方法",
     sendIntro: "Jakubに勉強してほしい日常会話や好きな表現をいつでも送れます！",
-    sendStep1: "1. アプリ上部の <strong>紙飛行機 / ハートアイコン</strong> またはメニュー「︙」から <strong>「Dla Jakuba / Jakubへフレーズを送る」</strong> をタップします。",
-    sendStep2: "2. 上部の切替タブが <strong>「日本語 (Dla Jakuba)」</strong> になっていることを確認します。",
-    sendStep3: "3. 以下の4項目を入力します：",
+    sendStep1: "1. 画面右下のピンクのハートボタン <strong>「＋」</strong> または右上のメニュー「︙」から <strong>「Dla Jakuba / Jakubへフレーズを送る」</strong> をタップします。",
+    sendStep2: "2. 上部の切替タブが <strong>「🇯🇵 日本語 (Dla Jakuba)」</strong> になっていることを確認します。",
+    sendStep3: "3. 以下の項目を入力します：",
     sendF1: "・ <strong>1. 日本語（漢字・ひらがな）</strong>：例「これ、すごく美味しいよ！」",
     sendF2: "・ <strong>2. カタカナ読み</strong>：例「コレ、スゴク オイシイ ヨ！」",
-    sendF3: "・ <strong>3. ローマ字</strong>：例「Kore, sugoku oishii yo!」",
-    sendF4: "・ <strong>4. 意味・メモ</strong>：例「To jest naprawdę pyszne!」やシチュエーション",
-    sendStep4: "4. <strong>「送信 / 送る」</strong> ボタンをタップします！",
+    sendF3: "・ <strong>3. ローマ字 (Rōmaji)</strong>：例「Kore, sugoku oishii yo!」",
+    sendF4: "・ <strong>4. 意味・メモ (Znaczenie)</strong>：例「To jest naprawdę pyszne! / This is so delicious!」",
+    sendF5: "・ <strong>5. メモ・使い方（任意）</strong>：例「食事の時に使うカジュアルな表現」",
+    sendTokenTitle: "【初回のみ】フレーズ送信の接続設定（GitHub Token）",
+    sendTokenDesc: "Gistへ新しい文を追加（送信）するには書き込み権限が必要です。フォーム内の「GitHub Gist設定 (Prywatne połączenie)」を開き：<br>・<strong>Gist URL</strong>: <code>共通Gistアドレスを自動入力</code> をタップ<br>・<strong>GitHub Token</strong>: Jakubから受け取った専用のGitHubトークン（PAT）を入力して「設定を保存」します。",
+    sendStep4: "4. 画面下の <strong>「送信 & 保存 (Wyślij do GitHuba i Zapisz)」</strong> ボタンをタップします！",
     sendResult: "これだけで共有データベースに送信され、Jakubがアプリを開いたときに自動的にこはるちゃんの日本語フレーズが学習リストに加わります！🌸",
 
     // Mockup Section
@@ -348,24 +356,32 @@ const translations = {
     sec5Title: "Connecting the Shared Database & Exchanging Phrases",
     sec5Desc: "Connect to the shared GitHub Gist so Jakub receives your Japanese sentences, and you receive Jakub's Polish sentences!",
 
-    syncSetupTitle: "1. Connect Shared Gist",
+    syncSetupTitle: "1. Connect Shared Gist & Download Lessons",
     syncStep1: "1. Tap the <strong>'︙'</strong> menu in the app.",
     syncStep2: "2. Tap <strong>'Zdalna baza zdań / Synchronizacja'</strong> (Remote Sync).",
-    syncStep3: "3. Copy the Gist URL below and paste it into the URL field.",
+    syncStep3: "3. Configure the <strong>'Adres URL bazy danych / JSON'</strong> field:",
+    syncQuickBtnTitle: "[Fastest: 1-Click Auto-Fill]",
+    syncQuickBtnDesc: "Simply tap the purple button <code>✨ Wstaw domyślny wspólny Gist (Jakub & Przyjaciółka)</code> right beneath the URL field to fill in the shared Gist URL instantly!",
+    syncManualHint: "Or you can copy and paste the shared Gist URL directly below:",
     copyGistBtn: "Copy Gist URL",
-    syncStep4: "4. Turn ON <strong>'Auto-sync on startup'</strong>.",
-    syncStep5: "5. Tap <strong>'Synchronizuj teraz' (Sync now)</strong> to download all Polish lessons Jakub prepared for Koharu!",
+    syncApiKeyHintTitle: "[About the API Key / Token field]",
+    syncApiKeyHint: "Leave <strong>'Klucz API / Token autoryzacji'</strong> <strong>[BLANK]</strong>! No key or password is required for reading and downloading lessons.",
+    syncStep4: "4. Turn ON <strong>'Auto-sync on startup'</strong> (Automatyczna synchronizacja przy starcie).",
+    syncStep5: "5. Tap <strong>'Synchronizuj teraz' (Sync now)</strong> to download all Polish lessons Jakub prepared for Koharu! 🎉",
 
     sendPhraseTitle: "2. How Koharu Sends Japanese Sentences to Jakub",
     sendIntro: "Whenever you think of a useful Japanese expression, you can send it to Jakub in 1 tap!",
-    sendStep1: "1. Tap the <strong>Send / Heart icon</strong> or menu '︙' -> <strong>'Dla Jakuba / Jakubへフレーズを送る'</strong>.",
-    sendStep2: "2. Make sure the tab is set to <strong>'日本語 (Dla Jakuba)'</strong>.",
-    sendStep3: "3. Enter the 4 fields:",
+    sendStep1: "1. Tap the pink Heart button <strong>'+'</strong> in the bottom right corner or menu '︙' -> <strong>'Dla Jakuba / Jakubへフレーズを送る'</strong>.",
+    sendStep2: "2. Make sure the tab is set to <strong>'🇯🇵 日本語 (Dla Jakuba)'</strong>.",
+    sendStep3: "3. Enter the fields:",
     sendF1: "• <strong>1. Japanese (Kanji/Kana)</strong>: e.g. これ、すごく美味しいよ！",
     sendF2: "• <strong>2. Katakana Reading</strong>: e.g. コレ、スゴク オイシイ ヨ！",
-    sendF3: "• <strong>3. Romaji</strong>: e.g. Kore, sugoku oishii yo!",
-    sendF4: "• <strong>4. Meaning / Notes</strong>: e.g. 'To jest naprawdę pyszne!'",
-    sendStep4: "4. Tap <strong>'送信 / Send'</strong>!",
+    sendF3: "• <strong>3. Romaji (Rōmaji)</strong>: e.g. Kore, sugoku oishii yo!",
+    sendF4: "• <strong>4. Meaning / Translation (Znaczenie)</strong>: e.g. 'To jest naprawdę pyszne! / This is so delicious!'",
+    sendF5: "• <strong>5. Usage Notes (Optional)</strong>: e.g. 'Casual expression recommended during meals'",
+    sendTokenTitle: "[First Time Only] Phrase Upload Connection (GitHub Token)",
+    sendTokenDesc: "To publish new phrases to the shared Gist, write access is needed. Expand 'GitHub Gist Configuration':<br>• <strong>Gist URL</strong>: Tap <code>共通Gistアドレスを自動入力</code> (Auto-fill)<br>• <strong>GitHub Token</strong>: Enter the personal GitHub token (PAT) provided by Jakub and tap 'Save'.",
+    sendStep4: "4. Tap <strong>'送信 & 保存' (Send & Save to GitHub)</strong> at the bottom of the screen!",
     sendResult: "The sentence is saved to the shared database. When Jakub opens his app, Koharu's Japanese sentence appears in his daily study queue! 🌸",
 
     mockupTitle: "Interactive App Preview",
@@ -558,26 +574,34 @@ const translations = {
 
     sec5Tag: "KROK 4",
     sec5Title: "Wspólna baza i wymiana zdań (GitHub Gist)",
-    sec5Desc: "Połączenie aplikacji przez Gist pozwala na dwukierunkową wymianę zdań.",
+    sec5Desc: "Połączenie aplikacji przez Gist pozwala na dwukierunkową wymianę zdań: Jakub przygotowuje lekcje polskiego dla Koharu, a Koharu wysyła japońskie zwroty dla Jakuba!",
 
-    syncSetupTitle: "1. Połączenie ze wspólnym Gistem",
-    syncStep1: "1. Otwórz menu <strong>'︙'</strong> w aplikacji.",
-    syncStep2: "2. Kliknij <strong>'Zdalna baza zdań / Synchronizacja'</strong>.",
-    syncStep3: "3. Wklej poniższy adres URL wspólnego Gista:",
+    syncSetupTitle: "1. Połączenie ze wspólnym Gistem i pobieranie lekcji",
+    syncStep1: "1. Otwórz menu <strong>'︙'</strong> w prawym górnym rogu aplikacji.",
+    syncStep2: "2. Kliknij <strong>'Zdalna baza zdań / Synchronizacja'</strong> (ikona chmury).",
+    syncStep3: "3. Uzupełnij pole <strong>'Adres URL bazy danych / JSON'</strong>:",
+    syncQuickBtnTitle: "✨ [Najszybsza opcja: 1 Kliknięcie]",
+    syncQuickBtnDesc: "Wystarczy kliknąć fioletowy przycisk <code>✨ Wstaw domyślny wspólny Gist (Jakub & Przyjaciółka)</code> bezpośrednio pod polem URL, a adres wspólnego Gista uzupełni się automatycznie!",
+    syncManualHint: "Możesz także skopiować i wkleić poniższy bezpośredni adres URL:",
     copyGistBtn: "Kopiuj adres Gist URL",
-    syncStep4: "4. Włącz opcję <strong>'Automatyczna synchronizacja przy starcie'</strong>.",
-    syncStep5: "5. Kliknij <strong>'Synchronizuj teraz'</strong>, aby pobrać lekcje polskiego przygotowane przez Jakuba dla Koharu!",
+    syncApiKeyHintTitle: "💡 [Pole Klucz API / Token autoryzacji]",
+    syncApiKeyHint: "Do odbioru i nauki lekcji od Jakuba pole to pozostaw <strong>[PUSTE]</strong>! Baza pobiera się bez żadnego hasła i tokena.",
+    syncStep4: "4. Włącz opcję <strong>'Automatyczna synchronizacja przy starcie'</strong> (Auto-sync on startup).",
+    syncStep5: "5. Kliknij <strong>'Synchronizuj teraz'</strong>, aby natychmiast pobrać lekcje polskiego przygotowane przez Jakuba dla Koharu! 🎉",
 
     sendPhraseTitle: "2. Jak Koharu wysyła zdania po japońsku dla Jakuba",
     sendIntro: "Gdy chcesz przekazać Jakubowi przydatny japoński zwrot:",
-    sendStep1: "1. Kliknij ikonę serca/wysyłania lub menu '︙' -> <strong>'Dla Koharu / Wyślij zwrot'</strong>.",
-    sendStep2: "2. Wybierz zakładkę <strong>'日本語 (Dla Jakuba)'</strong>.",
-    sendStep3: "3. Wypełnij pola:",
+    sendStep1: "1. Kliknij różową ikonę serca <strong>'+'</strong> w prawym dolnym rogu lub w menu '︙' -> <strong>'Dla Jakuba / Jakubへフレーズを送る'</strong>.",
+    sendStep2: "2. Upewnij się, że wybrana jest zakładka <strong>'🇯🇵 日本語 (Dla Jakuba)'</strong>.",
+    sendStep3: "3. Wypełnij pola formularza:",
     sendF1: "• <strong>1. Japoński (Kanji/Kana)</strong>: np. これ、すごく美味しいよ！",
     sendF2: "• <strong>2. Wymowa w katakanie</strong>: np. コレ、スゴク オイシイ ヨ！",
-    sendF3: "• <strong>3. Rōmaji</strong>: np. Kore, sugoku oishii yo!",
-    sendF4: "• <strong>4. Znaczenie / Notatki</strong>: np. 'To jest naprawdę pyszne!'",
-    sendStep4: "4. Kliknij przycisk <strong>'Wyślij'</strong>!",
+    sendF3: "• <strong>3. Transkrypcja fonetyczna / Rōmaji</strong>: np. Kore, sugoku oishii yo!",
+    sendF4: "• <strong>4. Znaczenie / Tłumaczenie</strong>: np. 'To jest naprawdę pyszne! / This is delicious!'",
+    sendF5: "• <strong>5. Wskazówki / Kontekst (Opcjonalnie)</strong>: np. 'Zwrot nieformalny, polecany podczas posiłków'",
+    sendTokenTitle: "🔑 [Tylko za pierwszym razem] Autoryzacja wysyłania zdań (GitHub Token)",
+    sendTokenDesc: "Aby móc wysyłać nowe zdania do chmury na GitHubie, wymagane jest jednorazowe podanie uprawnień: w sekcji 'Konfiguracja prywatnego GitHub Gist' kliknij <code>Wstaw adres wspólnego Gista</code>, a w polu Token wpisz Token (PAT) z uprawnieniem 'gist' przekazany przez Jakuba i kliknij 'Zapisz'.",
+    sendStep4: "4. Kliknij przycisk <strong>'Wyślij do GitHuba i Zapisz (送信 & 保存)'</strong> na dole formularza!",
     sendResult: "Zdanie trafi do wspólnej bazy, a Jakub zobaczy japońskie zdanie od Koharu w swojej aplikacji! 🌸",
 
     mockupTitle: "Podgląd ekranów aplikacji",
@@ -673,12 +697,12 @@ function initLanguage() {
   const paramLang = urlParams.get('lang');
   const paramGist = urlParams.get('gist');
 
-  if (paramGist) {
-    const gistUrlText = document.getElementById('gistUrlText');
-    const copyGistBtn = document.querySelector('[data-i18n="copyGistBtn"]');
-    if (gistUrlText) gistUrlText.textContent = paramGist;
-    if (copyGistBtn) copyGistBtn.setAttribute('data-copy', paramGist);
-  }
+  const DEFAULT_GIST = 'https://gist.github.com/Sliskislimak/8d8efa2b1884930a0894553eec419283';
+  const effectiveGist = paramGist || DEFAULT_GIST;
+  const gistUrlText = document.getElementById('gistUrlText');
+  const copyGistBtn = document.querySelector('[data-i18n="copyGistBtn"]');
+  if (gistUrlText) gistUrlText.textContent = effectiveGist;
+  if (copyGistBtn) copyGistBtn.setAttribute('data-copy', effectiveGist);
 
   const savedLang = localStorage.getItem('lang_islands_lang');
   if (paramLang && translations[paramLang]) {
