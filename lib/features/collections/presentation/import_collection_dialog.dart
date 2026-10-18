@@ -19,7 +19,7 @@ ZASADY TWORZENIA ZDAŃ:
 WYMAGANY FORMAT JSON (zwróć TYLKO czysty kod JSON bez znaczników markdown):
 {
   "id": "unikalne_id_kolekcji_np_verbs_a1_part1",
-  "title": "Tytuł kolekcji (np. Polskie powitania dla przyjaciółki / 100 czasowników)",
+  "title": "Tytuł kolekcji (np. Polskie powitania dla Koharu / 100 czasowników)",
   "cefrLevel": "A1",
   "tags": ["codzienne", "podstawy"],
   "targetLanguage": "pl",

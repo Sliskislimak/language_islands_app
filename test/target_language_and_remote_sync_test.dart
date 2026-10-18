@@ -475,7 +475,7 @@ void main() {
       expect(find.text('Adres URL bazy danych / JSON'), findsOneWidget);
       expect(find.text('Klucz API / Token autoryzacji (opcjonalny)'), findsOneWidget);
       expect(find.text('Zapisz i pobierz zdania teraz'), findsOneWidget);
-      expect(find.text('Jak zdalnie dodawać zdania dla przyjaciółki?'), findsOneWidget);
+      expect(find.text('Jak zdalnie dodawać zdania dla Koharu?'), findsOneWidget);
     });
 
     testWidgets('AddSentenceForFriendDialog displays bilingual form fields and switches between Japanese and Polish mode', (tester) async {
@@ -517,9 +517,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check Header & Default Japanese Mode
-      expect(find.text('Dla Przyjaciela / 友だちへフレーズを送る'), findsOneWidget);
+      expect(find.text('Dla Jakuba / Jakubへフレーズを送る'), findsOneWidget);
       expect(find.text('Japoński (Dla Jakuba)'), findsOneWidget);
-      expect(find.text('Polski (Dla Przyjaciółki)'), findsOneWidget);
+      expect(find.text('Polski (Dla Koharu)'), findsOneWidget);
       expect(find.text('1. 日本語（漢字・ひらがな）'), findsOneWidget);
       expect(find.text('2. カタカナ読み (Wymowa w katakanie)'), findsOneWidget);
       expect(find.text('3. ローマ字 (Rōmaji)'), findsOneWidget);
@@ -527,10 +527,10 @@ void main() {
       expect(find.text('5. メモ・使い方 (Wskazówki & Kontekst)'), findsOneWidget);
 
       // Switch to Polish mode
-      await tester.tap(find.text('Polski (Dla Przyjaciółki)'));
+      await tester.tap(find.text('Polski (Dla Koharu)'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Nowy zwrot dla Przyjaciółki / ポーランド語作成'), findsOneWidget);
+      expect(find.text('Dla Koharu / こはるちゃんへポーランド語作成'), findsOneWidget);
       expect(find.text('1. Zdanie po polsku (Polski)'), findsOneWidget);
       expect(find.text('2. カタカナ発音 (Katakana dla Japończyka)'), findsOneWidget);
       expect(find.text('3. Transkrypcja fonetyczna / Rōmaji'), findsOneWidget);
@@ -575,12 +575,12 @@ void main() {
 
       final fab = find.byKey(const ValueKey('fab_add_sentence_for_friend'));
       expect(fab, findsOneWidget);
-      expect(find.text('Dla Przyjaciela / Wyślij'), findsWidgets);
+      expect(find.text('Dla Koharu / Wyślij'), findsWidgets);
 
       await tester.tap(fab);
       await tester.pumpAndSettle();
 
-      expect(find.text('Dla Przyjaciela / 友だちへフレーズを送る'), findsOneWidget);
+      expect(find.text('Dla Jakuba / Jakubへフレーズを送る'), findsOneWidget);
     });
   });
 }

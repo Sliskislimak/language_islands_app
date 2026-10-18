@@ -105,8 +105,8 @@ class _RemoteSyncDialogState extends ConsumerState<RemoteSyncDialog> {
   void _copySampleJson() {
     const sample = '''
 {
-  "id": "polski_dla_przyjaciolki_01",
-  "title": "Polski dla początkujących - Lekcja 1",
+  "id": "polski_dla_koharu_01",
+  "title": "Polski dla Koharu - Lekcja 1",
   "cefrLevel": "A1",
   "tags": ["polski", "podstawy", "powitania"],
   "targetLanguage": "pl",
@@ -187,7 +187,7 @@ class _RemoteSyncDialogState extends ConsumerState<RemoteSyncDialog> {
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Pobieraj zdania zdalnie dodawane dla przyjaciółki',
+                          'Pobieraj zdania zdalnie dodawane dla Koharu',
                           style: TextStyle(
                             color: AppTheme.textMuted,
                             fontSize: 12,
@@ -369,7 +369,7 @@ class _RemoteSyncDialogState extends ConsumerState<RemoteSyncDialog> {
                                   const SizedBox(width: 10),
                                   const Expanded(
                                     child: Text(
-                                      'Jak zdalnie dodawać zdania dla przyjaciółki?',
+                                      'Jak zdalnie dodawać zdania dla Koharu?',
                                       style: TextStyle(
                                         color: AppTheme.textLight,
                                         fontWeight: FontWeight.w600,

@@ -118,7 +118,7 @@ class CollectionsScreen extends ConsumerWidget {
                 value: _CollectionsMenuAction.addSentenceForFriend,
                 child: _PopupMenuRow(
                   icon: Icons.send_rounded,
-                  label: 'Dla Przyjaciela / Wyślij zwrot',
+                  label: 'Dla Koharu / Wyślij zwrot',
                 ),
               ),
               const PopupMenuItem(
@@ -187,10 +187,10 @@ class CollectionsScreen extends ConsumerWidget {
         foregroundColor: Colors.white,
         icon: const Icon(Icons.send_rounded),
         label: const Text(
-          'Dla Przyjaciela / Wyślij',
+          'Dla Koharu / Wyślij',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        tooltip: 'Wyślij nowy zwrot dla przyjaciela (GitHub Gist) / 友だちへフレーズを送る',
+        tooltip: 'Wyślij nowy zwrot dla Koharu (GitHub Gist) / こはるちゃんへフレーズを送る',
         onPressed: () => showAddSentenceForFriendDialog(context),
       ),
       body: collectionsAsync.when(

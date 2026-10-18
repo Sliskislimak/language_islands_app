@@ -142,7 +142,7 @@ class _AddSentenceForFriendDialogState
     );
 
     String collectionId = _selectedCollectionId ?? 'shared_friend_island';
-    String collectionTitle = 'Wspólna lista zdań (Shared Island)';
+    String collectionTitle = 'Wspólna lista zdań (Jakub & Koharu)';
 
     if (_isCreatingNewCollection && _newCollectionTitle.trim().isNotEmpty) {
       collectionId = 'col_${DateTime.now().millisecondsSinceEpoch}';
@@ -253,8 +253,8 @@ class _AddSentenceForFriendDialogState
                       children: [
                         Text(
                           _isJapaneseMode
-                              ? 'Dla Przyjaciela / 友だちへフレーズを送る'
-                              : 'Nowy zwrot dla Przyjaciółki / ポーランド語作成',
+                              ? 'Dla Jakuba / Jakubへフレーズを送る'
+                              : 'Dla Koharu / こはるちゃんへポーランド語作成',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -263,8 +263,8 @@ class _AddSentenceForFriendDialogState
                         ),
                         Text(
                           _isJapaneseMode
-                              ? 'Wpisz japoński zwrot i wyślij 1 kliknięciem'
-                              : 'Twórz zdania po polsku do wspólnej listy',
+                              ? 'Wpisz japoński zwrot i wyślij dla Jakuba 1 kliknięciem'
+                              : 'Twórz zdania po polsku dla Koharu do wspólnej listy',
                           style: TextStyle(
                             fontSize: 12,
                             color: AppTheme.textMuted.withValues(alpha: 0.9),
@@ -602,7 +602,7 @@ class _AddSentenceForFriendDialogState
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
-                        'Polski (Dla Przyjaciółki)',
+                        'Polski (Dla Koharu)',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: !_isJapaneseMode ? FontWeight.bold : FontWeight.normal,
