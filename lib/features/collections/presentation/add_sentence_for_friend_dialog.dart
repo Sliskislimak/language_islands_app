@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:language_islands_app/core/models/remote_database_config.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
@@ -711,7 +712,30 @@ class _AddSentenceForFriendDialogState
               prefixIcon: Icons.code_rounded,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              icon: const Icon(Icons.auto_awesome, size: 13, color: AppTheme.sakuraPrimary),
+              label: Text(
+                _isJapaneseMode
+                    ? '共通Gistアドレスを自動入力 (Wspólny Gist)'
+                    : 'Wstaw adres wspólnego Gista (Jakub & Przyjaciółka)',
+                style: const TextStyle(fontSize: 11, color: AppTheme.sakuraPrimary),
+              ),
+              onPressed: () {
+                setState(() {
+                  _gistUrlController.text = RemoteDatabaseConfig.sharedPreset.url;
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 6),
           TextFormField(
             controller: _githubTokenController,
             obscureText: true,

@@ -1,5 +1,15 @@
 import 'dart:convert';
 
+const String kDefaultRemoteDatabaseUrl = String.fromEnvironment(
+  'DEFAULT_GIST_URL',
+  defaultValue: 'https://gist.github.com/Sliskislimak/8d8efa2b1884930a0894553eec419283',
+);
+
+const String kDefaultRemoteDatabaseApiKey = String.fromEnvironment(
+  'DEFAULT_GIST_TOKEN',
+  defaultValue: '',
+);
+
 class RemoteDatabaseConfig {
   const RemoteDatabaseConfig({
     this.url = '',
@@ -8,6 +18,13 @@ class RemoteDatabaseConfig {
     this.lastSyncedAt,
     this.lastSyncStatus,
   });
+
+  /// The pre-configured shared Gist database for Jakub and his friend.
+  static const RemoteDatabaseConfig sharedPreset = RemoteDatabaseConfig(
+    url: kDefaultRemoteDatabaseUrl,
+    apiKey: kDefaultRemoteDatabaseApiKey,
+    autoSyncOnStartup: true,
+  );
 
   final String url;
   final String apiKey;

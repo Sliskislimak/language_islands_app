@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:language_islands_app/core/models/remote_database_config.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
 import 'package:language_islands_app/features/collections/providers/remote_sync_controller.dart';
 
@@ -229,7 +230,31 @@ class _RemoteSyncDialogState extends ConsumerState<RemoteSyncDialog> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: const Icon(Icons.auto_awesome, size: 14, color: AppTheme.sakuraPrimary),
+                        label: const Text(
+                          'Wstaw domyślny wspólny Gist (Jakub & Przyjaciółka)',
+                          style: TextStyle(
+                            color: AppTheme.sakuraPrimary,
+                            fontSize: 12,
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _urlController.text = RemoteDatabaseConfig.sharedPreset.url;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: _apiKeyController,
                       obscureText: true,
