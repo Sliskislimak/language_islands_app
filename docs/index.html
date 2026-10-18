@@ -429,21 +429,39 @@
 
         <!-- Subsection 1: Connect Gist -->
         <div class="step-card" style="margin-bottom: 30px;">
-          <h3 style="font-size: 1.3rem; margin-bottom: 14px;" data-i18n="syncSetupTitle">1. 共有データベース（Gist）の接続</h3>
+          <h3 style="font-size: 1.3rem; margin-bottom: 14px;" data-i18n="syncSetupTitle">1. 共有データベース（Gist）の接続・受信設定</h3>
           <div class="step-card-body">
             <p data-i18n="syncStep1">1. アプリ右上の <strong>「︙」</strong> メニューをタップします。</p>
             <p data-i18n="syncStep2">2. <strong>「Zdalna baza zdań / Synchronizacja」</strong>（雲の同期アイコン）をタップします。</p>
-            <p data-i18n="syncStep3">3. 以下の「共有URL」をコピーして、入力欄に貼り付けます。</p>
+            <p data-i18n="syncStep3">3. <strong>「Adres URL bazy danych / JSON」</strong> の入力欄を設定します：</p>
+
+            <div class="callout callout-tip" style="margin: 14px 0;">
+              <div class="callout-icon">✨</div>
+              <div>
+                <strong data-i18n="syncQuickBtnTitle">【最速・ワンタップ入力】</strong><br>
+                <span data-i18n="syncQuickBtnDesc">URL入力欄のすぐ下にある紫色のボタン <code>✨ Wstaw domyślny wspólny Gist (Jakub & Przyjaciółka)</code> をタップするだけで、共有Gistのアドレスが一瞬で自動入力されます！</span>
+              </div>
+            </div>
+
+            <p data-i18n="syncManualHint" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 10px;">または、以下の共有URLをコピーして直接貼り付けることもできます：</p>
 
             <div class="copy-box">
-              <span class="copy-text" id="gistUrlText">https://api.github.com/gists/SHARED_GIST_ID</span>
-              <button class="copy-btn" data-copy="https://api.github.com/gists/SHARED_GIST_ID" data-i18n="copyGistBtn">
+              <span class="copy-text" id="gistUrlText">https://gist.github.com/Sliskislimak/8d8efa2b1884930a0894553eec419283</span>
+              <button class="copy-btn" data-copy="https://gist.github.com/Sliskislimak/8d8efa2b1884930a0894553eec419283" data-i18n="copyGistBtn">
                 Gist URLをコピー
               </button>
             </div>
 
+            <div class="callout callout-note" style="margin: 14px 0;">
+              <div class="callout-icon">💡</div>
+              <div>
+                <strong data-i18n="syncApiKeyHintTitle">【Klucz API / Token autoryzacji 欄について】</strong><br>
+                <span data-i18n="syncApiKeyHint">Jakubからのレッスンを受信・閲覧・同期するだけなら、この欄は <strong>【空欄（空っぽ）】</strong> のままで大丈夫です！（パスワード不要で誰でもダウンロードできます）</span>
+              </div>
+            </div>
+
             <p data-i18n="syncStep4">4. <strong>「起動時に自動同期」</strong>（Auto-sync on startup）のスイッチをONにします。</p>
-            <p data-i18n="syncStep5">5. <strong>「今すぐ同期」</strong>（Synchronizuj teraz）をタップします。これでJakubが作ったポーランド語レッスンが一気に届きます！</p>
+            <p data-i18n="syncStep5">5. <strong>「今すぐ同期」</strong>（Synchronizuj teraz）をタップします。これでJakubが作ったポーランド語レッスンが一気に届きます！🎉</p>
           </div>
         </div>
 
@@ -454,18 +472,30 @@
           </h3>
           <div class="step-card-body">
             <p data-i18n="sendIntro">Jakubに勉強してほしい日常会話や好きな表現をいつでも送れます！</p>
-            <p data-i18n="sendStep1">1. アプリ上部の <strong>紙飛行機 / ハートアイコン</strong> またはメニュー「︙」から <strong>「Dla Jakuba / Jakubへフレーズを送る」</strong> をタップします。</p>
-            <p data-i18n="sendStep2">2. 上部の切替タブが <strong>「日本語 (Dla Jakuba)」</strong> になっていることを確認します。</p>
-            <p data-i18n="sendStep3">3. 以下の4項目を入力します：</p>
+            <p data-i18n="sendStep1">1. 画面右下のピンクのハートボタン <strong>「＋」</strong> または右上のメニュー「︙」から <strong>「Dla Jakuba / Jakubへフレーズを送る」</strong> をタップします。</p>
+            <p data-i18n="sendStep2">2. 上部の切替タブが <strong>「🇯🇵 日本語 (Dla Jakuba)」</strong> になっていることを確認します。</p>
+            <p data-i18n="sendStep3">3. 以下の項目を入力します：</p>
             
-            <div style="background-color: var(--bg-surface-elevated); padding: 14px 18px; border-radius: var(--radius-sm); margin: 10px 0; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 6px; font-size: 0.92rem;">
+            <div style="background-color: var(--bg-surface-elevated); padding: 14px 18px; border-radius: var(--radius-sm); margin: 10px 0; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; font-size: 0.92rem;">
               <span data-i18n="sendF1">• <strong>1. 日本語（漢字・ひらがな）</strong>：例「これ、すごく美味しいよ！」</span>
               <span data-i18n="sendF2">• <strong>2. カタカナ読み</strong>：例「コレ、スゴク オイシイ ヨ！」</span>
-              <span data-i18n="sendF3">• <strong>3. ローマ字</strong>：例「Kore, sugoku oishii yo!」</span>
-              <span data-i18n="sendF4">• <strong>4. 意味・メモ</strong>：例「To jest naprawdę pyszne!」やシチュエーション</span>
+              <span data-i18n="sendF3">• <strong>3. ローマ字 (Rōmaji)</strong>：例「Kore, sugoku oishii yo!」</span>
+              <span data-i18n="sendF4">• <strong>4. 意味・メモ (Znaczenie)</strong>：例「To jest naprawdę pyszne! / This is so delicious!」</span>
+              <span data-i18n="sendF5">• <strong>5. メモ・使い方 (任意)</strong>：例「食事の時に使うカジュアルな表現」</span>
             </div>
 
-            <p data-i18n="sendStep4">4. <strong>「送信 / 送る」</strong> ボタンをタップします！</p>
+            <!-- GitHub Token explanation for sending -->
+            <div class="callout callout-note" style="margin: 16px 0;">
+              <div class="callout-icon">🔑</div>
+              <div>
+                <strong data-i18n="sendTokenTitle">【初回のみ】フレーズ送信の接続設定（GitHub Token）</strong><br>
+                <span data-i18n="sendTokenDesc">Gistへ新しい文を追加（送信）するには書き込み権限が必要です。フォーム内の「GitHub Gist設定 (Prywatne połączenie)」を開き：<br>
+                ・<strong>Gist URL</strong>: <code>共通Gistアドレスを自動入力</code> をタップ<br>
+                ・<strong>GitHub Token</strong>: Jakubから受け取った専用のGitHubトークン（PAT）を入力して「設定を保存」します。</span>
+              </div>
+            </div>
+
+            <p data-i18n="sendStep4">4. 画面下の <strong>「送信 & 保存 (Wyślij do GitHuba i Zapisz)」</strong> ボタンをタップします！</p>
             
             <div class="callout callout-tip" style="margin-top: 14px;">
               <div class="callout-icon">🌸</div>
@@ -581,10 +611,16 @@
 
                 <div class="mock-form-group">
                   <label class="mock-label">Adres URL bazy danych / JSON</label>
-                  <input type="text" class="mock-input" value="https://api.github.com/gists/..." readonly>
+                  <input type="text" class="mock-input" value="https://gist.github.com/Sliskislimak/8d8efa2b1884930a0894553eec419283" readonly style="font-size: 8px;">
+                  <div style="font-size: 8.5px; color: var(--sakura); margin-top: 3px; font-weight: bold;">✨ Wstaw domyślny wspólny Gist (1-klik)</div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 10px;">
+                <div class="mock-form-group" style="margin-top: 8px;">
+                  <label class="mock-label">Klucz API / Token (opcjonalny)</label>
+                  <input type="text" class="mock-input" placeholder="(空欄のままでOK / Puste)" readonly style="font-size: 9px;">
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 10px;">
                   <span style="font-size: 11px; color: #c9d1d9;">起動時に自動同期</span>
                   <span style="background-color: #238636; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px;">ON</span>
                 </div>
