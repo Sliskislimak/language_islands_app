@@ -10,7 +10,11 @@ const translations = {
     navAppInstall: "アプリ入手",
     navPolishConfig: "ポーランド語設定",
     navExchange: "フレーズ交換",
+    navVersions: "リリース一覧",
     navFaq: "FAQ",
+    viewAllVersionsBtn: "📦 バージョン一覧・詳細はこちら ↗",
+    versionCardTitle: "現在の最新版: v1.0.0 (安定版)",
+    versionCardDesc: "こはるちゃん専用の語学交換機能・ポーランド語ニューラル音声・カタカナ発音補助を搭載。",
 
     // Hero
     heroBadge: "🌸 こはるちゃんへ贈る特別ガイド",
@@ -178,6 +182,46 @@ const translations = {
     resIloaderMac: "iloader (macOS)",
     resIloaderMacDesc: "Mac用公式インストーラー (.dmg)",
 
+    // Releases Page
+    relPageTitle: "Language Islands • バージョン一覧 & IPAダウンロード",
+    relNavHome: "ガイドTOP",
+    relNavSideStore: "SideStore導入",
+    relNavVersions: "リリース一覧",
+    relHeroBadge: "🌸 アプリ配布・バージョン一覧",
+    relHeroTitle: "Language Islands<br><span class=\"highlight\">IPA ダウンロード</span>",
+    relHeroDesc: "SideStoreを使ってiPhoneにインストールできる `Runner.ipa` の配布ページです。こはるちゃんのiPhoneから直接ワンタップで最新版や過去バージョンをダウンロードできます。",
+    relLatestBadge: "🌸 最新安定版 (Recommended)",
+    relV100Title: "Language Islands v1.0.0",
+    relV100Date: "2026年10月18日 公開 • ビルド #1",
+    relDownloadBtn: "Runner.ipa を直接ダウンロード ↓ (28 MB)",
+    relMirrorGhBtn: "GitHub Releases ページ ↗",
+    relMirrorActionsBtn: "CI/CD ビルド成果物 (Actions) ↗",
+    relChangelogTitle: "📋 バージョン 1.0.0 の更新内容",
+    relF1: "🌸 <strong>こはるちゃん専用カスタマイズ</strong>：Jakubと2人で相互学習できるように画面やメッセージを最適化",
+    relF2: "🇵🇱 <strong>ポーランド語学習モード</strong>：ネイティブニューラル音声（Marek / Zofia）によるクリアな発音",
+    relF3: "🔤 <strong>カタカナ読み補助</strong>：ポーランド語特有の難しい発音も一目でわかる親切表記",
+    relF4: "☁️ <strong>Gist リモート双方向同期</strong>：こはるちゃんがアプリから送信した日本語がJakubの学習リストに即座に反映",
+    relF5: "🔁 <strong>シャドーイング＆アクティブリコール</strong>：記憶の定着を加速する2大特訓モード完備",
+    relSpecsTitle: "📱 動作要件・詳細情報",
+    relSpecIos: "対応OS: iOS 14.0 〜 iOS 18.x (iPhone / iPad)",
+    relSpecBundle: "Bundle ID: com.example.languageIslandsApp",
+    relSpecFormat: "ファイル形式: .ipa (iOS Application Archive)",
+    relSpecInstall: "インストール方法: SideStore経由（脱獄不要・完全無料）",
+    relHowToTitle: "💡 ダウンロード後のインストール手順（SideStore）",
+    relHowToStep1: "1. Safariで上の「Runner.ipa を直接ダウンロード」をタップします。",
+    relHowToStep2: "2. <strong>LocalDevVPN</strong> アプリを開き、Connected（接続済み）にします。",
+    relHowToStep3: "3. <strong>SideStore</strong> を開き、下の「My Apps」タブをタップします。",
+    relHowToStep4: "4. 左上の <strong>「＋」</strong> ボタンを押し、ダウンロードした <code>Runner.ipa</code> を選択します。",
+    relHowToStep5: "5. ホーム画面にアイコンが追加され、すぐに学習を開始できます！🎉",
+    relHowToUpdateNote: "※アップデート時も同様の手順で新しいIPAを追加するだけで上書き更新されます。これまでの学習履歴や送受信したフレーズは一切消えません。",
+    relArchiveTitle: "📦 過去のバージョン (Archive)",
+    relBetaTitle: "v1.0.0-beta (プロトタイプ初期版)",
+    relBetaDate: "2026年10月10日 • アーカイブ",
+    relBetaDesc: "Edge-TTS音声エンジンと基本カードUIの初期検証ビルド",
+    relBetaBtn: "v1.0.0-beta IPA をダウンロード ↓",
+    relUpcomingTitle: "🚧 次期バージョン予定: v1.1.0",
+    relUpcomingDesc: "オフライン音声キャッシュ、学習ストリーク（連続日数）ウィジェットを準備中です。",
+
     // Footer
     footerNote: "JakubとKoharuのための特製語学学習プロジェクト",
     footerCopy: "© 2026 Language Islands • All rights reserved."
@@ -191,7 +235,11 @@ const translations = {
     navAppInstall: "Install App",
     navPolishConfig: "Polish Config",
     navExchange: "Exchange Sentences",
+    navVersions: "Releases",
     navFaq: "FAQ",
+    viewAllVersionsBtn: "📦 View All Versions & Changelog ↗",
+    versionCardTitle: "Current Release: v1.0.0 (Stable)",
+    versionCardDesc: "Personalized for Koharu with two-way exchange, Polish neural voices, and Katakana phonetic guides.",
 
     heroBadge: "🌸 Special Guide for Koharu",
     heroTitle: "Learn <span class=\"highlight\">Polish & Japanese</span><br>Together on iPhone",
@@ -347,6 +395,46 @@ const translations = {
     resIloaderMac: "iloader (macOS)",
     resIloaderMacDesc: "Modern installer for macOS (.dmg)",
 
+    // Releases Page
+    relPageTitle: "Language Islands • Releases & IPA Downloads",
+    relNavHome: "Guide Home",
+    relNavSideStore: "SideStore Setup",
+    relNavVersions: "Releases",
+    relHeroBadge: "🌸 Official Releases & IPA Archive",
+    relHeroTitle: "Language Islands<br><span class=\"highlight\">IPA Downloads</span>",
+    relHeroDesc: "Directory of `Runner.ipa` packages to install via SideStore on iOS. Tap directly from your iPhone in Safari to download the latest or previous versions.",
+    relLatestBadge: "🌸 Latest Stable (Recommended)",
+    relV100Title: "Language Islands v1.0.0",
+    relV100Date: "Released Oct 18, 2026 • Build #1",
+    relDownloadBtn: "Direct Download Runner.ipa ↓ (28 MB)",
+    relMirrorGhBtn: "GitHub Releases Page ↗",
+    relMirrorActionsBtn: "CI/CD Build Artifacts (Actions) ↗",
+    relChangelogTitle: "📋 What's New in Version 1.0.0",
+    relF1: "🌸 <strong>Customized for Koharu</strong>: Tailored UI and warm interaction flow for reciprocal study with Jakub",
+    relF2: "🇵🇱 <strong>Polish Learning Mode</strong>: Native neural voices (Marek & Zofia) with high acoustic clarity",
+    relF3: "🔤 <strong>Katakana Phonetic Guides</strong>: Intuitive pronunciation helpers below tricky Polish phrases",
+    relF4: "☁️ <strong>Gist Two-Way Sync</strong>: Japanese sentences sent by Koharu sync immediately to Jakub's study queue",
+    relF5: "🔁 <strong>Shadowing & Active Recall</strong>: Two powerful scientific memory retention study modes",
+    relSpecsTitle: "📱 System Requirements & Metadata",
+    relSpecIos: "Compatibility: iOS 14.0 to iOS 18.x (iPhone / iPad)",
+    relSpecBundle: "Bundle ID: com.example.languageIslandsApp",
+    relSpecFormat: "Package Format: .ipa (iOS Application Archive)",
+    relSpecInstall: "Installation: Via SideStore (100% Free, No Jailbreak)",
+    relHowToTitle: "💡 How to Install in SideStore after Download",
+    relHowToStep1: "1. Tap 'Direct Download Runner.ipa' above in Safari on your iPhone.",
+    relHowToStep2: "2. Open <strong>LocalDevVPN</strong> and verify it is Connected.",
+    relHowToStep3: "3. Open <strong>SideStore</strong> and go to the 'My Apps' tab.",
+    relHowToStep4: "4. Tap <strong>'+'</strong> in the top left and choose the downloaded <code>Runner.ipa</code>.",
+    relHowToStep5: "5. The app icon appears on your home screen! Start learning! 🎉",
+    relHowToUpdateNote: "Note: When updating to future releases, just import the new IPA through SideStore; your study progress and sent phrases will never be erased.",
+    relArchiveTitle: "📦 Previous Releases (Archive)",
+    relBetaTitle: "v1.0.0-beta (Initial Prototype)",
+    relBetaDate: "Oct 10, 2026 • Archived",
+    relBetaDesc: "Initial verification prototype for Edge-TTS and flashcard UI",
+    relBetaBtn: "Download v1.0.0-beta IPA ↓",
+    relUpcomingTitle: "🚧 Upcoming: v1.1.0",
+    relUpcomingDesc: "Offline voice caching and daily study streak tracker currently in development.",
+
     footerNote: "Custom language exchange app for Jakub & Koharu",
     footerCopy: "© 2026 Language Islands • All rights reserved."
   },
@@ -359,7 +447,11 @@ const translations = {
     navAppInstall: "Pobieranie IPA",
     navPolishConfig: "Nauka polskiego",
     navExchange: "Wymiana zdań",
+    navVersions: "Wersje",
     navFaq: "FAQ",
+    viewAllVersionsBtn: "📦 Zobacz wszystkie wersje i historię ↗",
+    versionCardTitle: "Aktualne wydanie: v1.0.0 (Stabilna)",
+    versionCardDesc: "Wersja dla Koharu: dwukierunkowa wymiana zdań, polski lektor neuralny i zapis w katakanie.",
 
     heroBadge: "🌸 Przewodnik dla Koharu",
     heroTitle: "Wspólna nauka <span class=\"highlight\">polskiego i japońskiego</span><br>na iPhone",
@@ -515,6 +607,46 @@ const translations = {
     resIloaderMac: "iloader (macOS)",
     resIloaderMacDesc: "Instalator na macOS (.dmg)",
 
+    // Releases Page
+    relPageTitle: "Language Islands • Wersje aplikacji i pliki IPA",
+    relNavHome: "Strona główna",
+    relNavSideStore: "Instalacja SideStore",
+    relNavVersions: "Wersje",
+    relHeroBadge: "🌸 Wydania aplikacji i pliki IPA",
+    relHeroTitle: "Language Islands<br><span class=\"highlight\">Pobieranie plików IPA</span>",
+    relHeroDesc: "Katalog wydań i bezpośrednich plików instalacyjnych `Runner.ipa` dla iPhone przez SideStore. Możesz pobrać plik bezpośrednio z Safari na telefonie.",
+    relLatestBadge: "🌸 Najnowsza wersja stabilna (Zalecana)",
+    relV100Title: "Language Islands v1.0.0",
+    relV100Date: "Wydano 18 października 2026 • Build #1",
+    relDownloadBtn: "Pobierz bezpośrednio Runner.ipa ↓ (28 MB)",
+    relMirrorGhBtn: "Strona wydań na GitHubie ↗",
+    relMirrorActionsBtn: "Artefakty z GitHub Actions ↗",
+    relChangelogTitle: "📋 Co nowego w wersji 1.0.0",
+    relF1: "🌸 <strong>Dedykowana personalizacja dla Koharu</strong>: Zoptymalizowany interfejs do wspólnej nauki z Jakubem",
+    relF2: "🇵🇱 <strong>Tryb nauki języka polskiego</strong>: Polskie głosy neuralne (Marek i Zofia) o naturalnym brzmieniu",
+    relF3: "🔤 <strong>Wymowa w katakanie</strong>: Fonetyczny zapis pod każdym polskim zdaniem ułatwiający naukę",
+    relF4: "☁️ <strong>Synchronizacja przez Gist</strong>: Zdania japońskie wysłane przez Koharu natychmiast trafiają do aplikacji Jakuba",
+    relF5: "🔁 <strong>Trening Shadowing i Active Recall</strong>: Dwa zaawansowane tryby utrwalania pamięciowego",
+    relSpecsTitle: "📱 Wymagania systemowe i dane techniczne",
+    relSpecIos: "Kompatybilność: iOS 14.0 do iOS 18.x (iPhone / iPad)",
+    relSpecBundle: "Bundle ID: com.example.languageIslandsApp",
+    relSpecFormat: "Format pliku: .ipa (iOS Application Archive)",
+    relSpecInstall: "Metoda instalacji: Przez SideStore (bez jailbreaku, za darmo)",
+    relHowToTitle: "💡 Jak zainstalować plik w SideStore po pobraniu",
+    relHowToStep1: "1. Kliknij „Pobierz bezpośrednio Runner.ipa” powyżej w Safari na telefonie.",
+    relHowToStep2: "2. Włącz <strong>LocalDevVPN</strong> na telefonie (Connected).",
+    relHowToStep3: "3. Otwórz <strong>SideStore</strong> i wejdź w zakładkę 'My Apps'.",
+    relHowToStep4: "4. Kliknij <strong>'+'</strong> w lewym górnym rogu i wybierz pobrany plik <code>Runner.ipa</code>.",
+    relHowToStep5: "5. Ikona aplikacji pojawi się na ekranie głównym! Możesz zacząć naukę! 🎉",
+    relHowToUpdateNote: "Uwaga: Przy aktualizacji do nowszej wersji po prostu wgraj nowy plik IPA przez SideStore. Żadne dane nauki ani przesłane zwroty nie zostaną skasowane.",
+    relArchiveTitle: "📦 Poprzednie wydania (Archiwum)",
+    relBetaTitle: "v1.0.0-beta (Wersja testowa)",
+    relBetaDate: "10 października 2026 • Zarchiwizowana",
+    relBetaDesc: "Wczesny prototyp silnika Edge-TTS i interfejsu fiszek",
+    relBetaBtn: "Pobierz v1.0.0-beta IPA ↓",
+    relUpcomingTitle: "🚧 Nadchodzące wydanie: v1.1.0",
+    relUpcomingDesc: "Prace nad buforowaniem dźwięku offline i licznikiem codziennej nauki (streak).",
+
     footerNote: "Aplikacja do wspólnej nauki języków dla Jakuba i Koharu",
     footerCopy: "© 2026 Language Islands • Wszelkie prawa zastrzeżone."
   }
@@ -562,14 +694,16 @@ function initLanguage() {
   const langBtn = document.getElementById('langBtn');
   const langDropdown = document.getElementById('langDropdown');
 
-  langBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    langDropdown.classList.toggle('open');
-  });
+  if (langBtn && langDropdown) {
+    langBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langDropdown.classList.toggle('open');
+    });
 
-  document.addEventListener('click', () => {
-    langDropdown.classList.remove('open');
-  });
+    document.addEventListener('click', () => {
+      langDropdown.classList.remove('open');
+    });
+  }
 
   document.querySelectorAll('.lang-opt').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -578,7 +712,7 @@ function initLanguage() {
         currentLang = selected;
         localStorage.setItem('lang_islands_lang', currentLang);
         applyLanguage(currentLang);
-        langDropdown.classList.remove('open');
+        if (langDropdown) langDropdown.classList.remove('open');
       }
     });
   });
@@ -619,16 +753,19 @@ function initTheme() {
   document.documentElement.setAttribute('data-theme', savedTheme);
   updateThemeIcon(savedTheme);
 
-  themeToggle.addEventListener('click', () => {
-    const active = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', active);
-    localStorage.setItem('lang_islands_theme', active);
-    updateThemeIcon(active);
-  });
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const active = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', active);
+      localStorage.setItem('lang_islands_theme', active);
+      updateThemeIcon(active);
+    });
+  }
 }
 
 function updateThemeIcon(theme) {
   const themeToggle = document.getElementById('themeToggle');
+  if (!themeToggle) return;
   themeToggle.innerHTML = theme === 'light' ? '🌙' : '☀️';
   themeToggle.setAttribute('title', theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode');
 }
@@ -638,6 +775,8 @@ function initChecklist() {
   const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
   const progressBar = document.getElementById('progressBar');
   const progressPct = document.getElementById('progressPct');
+
+  if (!progressBar || !progressPct || checkboxes.length === 0) return;
 
   function calculateProgress() {
     const total = checkboxes.length;

@@ -30,6 +30,7 @@
           <li><a href="#app-install" data-i18n="navAppInstall">アプリ入手</a></li>
           <li><a href="#polish-config" data-i18n="navPolishConfig">ポーランド語設定</a></li>
           <li><a href="#exchange" data-i18n="navExchange">フレーズ交換</a></li>
+          <li><a href="releases.html" data-i18n="navVersions">リリース一覧</a></li>
           <li><a href="#faq" data-i18n="navFaq">FAQ</a></li>
         </ul>
       </nav>
@@ -340,13 +341,18 @@
           SideStoreの準備ができたら、いよいよアプリ本体（Runner.ipa）をインストールします。
         </p>
 
-        <!-- Direct Download Button for IPA -->
+        <!-- Direct Download Button for IPA & Version Portal -->
         <div style="text-align: center; margin: 30px 0;">
-          <a href="https://github.com/Sliskislimak/language_islands_app/releases/latest" target="_blank" rel="noopener" class="btn-primary" style="font-size: 1.1rem; padding: 16px 36px;" data-i18n="downloadIpaBtn">
-            Runner.ipa (最新版アプリ) をダウンロード ↓
-          </a>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-            ※ iPhoneのSafariでダウンロードしてください
+          <div class="btn-group" style="justify-content: center; gap: 14px; flex-wrap: wrap;">
+            <a href="https://github.com/Sliskislimak/language_islands_app/releases/download/v1.0.0/Runner.ipa" download="Runner.ipa" class="btn-primary" style="font-size: 1.1rem; padding: 16px 36px;" data-i18n="downloadIpaBtn">
+              Runner.ipa (最新版アプリ) をダウンロード ↓
+            </a>
+            <a href="releases.html" class="btn-secondary" style="font-size: 1rem; padding: 16px 28px;" data-i18n="viewAllVersionsBtn">
+              📦 バージョン一覧・詳細はこちら ↗
+            </a>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">
+            ※ iPhoneのSafariでダウンロードしてください（iOS 14.0〜18.x対応）
           </p>
         </div>
 
@@ -682,11 +688,16 @@
             <div>
               <div class="resource-icon">📱</div>
               <div class="resource-title" data-i18n="resAppTitle">Language Islands IPA</div>
-              <div class="resource-desc" data-i18n="resAppDesc">最新のRunner.ipaアプリ本体</div>
+              <div class="resource-desc" data-i18n="resAppDesc">最新のRunner.ipaアプリ本体 (v1.0.0)</div>
             </div>
-            <a href="https://github.com/Sliskislimak/language_islands_app/releases/latest" target="_blank" rel="noopener" class="btn-primary">
-              Runner.ipa 入手 ↓
-            </a>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a href="https://github.com/Sliskislimak/language_islands_app/releases/download/v1.0.0/Runner.ipa" download="Runner.ipa" class="btn-primary" style="text-align: center;">
+                Runner.ipa 入手 ↓
+              </a>
+              <a href="releases.html" class="btn-secondary" style="text-align: center; font-size: 0.85rem;" data-i18n="navVersions">
+                リリース一覧 ↗
+              </a>
+            </div>
           </div>
 
           <!-- iloader Windows -->

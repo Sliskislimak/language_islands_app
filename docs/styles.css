@@ -1297,3 +1297,179 @@ body {
     font-size: 1.6rem;
   }
 }
+
+/* ==========================================================================
+   Releases & Version Downloads Page
+   ========================================================================== */
+
+.release-card-featured {
+  background-color: var(--bg-surface);
+  border: 2px solid var(--sakura);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 12px 36px var(--sakura-glow);
+  margin-bottom: 32px;
+}
+
+.release-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.release-version-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.02em;
+}
+
+.release-date-sub {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.release-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  background-color: var(--sakura-bg);
+  color: var(--sakura);
+  border: 1px solid var(--sakura);
+}
+
+.release-badge-pill.matcha {
+  background-color: var(--matcha-bg);
+  color: var(--matcha);
+  border-color: var(--matcha);
+}
+
+.release-badge-pill.muted {
+  background-color: var(--bg-surface-elevated);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+  background-color: var(--bg-surface-elevated);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  border: 1px solid var(--border-color);
+}
+
+.spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spec-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+  font-weight: 700;
+}
+
+.spec-val {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.changelog-box {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.changelog-box h4 {
+  font-size: 1.1rem;
+  margin-bottom: 14px;
+  color: var(--sakura);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.changelog-box ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.changelog-box li {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  padding-left: 24px;
+  position: relative;
+}
+
+.changelog-box li::before {
+  content: "🌸";
+  position: absolute;
+  left: 0;
+  font-size: 0.95rem;
+  top: 1px;
+}
+
+.archive-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.archive-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+}
+
+.archive-info h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.archive-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.archive-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+

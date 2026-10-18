@@ -5,11 +5,16 @@ on:
     branches:
       - main
       - 'feat/**'
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -42,3 +47,31 @@ jobs:
           name: language-islands-ios
           path: Runner.ipa
           retention-days: 30
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/friend-guide-website' || github.ref == 'refs/heads/feat/friend-shared-list-sync'
+        with:
+          tag_name: v1.0.0
+          name: "Language Islands v1.0.0 (Release)"
+          draft: false
+          prerelease: false
+          body: |
+            ## 🌸 Language Islands v1.0.0 (iOS IPA)
+
+            Dedicated language exchange app for **Koharu & Jakub**.
+
+            ### ✨ Highlights
+            - 🇵🇱 **Polish Learning Mode**: High-quality neural voices (`Marek` & `Zofia`)
+            - 🔤 **Katakana Phonetic Guides**: Pronunciation helper beneath Polish sentences
+            - ☁️ **GitHub Gist Sync**: Two-way remote synchronization of study phrases
+            - 💌 **Phrase Exchange**: Send daily Japanese phrases straight to Jakub
+            - 🎧 **Shadowing & Active Recall**: Dual scientific memorization modes
+
+            ### 📱 How to Install via SideStore
+            1. Download `Runner.ipa` on your iPhone in Safari.
+            2. Connect to **LocalDevVPN**.
+            3. Open **SideStore** -> `My Apps` -> tap `+` -> select `Runner.ipa`.
+          files: Runner.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
