@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:edge_tts/edge_tts.dart';
+import 'package:language_islands_app/core/services/edge_tts_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:language_islands_app/core/constants/api_constants.dart';
@@ -79,11 +79,10 @@ class AzureTtsService {
     }
 
     try {
-      final comm = Communicate(
+      final bytes = await EdgeTtsClient.synthesize(
         text: text,
         voice: ApiConstants.japaneseVoiceName,
       );
-      final bytes = await comm.toBytes();
       if (bytes.isNotEmpty) {
         await cacheFile.parent.create(recursive: true);
         await cacheFile.writeAsBytes(bytes, flush: true);
@@ -144,11 +143,10 @@ class AzureTtsService {
   }) async {
     // 1. Primary: Free Edge TTS (no API key required)
     try {
-      final comm = Communicate(
+      final bytes = await EdgeTtsClient.synthesize(
         text: targetText,
         voice: voiceName,
       );
-      final bytes = await comm.toBytes();
       if (bytes.isNotEmpty) {
         await destination.parent.create(recursive: true);
         await destination.writeAsBytes(bytes, flush: true);
@@ -192,11 +190,10 @@ class AzureTtsService {
   }) async {
     // 1. Primary: Free Edge TTS (no API key required)
     try {
-      final comm = Communicate(
+      final bytes = await EdgeTtsClient.synthesize(
         text: sourceText,
         voice: voiceName,
       );
-      final bytes = await comm.toBytes();
       if (bytes.isNotEmpty) {
         await destination.parent.create(recursive: true);
         await destination.writeAsBytes(bytes, flush: true);
