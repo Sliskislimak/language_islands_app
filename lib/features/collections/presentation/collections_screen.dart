@@ -7,6 +7,7 @@ import 'package:language_islands_app/core/theme/app_theme.dart';
 import 'package:language_islands_app/features/collections/presentation/add_sentence_for_friend_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/edit_collection_json_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/import_collection_dialog.dart';
+import 'package:language_islands_app/features/collections/presentation/manage_collection_screen.dart';
 import 'package:language_islands_app/features/collections/presentation/language_management_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/remote_sync_dialog.dart';
 import 'package:language_islands_app/features/collections/presentation/select_target_language_dialog.dart';
@@ -489,6 +490,34 @@ class _CollectionTile extends ConsumerWidget {
                           ),
                         ),
                       ),
+                      Tooltip(
+                        message: 'Tryb edycji / Zarządzaj fiszkami',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => ManageCollectionScreen(
+                                    collectionId: collection.id,
+                                    initialCollection: collection,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(5),
+                              child: Icon(
+                                Icons.tune_rounded,
+                                size: 20,
+                                color: AppTheme.sakuraPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 2),
                       PopupMenuButton<_CollectionTileAction>(
                         tooltip: 'Więcej opcji wyspy',
                         icon: const Icon(
@@ -499,6 +528,15 @@ class _CollectionTile extends ConsumerWidget {
                         color: AppTheme.surfaceElevated,
                         onSelected: (action) async {
                           switch (action) {
+                            case _CollectionTileAction.manageSentences:
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => ManageCollectionScreen(
+                                    collectionId: collection.id,
+                                    initialCollection: collection,
+                                  ),
+                                ),
+                              );
                             case _CollectionTileAction.changeTargetLanguage:
                               showSelectTargetLanguageDialog(
                                 context,
@@ -532,6 +570,13 @@ class _CollectionTile extends ConsumerWidget {
                           }
                         },
                         itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: _CollectionTileAction.manageSentences,
+                            child: _PopupMenuRow(
+                              icon: Icons.tune_rounded,
+                              label: 'Tryb edycji / Zarządzaj fiszkami',
+                            ),
+                          ),
                           const PopupMenuItem(
                             value: _CollectionTileAction.changeTargetLanguage,
                             child: _PopupMenuRow(
@@ -756,6 +801,7 @@ enum _CollectionsMenuAction {
 }
 
 enum _CollectionTileAction {
+  manageSentences,
   changeTargetLanguage,
   changeVoice,
   syncRemote,

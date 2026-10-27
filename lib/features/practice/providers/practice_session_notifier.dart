@@ -242,6 +242,56 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     ref.invalidate(collectionsControllerProvider);
   }
 
+  Future<void> updateSentence(Sentence updatedSentence) async {
+    final current = state;
+    if (current == null) return;
+
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.updateSentence(current.collection.id, updatedSentence);
+
+    final refreshed =
+        await repo.getById(current.collection.id) ?? current.collection;
+
+    state = current.copyWith(collection: refreshed);
+    ref.invalidate(collectionsControllerProvider);
+  }
+
+  Future<void> addSentence(Sentence newSentence) async {
+    final current = state;
+    if (current == null) return;
+
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.addSentence(current.collection.id, newSentence);
+
+    final refreshed =
+        await repo.getById(current.collection.id) ?? current.collection;
+
+    state = current.copyWith(collection: refreshed);
+    ref.invalidate(collectionsControllerProvider);
+  }
+
+  Future<void> deleteSentence(String sentenceId) async {
+    final current = state;
+    if (current == null) return;
+
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.deleteSentence(current.collection.id, sentenceId);
+
+    final refreshed =
+        await repo.getById(current.collection.id) ?? current.collection;
+
+    final nextActive = refreshed.sentences.any((s) => s.id == current.activeSentenceId)
+        ? current.activeSentenceId
+        : refreshed.sentences.firstOrNull?.id;
+
+    state = current.copyWith(
+      collection: refreshed,
+      activeSentenceId: nextActive,
+      clearActiveSentenceId: nextActive == null,
+    );
+    ref.invalidate(collectionsControllerProvider);
+  }
+
   void setActiveSentenceIndex(int index) {
     final current = state;
     if (current == null) return;

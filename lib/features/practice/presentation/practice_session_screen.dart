@@ -5,7 +5,9 @@ import 'package:language_islands_app/core/models/app_language.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
+import 'package:language_islands_app/features/collections/presentation/manage_collection_screen.dart';
 import 'package:language_islands_app/features/collections/presentation/select_translation_voice_dialog.dart';
+import 'package:language_islands_app/features/collections/presentation/sentence_edit_dialog.dart';
 import 'package:language_islands_app/features/practice/playback_speed.dart';
 import 'package:language_islands_app/features/practice/presentation/screens/focus_mode_screen.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/audio_settings_sheet.dart';
@@ -169,12 +171,47 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
             icon: const Icon(Icons.tune_rounded, color: AppTheme.textLight),
             onPressed: () => showAudioSettingsSheet(context, ref),
           ),
+          IconButton(
+            tooltip: 'Tryb edycji / Zarządzaj fiszkami',
+            icon: const Icon(Icons.edit_note_rounded, color: AppTheme.sakuraPrimary),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => ManageCollectionScreen(
+                    collectionId: collection.id,
+                    initialCollection: collection,
+                  ),
+                ),
+              );
+            },
+          ),
           PopupMenuButton<_PracticeSessionMenuAction>(
             tooltip: 'Więcej opcji',
             icon: const Icon(Icons.more_vert_rounded, color: AppTheme.textLight),
             color: AppTheme.surfaceElevated,
             onSelected: (action) {
               switch (action) {
+                case _PracticeSessionMenuAction.manageSentences:
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ManageCollectionScreen(
+                        collectionId: collection.id,
+                        initialCollection: collection,
+                      ),
+                    ),
+                  );
+                case _PracticeSessionMenuAction.addSentence:
+                  showSentenceEditDialog(
+                    context,
+                    collectionId: collection.id,
+                    targetLanguageCode:
+                        session?.targetLanguage ?? collection.targetLanguage,
+                    onSave: (saved) async {
+                      await ref
+                          .read(practiceSessionProvider.notifier)
+                          .addSentence(saved);
+                    },
+                  );
                 case _PracticeSessionMenuAction.translationVoice:
                   showSelectTranslationVoiceDialog(
                     context,
@@ -187,6 +224,54 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: _PracticeSessionMenuAction.manageSentences,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      size: 20,
+                      color: AppTheme.sakuraPrimary,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Tryb edycji / Zarządzaj fiszkami',
+                        style: TextStyle(
+                          color: AppTheme.textLight,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: _PracticeSessionMenuAction.addSentence,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add_rounded,
+                      size: 20,
+                      color: AppTheme.greenMatcha,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Dodaj nową fiszkę',
+                        style: TextStyle(
+                          color: AppTheme.textLight,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: _PracticeSessionMenuAction.translationVoice,
                 child: Row(
@@ -439,6 +524,32 @@ class _SessionContentColumn extends ConsumerWidget {
                         onSaveNotes: (notes) => ref
                             .read(practiceSessionProvider.notifier)
                             .updateSentenceNotes(sentence.id, notes),
+                        onEdit: () async {
+                          final currentSession =
+                              ref.read(practiceSessionProvider);
+                          if (currentSession == null) return;
+                          final updated = await showSentenceEditDialog(
+                            context,
+                            collectionId: currentSession.collection.id,
+                            sentence: sentence,
+                            targetLanguageCode: currentSession.targetLanguage,
+                            onSave: (saved) async {
+                              await ref
+                                  .read(practiceSessionProvider.notifier)
+                                  .updateSentence(saved);
+                            },
+                          );
+                          if (updated != null && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Zaktualizowano fiszkę: "${updated.targetText}"',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
                         activeAudioChannel: session?.activeAudioChannel ??
                             ActiveAudioChannel.none,
                         targetLanguageCode: session?.targetLanguage,
@@ -965,6 +1076,8 @@ class _ExportCollectionDialog extends StatelessWidget {
 }
 
 enum _PracticeSessionMenuAction {
+  manageSentences,
+  addSentence,
   translationVoice,
   audioSettings,
   exportJson,

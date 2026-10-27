@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/providers/app_providers.dart';
 
@@ -33,6 +34,44 @@ class CollectionsController extends AsyncNotifier<List<SentenceCollection>> {
       await repo.updateCollectionFromJson(collectionId, jsonStr);
       return repo.loadAll();
     });
+  }
+
+  Future<void> addSentence(String collectionId, Sentence sentence) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.addSentence(collectionId, sentence);
+    ref.invalidateSelf();
+  }
+
+  Future<void> updateSentence(String collectionId, Sentence sentence) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.updateSentence(collectionId, sentence);
+    ref.invalidateSelf();
+  }
+
+  Future<void> deleteSentence(String collectionId, String sentenceId) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.deleteSentence(collectionId, sentenceId);
+    ref.invalidateSelf();
+  }
+
+  Future<void> reorderSentences(
+    String collectionId,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    await repo.reorderSentences(collectionId, oldIndex, newIndex);
+    ref.invalidateSelf();
+  }
+
+  Future<void> updateCollectionTitle(String collectionId, String newTitle) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    final collection = await repo.getById(collectionId);
+    if (collection != null) {
+      final updated = collection.copyWith(title: newTitle.trim());
+      await repo.updateCollection(updated);
+      ref.invalidateSelf();
+    }
   }
 
   Future<void> deleteCollection(String id) async {

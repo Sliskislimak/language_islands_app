@@ -52,6 +52,69 @@ class CollectionRepository {
     return imported;
   }
 
+  Future<void> addSentence(String collectionId, Sentence sentence) async {
+    final all = await loadAll();
+    final index = all.indexWhere((c) => c.id == collectionId);
+    if (index < 0) {
+      throw StateError('Collection "$collectionId" not found.');
+    }
+
+    final collection = all[index];
+    final updatedSentences = List<Sentence>.from(collection.sentences)..add(sentence);
+    final updatedCollection = collection.copyWith(sentences: updatedSentences);
+    await _writeCollection(updatedCollection);
+
+    final next = List<SentenceCollection>.from(all);
+    next[index] = updatedCollection;
+    _cache = next;
+  }
+
+  Future<void> deleteSentence(String collectionId, String sentenceId) async {
+    final all = await loadAll();
+    final index = all.indexWhere((c) => c.id == collectionId);
+    if (index < 0) {
+      throw StateError('Collection "$collectionId" not found.');
+    }
+
+    final collection = all[index];
+    final updatedSentences =
+        collection.sentences.where((s) => s.id != sentenceId).toList();
+    final updatedCollection = collection.copyWith(sentences: updatedSentences);
+    await _writeCollection(updatedCollection);
+
+    final next = List<SentenceCollection>.from(all);
+    next[index] = updatedCollection;
+    _cache = next;
+  }
+
+  Future<void> reorderSentences(
+    String collectionId,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    final all = await loadAll();
+    final index = all.indexWhere((c) => c.id == collectionId);
+    if (index < 0) return;
+
+    final collection = all[index];
+    final list = List<Sentence>.from(collection.sentences);
+    if (oldIndex < 0 || oldIndex >= list.length) return;
+    if (newIndex < 0 || newIndex > list.length) return;
+
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = list.removeAt(oldIndex);
+    list.insert(newIndex, item);
+
+    final updatedCollection = collection.copyWith(sentences: list);
+    await _writeCollection(updatedCollection);
+
+    final next = List<SentenceCollection>.from(all);
+    next[index] = updatedCollection;
+    _cache = next;
+  }
+
   Future<void> updateSentence(String collectionId, Sentence sentence) async {
     final all = await loadAll();
     final index = all.indexWhere((c) => c.id == collectionId);

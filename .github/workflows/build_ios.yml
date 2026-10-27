@@ -50,16 +50,19 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/friend-guide-website' || github.ref == 'refs/heads/feat/friend-shared-list-sync'
         with:
-          tag_name: v1.0.0
-          name: "Language Islands v1.0.0 (Release)"
+          tag_name: v1.1.0
+          name: "Language Islands v1.1.0 (Release)"
           draft: false
           prerelease: false
           body: |
-            ## 🌸 Language Islands v1.0.0 (iOS IPA)
+            ## 🌸 Language Islands v1.1.0 (iOS IPA)
 
             Dedicated language exchange app for **Koharu & Jakub**.
 
-            ### ✨ Highlights
+            ### ✨ Highlights (v1.1.0)
+            - ➕ **Dodawanie pojedynczych fiszek**: Szybkie dodawanie nowych fiszek bez edycji surowego JSON
+            - ✏️ **Nowy tryb edycji grup fiszek**: Ekran zarządzania fiszkami, wyszukiwanie, edycja i usuwanie
+            - 🔍 **Edycja pojedynczej fiszki w trakcie nauki**: Przycisk edycji na karcie fiszki oraz w Focus Mode
             - 🇵🇱 **Polish Learning Mode**: High-quality neural voices (`Marek` & `Zofia`)
             - 🔤 **Katakana Phonetic Guides**: Pronunciation helper beneath Polish sentences
             - ☁️ **GitHub Gist Sync**: Two-way remote synchronization of study phrases

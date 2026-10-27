@@ -53,6 +53,7 @@ class SentenceCardWidget extends StatefulWidget {
     required this.onToggleReveal,
     required this.onRate,
     this.onSaveNotes,
+    this.onEdit,
     this.activeAudioChannel = ActiveAudioChannel.none,
     this.targetLanguageCode,
   });
@@ -66,6 +67,7 @@ class SentenceCardWidget extends StatefulWidget {
   final VoidCallback onToggleReveal;
   final ValueChanged<int> onRate;
   final ValueChanged<String>? onSaveNotes;
+  final VoidCallback? onEdit;
   final ActiveAudioChannel activeAudioChannel;
   final String? targetLanguageCode;
 
@@ -201,6 +203,7 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
                   _fullCardClipboardText(widget.sentence),
                   'Skopiowano całą kartę',
                 ),
+                onEdit: widget.onEdit,
                 onFlip: _toggleFlip,
               ),
               const SizedBox(height: 12),
@@ -246,6 +249,7 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
                 isLocked: _isLocked,
                 onToggleLock: _toggleLock,
                 onCopyNotes: _copyNotes,
+                onEdit: widget.onEdit,
                 onFlip: _toggleFlip,
               ),
               const SizedBox(height: 10),
@@ -275,6 +279,7 @@ class _ToolbarRow extends StatelessWidget {
     required this.onPlayAudio,
     required this.onRate,
     required this.onCopyAll,
+    this.onEdit,
     required this.onFlip,
   });
 
@@ -284,6 +289,7 @@ class _ToolbarRow extends StatelessWidget {
   final VoidCallback onPlayAudio;
   final ValueChanged<int> onRate;
   final VoidCallback onCopyAll;
+  final VoidCallback? onEdit;
   final VoidCallback onFlip;
 
   @override
@@ -332,6 +338,28 @@ class _ToolbarRow extends StatelessWidget {
         ),
         const Spacer(),
         _StarRatingRow(score: score, onRate: onRate),
+        if (onEdit != null) ...[
+          const SizedBox(width: 6),
+          Tooltip(
+            message: 'Edytuj treść i tłumaczenie fiszki',
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                key: const ValueKey('sentence_card_edit_button'),
+                onTap: onEdit,
+                borderRadius: BorderRadius.circular(6),
+                child: const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: AppTheme.sakuraPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
         const SizedBox(width: 8),
         Tooltip(
           message: hasNotes
@@ -383,12 +411,14 @@ class _BackToolbarRow extends StatelessWidget {
     required this.isLocked,
     required this.onToggleLock,
     required this.onCopyNotes,
+    this.onEdit,
     required this.onFlip,
   });
 
   final bool isLocked;
   final VoidCallback onToggleLock;
   final VoidCallback onCopyNotes;
+  final VoidCallback? onEdit;
   final VoidCallback onFlip;
 
   @override
@@ -436,6 +466,28 @@ class _BackToolbarRow extends StatelessWidget {
             ),
           ),
         ),
+        if (onEdit != null) ...[
+          const SizedBox(width: 6),
+          Tooltip(
+            message: 'Edytuj treść i tłumaczenie fiszki',
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                key: const ValueKey('sentence_card_back_edit_button'),
+                onTap: onEdit,
+                borderRadius: BorderRadius.circular(6),
+                child: const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: AppTheme.sakuraPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
         const SizedBox(width: 8),
         Text(
           isLocked ? 'Notatki / Teoria' : 'Notatki (edycja odblokowana)',

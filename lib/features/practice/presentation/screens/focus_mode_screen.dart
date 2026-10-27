@@ -5,6 +5,7 @@ import 'package:language_islands_app/core/models/audio_translation_mode.dart';
 import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
+import 'package:language_islands_app/features/collections/presentation/sentence_edit_dialog.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/audio_settings_sheet.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/landscape_exercise_view.dart';
 import 'package:language_islands_app/features/practice/presentation/widgets/sentence_card_widget.dart';
@@ -357,6 +358,9 @@ class _FocusTopBar extends ConsumerWidget {
         children: [
           IconButton(
             onPressed: onClose,
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.all(4),
+            constraints: const BoxConstraints(),
             icon: const Icon(Icons.close_rounded, color: AppTheme.textLight),
           ),
           Expanded(
@@ -381,8 +385,47 @@ class _FocusTopBar extends ConsumerWidget {
           ),
           const SizedBox(width: 4),
           Tooltip(
+            message: 'Edytuj treść i tłumaczenie fiszki',
+            child: IconButton(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
+              onPressed: () async {
+                final session = ref.read(practiceSessionProvider);
+                if (session == null) return;
+                final updated = await showSentenceEditDialog(
+                  context,
+                  collectionId: session.collection.id,
+                  sentence: sentence,
+                  targetLanguageCode: session.targetLanguage,
+                  onSave: (saved) async {
+                    await ref
+                        .read(practiceSessionProvider.notifier)
+                        .updateSentence(saved);
+                  },
+                );
+                if (updated != null && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Zaktualizowano fiszkę: "${updated.targetText}"',
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.edit_outlined,
+                  color: AppTheme.sakuraPrimary),
+            ),
+          ),
+          const SizedBox(width: 2),
+          Tooltip(
             message: 'Lektor tłumaczenia & Audio',
             child: IconButton(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
               onPressed: () => showAudioSettingsSheet(context, ref),
               icon: const Icon(Icons.tune_rounded, color: AppTheme.textLight),
             ),
@@ -393,6 +436,9 @@ class _FocusTopBar extends ConsumerWidget {
                 ? 'Notatki (zawiera notatki)'
                 : 'Notatki / Teoria',
             child: IconButton(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
               onPressed: onOpenNotes,
               icon: Stack(
                 clipBehavior: Clip.none,
@@ -926,3 +972,4 @@ class _FocusEmojiVisualCuesBadge extends StatelessWidget {
     );
   }
 }
+
