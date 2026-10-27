@@ -53,8 +53,11 @@ class _ManageCollectionScreenState
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle_rounded,
-                  color: AppTheme.greenMatcha, size: 20),
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppTheme.greenMatcha,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text('Dodano nową fiszkę: "${result.targetText}"'),
@@ -89,8 +92,11 @@ class _ManageCollectionScreenState
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle_rounded,
-                  color: AppTheme.greenMatcha, size: 20),
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppTheme.greenMatcha,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text('Zaktualizowano fiszkę: "${result.targetText}"'),
@@ -221,7 +227,8 @@ class _ManageCollectionScreenState
   Widget build(BuildContext context) {
     final collectionsAsync = ref.watch(collectionsControllerProvider);
 
-    final collection = collectionsAsync.valueOrNull?.firstWhere(
+    final collection =
+        collectionsAsync.valueOrNull?.firstWhere(
           (c) => c.id == widget.collectionId,
           orElse: () => widget.initialCollection,
         ) ??
@@ -264,8 +271,11 @@ class _ManageCollectionScreenState
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined,
-                      size: 16, color: AppTheme.sakuraPrimary),
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    size: 16,
+                    color: AppTheme.sakuraPrimary,
+                  ),
                   tooltip: 'Zmień nazwę zbioru',
                   padding: const EdgeInsets.all(4),
                   constraints: const BoxConstraints(),
@@ -275,17 +285,16 @@ class _ManageCollectionScreenState
             ),
             Text(
               'Tryb edycji fiszek • ${collection.sentences.length} fiszek',
-              style: const TextStyle(
-                color: AppTheme.textMuted,
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.play_circle_fill_rounded,
-                color: AppTheme.sakuraPrimary),
+            icon: const Icon(
+              Icons.play_circle_fill_rounded,
+              color: AppTheme.sakuraPrimary,
+            ),
             tooltip: 'Rozpocznij naukę tej grupy',
             onPressed: () {
               Navigator.of(context).pushReplacement(
@@ -325,8 +334,11 @@ class _ManageCollectionScreenState
                 value: 'add',
                 child: Row(
                   children: [
-                    Icon(Icons.add_rounded,
-                        size: 20, color: AppTheme.sakuraPrimary),
+                    Icon(
+                      Icons.add_rounded,
+                      size: 20,
+                      color: AppTheme.sakuraPrimary,
+                    ),
                     SizedBox(width: 10),
                     Text('Dodaj nową fiszkę'),
                   ],
@@ -336,8 +348,11 @@ class _ManageCollectionScreenState
                 value: 'copyJson',
                 child: Row(
                   children: [
-                    Icon(Icons.copy_rounded,
-                        size: 20, color: AppTheme.textMuted),
+                    Icon(
+                      Icons.copy_rounded,
+                      size: 20,
+                      color: AppTheme.textMuted,
+                    ),
                     SizedBox(width: 10),
                     Text('Kopiuj JSON'),
                   ],
@@ -347,8 +362,11 @@ class _ManageCollectionScreenState
                 value: 'editJson',
                 child: Row(
                   children: [
-                    Icon(Icons.code_rounded,
-                        size: 20, color: AppTheme.textMuted),
+                    Icon(
+                      Icons.code_rounded,
+                      size: 20,
+                      color: AppTheme.textMuted,
+                    ),
                     SizedBox(width: 10),
                     Text('Edytuj surowy JSON'),
                   ],
@@ -376,9 +394,7 @@ class _ManageCollectionScreenState
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
               color: AppTheme.surface,
-              border: Border(
-                bottom: BorderSide(color: AppTheme.surfaceBorder),
-              ),
+              border: Border(bottom: BorderSide(color: AppTheme.surfaceBorder)),
             ),
             child: Row(
               children: [
@@ -454,6 +470,58 @@ class _ManageCollectionScreenState
             ),
           ),
 
+          // Stats bar: Total cards, recorded voice stats
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: const BoxDecoration(
+              color: AppTheme.surfaceElevated,
+              border: Border(bottom: BorderSide(color: AppTheme.surfaceBorder)),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.layers_outlined,
+                  size: 15,
+                  color: AppTheme.textMuted,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  'Fiszek: ${allSentences.length}',
+                  style: const TextStyle(
+                    color: AppTheme.textMuted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Container(
+                  width: 1,
+                  height: 12,
+                  color: AppTheme.surfaceBorder,
+                ),
+                const SizedBox(width: 14),
+                Icon(
+                  Icons.mic_rounded,
+                  size: 15,
+                  color: allSentences.any((s) => s.hasCustomTargetAudio || s.hasCustomTranslationAudio)
+                      ? AppTheme.greenMatcha
+                      : AppTheme.textMuted,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  'Nagrania głosowe: ${allSentences.where((s) => s.hasCustomTargetAudio || s.hasCustomTranslationAudio).length}/${allSentences.length}',
+                  style: TextStyle(
+                    color: allSentences.any((s) => s.hasCustomTargetAudio || s.hasCustomTranslationAudio)
+                        ? AppTheme.textLight
+                        : AppTheme.textMuted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // Main list or empty state
           Expanded(
             child: filteredSentences.isEmpty
@@ -496,76 +564,62 @@ class _ManageCollectionScreenState
                     ),
                   )
                 : _searchFilter.isNotEmpty
-                    // When searching, display regular ListView
-                    ? ListView.separated(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 14,
-                          bottom: 84,
-                        ),
-                        itemCount: filteredSentences.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          final sentence = filteredSentences[index];
-                          final originalIndex =
-                              allSentences.indexOf(sentence);
-                          return _SentenceRowTile(
-                            key: ValueKey(sentence.id),
-                            sentence: sentence,
-                            index: originalIndex + 1,
-                            targetLanguageFlag: targetLang?.flagEmoji,
-                            onEdit: () => _openEditSentenceDialog(
-                              collection,
-                              sentence,
-                            ),
-                            onDelete: () => _confirmDeleteSentence(
-                              collection,
-                              sentence,
-                            ),
-                            showDragHandle: false,
-                          );
-                        },
-                      )
-                    // When not searching, allow reordering
-                    : ReorderableListView.builder(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          top: 14,
-                          bottom: 84,
-                        ),
-                        itemCount: allSentences.length,
-                        // ignore: deprecated_member_use
-                        onReorder: (oldIndex, newIndex) {
-                          ref
-                              .read(collectionsControllerProvider.notifier)
-                              .reorderSentences(
-                                collection.id,
-                                oldIndex,
-                                newIndex,
-                              );
-                        },
-                        itemBuilder: (context, index) {
-                          final sentence = allSentences[index];
-                          return _SentenceRowTile(
-                            key: ValueKey(sentence.id),
-                            sentence: sentence,
-                            index: index + 1,
-                            targetLanguageFlag: targetLang?.flagEmoji,
-                            onEdit: () => _openEditSentenceDialog(
-                              collection,
-                              sentence,
-                            ),
-                            onDelete: () => _confirmDeleteSentence(
-                              collection,
-                              sentence,
-                            ),
-                            showDragHandle: true,
-                          );
-                        },
-                      ),
+                // When searching, display regular ListView
+                ? ListView.separated(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: 14,
+                      bottom: 84,
+                    ),
+                    itemCount: filteredSentences.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final sentence = filteredSentences[index];
+                      final originalIndex = allSentences.indexOf(sentence);
+                      return _SentenceRowTile(
+                        key: ValueKey(sentence.id),
+                        sentence: sentence,
+                        index: originalIndex + 1,
+                        targetLanguageFlag: targetLang?.flagEmoji,
+                        onEdit: () =>
+                            _openEditSentenceDialog(collection, sentence),
+                        onDelete: () =>
+                            _confirmDeleteSentence(collection, sentence),
+                        showDragHandle: false,
+                      );
+                    },
+                  )
+                // When not searching, allow reordering
+                : ReorderableListView.builder(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: 14,
+                      bottom: 84,
+                    ),
+                    itemCount: allSentences.length,
+                    // ignore: deprecated_member_use
+                    onReorder: (oldIndex, newIndex) {
+                      ref
+                          .read(collectionsControllerProvider.notifier)
+                          .reorderSentences(collection.id, oldIndex, newIndex);
+                    },
+                    itemBuilder: (context, index) {
+                      final sentence = allSentences[index];
+                      return _SentenceRowTile(
+                        key: ValueKey(sentence.id),
+                        sentence: sentence,
+                        index: index + 1,
+                        targetLanguageFlag: targetLang?.flagEmoji,
+                        onEdit: () =>
+                            _openEditSentenceDialog(collection, sentence),
+                        onDelete: () =>
+                            _confirmDeleteSentence(collection, sentence),
+                        showDragHandle: true,
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -610,8 +664,7 @@ class _SentenceRowTile extends StatelessWidget {
             children: [
               // Index chip
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceElevated,
                   borderRadius: BorderRadius.circular(6),
@@ -701,6 +754,56 @@ class _SentenceRowTile extends StatelessWidget {
                                 fontSize: 11,
                                 fontStyle: FontStyle.italic,
                               ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+
+                    // Custom voice badge if present
+                    if (sentence.hasCustomTargetAudio ||
+                        sentence.hasCustomTranslationAudio) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.greenMatcha
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: AppTheme.greenMatcha
+                                    .withValues(alpha: 0.35),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.mic_rounded,
+                                  size: 11,
+                                  color: AppTheme.greenMatcha,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  sentence.hasCustomTargetAudio &&
+                                          sentence.hasCustomTranslationAudio
+                                      ? 'Nagranie: Obustronne'
+                                      : sentence.hasCustomTargetAudio
+                                          ? 'Nagranie głosu'
+                                          : 'Nagranie tłumaczenia',
+                                  style: const TextStyle(
+                                    color: AppTheme.greenMatcha,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],

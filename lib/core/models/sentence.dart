@@ -9,6 +9,8 @@ class Sentence {
     required this.sourceText,
     this.targetAudioPath,
     this.translationAudioPath,
+    this.targetAudioBase64,
+    this.translationAudioBase64,
     this.comprehensionScore = 0,
     this.speakingScore = 0,
     this.totalReps = 0,
@@ -23,6 +25,8 @@ class Sentence {
   final String sourceText;
   final String? targetAudioPath;
   final String? translationAudioPath;
+  final String? targetAudioBase64;
+  final String? translationAudioBase64;
   final int comprehensionScore;
   final int speakingScore;
   final int totalReps;
@@ -30,6 +34,16 @@ class Sentence {
   final List<String> emojis;
 
   bool get hasNotes => notes != null && notes!.trim().isNotEmpty;
+
+  bool get hasCustomTargetAudio =>
+      (targetAudioBase64 != null && targetAudioBase64!.isNotEmpty) ||
+      (targetAudioPath != null && targetAudioPath!.contains('user_recordings'));
+
+  bool get hasCustomTranslationAudio =>
+      (translationAudioBase64 != null && translationAudioBase64!.isNotEmpty) ||
+      (translationAudioPath != null && translationAudioPath!.contains('user_recordings'));
+
+  bool get hasCustomVoice => hasCustomTargetAudio || hasCustomTranslationAudio;
 
   /// Returns visual cues. If explicit [emojis] were specified in JSON, uses them.
   /// Otherwise auto-detects based on target/source/phonetic text.
@@ -53,6 +67,10 @@ class Sentence {
     bool clearTargetAudioPath = false,
     String? translationAudioPath,
     bool clearTranslationAudioPath = false,
+    String? targetAudioBase64,
+    bool clearTargetAudioBase64 = false,
+    String? translationAudioBase64,
+    bool clearTranslationAudioBase64 = false,
     int? comprehensionScore,
     int? speakingScore,
     int? totalReps,
@@ -75,6 +93,12 @@ class Sentence {
       translationAudioPath: clearTranslationAudioPath
           ? null
           : (translationAudioPath ?? this.translationAudioPath),
+      targetAudioBase64: clearTargetAudioBase64
+          ? null
+          : (targetAudioBase64 ?? this.targetAudioBase64),
+      translationAudioBase64: clearTranslationAudioBase64
+          ? null
+          : (translationAudioBase64 ?? this.translationAudioBase64),
       comprehensionScore: comprehensionScore ?? this.comprehensionScore,
       speakingScore: speakingScore ?? this.speakingScore,
       totalReps: totalReps ?? this.totalReps,
@@ -110,6 +134,15 @@ class Sentence {
             map['sourceAudioPath'] ??
             map['sourceAudio'],
       ),
+      targetAudioBase64: _optionalString(
+        map['targetAudioBase64'] ?? map['target_audio_base64'],
+      ),
+      translationAudioBase64: _optionalString(
+        map['translationAudioBase64'] ??
+            map['translation_audio_base64'] ??
+            map['sourceAudioBase64'] ??
+            map['source_audio_base64'],
+      ),
       comprehensionScore: _score(map['comprehensionScore']),
       speakingScore: _score(map['speakingScore']),
       totalReps: _nonNegativeInt(map['totalReps']),
@@ -139,6 +172,13 @@ class Sentence {
       'speakingScore': speakingScore,
       'totalReps': totalReps,
     };
+    if (targetAudioBase64 != null && targetAudioBase64!.isNotEmpty) {
+      map['targetAudioBase64'] = targetAudioBase64;
+    }
+    if (translationAudioBase64 != null &&
+        translationAudioBase64!.isNotEmpty) {
+      map['translationAudioBase64'] = translationAudioBase64;
+    }
     if (notes != null && notes!.trim().isNotEmpty) {
       map['notes'] = notes!.trim();
     }
@@ -206,6 +246,9 @@ class Sentence {
           phoneticReading == other.phoneticReading &&
           sourceText == other.sourceText &&
           targetAudioPath == other.targetAudioPath &&
+          translationAudioPath == other.translationAudioPath &&
+          targetAudioBase64 == other.targetAudioBase64 &&
+          translationAudioBase64 == other.translationAudioBase64 &&
           comprehensionScore == other.comprehensionScore &&
           speakingScore == other.speakingScore &&
           totalReps == other.totalReps &&
@@ -220,6 +263,9 @@ class Sentence {
         phoneticReading,
         sourceText,
         targetAudioPath,
+        translationAudioPath,
+        targetAudioBase64,
+        translationAudioBase64,
         comprehensionScore,
         speakingScore,
         totalReps,

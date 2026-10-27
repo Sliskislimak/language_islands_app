@@ -31,11 +31,13 @@ class RemoteDatabaseRepository {
     http.Client? client,
     RemoteDatabaseConfig? initialConfig,
     this.configFileProvider,
+    this.documentsDirectoryProvider,
   })  : _client = client ?? http.Client(),
         _cachedConfig = initialConfig;
 
   final http.Client _client;
   final Future<File> Function()? configFileProvider;
+  final Future<Directory> Function()? documentsDirectoryProvider;
   RemoteDatabaseConfig? _cachedConfig;
 
   Future<RemoteDatabaseConfig> loadConfig() async {
@@ -113,7 +115,8 @@ class RemoteDatabaseRepository {
 
     final decodedStr = utf8.decode(response.bodyBytes);
     final dynamic decodedJson = jsonDecode(decodedStr);
-    return parseCollectionsFromJson(decodedJson, fallbackSourceUrl: url);
+    final parsed = parseCollectionsFromJson(decodedJson, fallbackSourceUrl: url);
+    return await materializeBase64Recordings(parsed);
   }
 
   List<SentenceCollection> parseCollectionsFromJson(
@@ -173,6 +176,10 @@ class RemoteDatabaseRepository {
                 sourceText: source,
                 phoneticReading: raw['phoneticReading'] ?? raw['phonetic_reading'],
                 katakana: raw['katakana'],
+                targetAudioBase64: raw['targetAudioBase64'] ?? raw['target_audio_base64'],
+                translationAudioBase64: raw['translationAudioBase64'] ??
+                    raw['translation_audio_base64'] ??
+                    raw['sourceAudioBase64'],
                 notes: raw['notes'] ?? raw['grammar_notes'],
               ),
             );
@@ -282,12 +289,29 @@ class RemoteDatabaseRepository {
 
             if (local != null) {
               // Preserve ratings, repetitions, audio paths and custom user notes if set
+              // Prioritize human voice recording if present on either side
+              final targetAudio = local.hasCustomTargetAudio
+                  ? local.targetAudioPath
+                  : (incomingSentence.targetAudioPath ?? local.targetAudioPath);
+              final targetAudioB64 = local.hasCustomTargetAudio
+                  ? (local.targetAudioBase64 ?? incomingSentence.targetAudioBase64)
+                  : (incomingSentence.targetAudioBase64 ?? local.targetAudioBase64);
+
+              final transAudio = local.hasCustomTranslationAudio
+                  ? local.translationAudioPath
+                  : (incomingSentence.translationAudioPath ?? local.translationAudioPath);
+              final transAudioB64 = local.hasCustomTranslationAudio
+                  ? (local.translationAudioBase64 ?? incomingSentence.translationAudioBase64)
+                  : (incomingSentence.translationAudioBase64 ?? local.translationAudioBase64);
+
               final updated = incomingSentence.copyWith(
                 comprehensionScore: local.comprehensionScore,
                 speakingScore: local.speakingScore,
                 totalReps: local.totalReps,
-                targetAudioPath: local.targetAudioPath,
-                translationAudioPath: local.translationAudioPath,
+                targetAudioPath: targetAudio,
+                targetAudioBase64: targetAudioB64,
+                translationAudioPath: transAudio,
+                translationAudioBase64: transAudioB64,
                 notes: (local.notes != null && local.notes!.trim().isNotEmpty)
                     ? local.notes
                     : incomingSentence.notes,
@@ -352,12 +376,28 @@ class RemoteDatabaseRepository {
                   processedIds.add(incomingSentence.id);
                   final local = existingSentenceMap[incomingSentence.id];
                   if (local != null) {
+                    final targetAudio = local.hasCustomTargetAudio
+                        ? local.targetAudioPath
+                        : (incomingSentence.targetAudioPath ?? local.targetAudioPath);
+                    final targetAudioB64 = local.hasCustomTargetAudio
+                        ? (local.targetAudioBase64 ?? incomingSentence.targetAudioBase64)
+                        : (incomingSentence.targetAudioBase64 ?? local.targetAudioBase64);
+
+                    final transAudio = local.hasCustomTranslationAudio
+                        ? local.translationAudioPath
+                        : (incomingSentence.translationAudioPath ?? local.translationAudioPath);
+                    final transAudioB64 = local.hasCustomTranslationAudio
+                        ? (local.translationAudioBase64 ?? incomingSentence.translationAudioBase64)
+                        : (incomingSentence.translationAudioBase64 ?? local.translationAudioBase64);
+
                     final updated = incomingSentence.copyWith(
                       comprehensionScore: local.comprehensionScore,
                       speakingScore: local.speakingScore,
                       totalReps: local.totalReps,
-                      targetAudioPath: local.targetAudioPath,
-                      translationAudioPath: local.translationAudioPath,
+                      targetAudioPath: targetAudio,
+                      targetAudioBase64: targetAudioB64,
+                      translationAudioPath: transAudio,
+                      translationAudioBase64: transAudioB64,
                       notes: (local.notes != null && local.notes!.trim().isNotEmpty)
                           ? local.notes
                           : incomingSentence.notes,
@@ -454,6 +494,8 @@ class RemoteDatabaseRepository {
     final isGist = configHelper.isGitHubGist;
 
     try {
+      final preparedCollections = await _prepareCollectionsForPush(collections);
+
       if (isGist) {
         final gistId = configHelper.gistId!;
         if (targetKey.isEmpty) {
@@ -476,7 +518,7 @@ class RemoteDatabaseRepository {
         };
 
         final jsonContent = const JsonEncoder.withIndent('  ').convert(
-          collections.map((c) => c.toMap()).toList(),
+          preparedCollections.map((c) => c.toMap()).toList(),
         );
 
         final actualFilename = filename ?? 'sentences.json';
@@ -525,7 +567,7 @@ class RemoteDatabaseRepository {
           headers['Authorization'] = 'Bearer $targetKey';
         }
 
-        final body = jsonEncode(collections.map((c) => c.toMap()).toList());
+        final body = jsonEncode(preparedCollections.map((c) => c.toMap()).toList());
         final response = await _client.put(uri, headers: headers, body: body).timeout(
           const Duration(seconds: 20),
           onTimeout: () => throw HttpException('Przekroczono limit czasu połączenia (20s).'),
@@ -723,13 +765,120 @@ class RemoteDatabaseRepository {
     }
   }
 
+  Future<Directory> _getDocumentsDir() async {
+    final provider = documentsDirectoryProvider;
+    if (provider != null) {
+      return provider();
+    }
+    try {
+      return await getApplicationDocumentsDirectory();
+    } catch (_) {
+      return Directory.systemTemp;
+    }
+  }
+
   Future<File> _configFile() async {
     final provider = configFileProvider;
     if (provider != null) {
       return provider();
     }
-    final docs = await getApplicationDocumentsDirectory();
+    final docs = await _getDocumentsDir();
     return File(p.join(docs.path, 'settings', 'remote_database_config.json'));
+  }
+
+  /// Decodes any Base64 audio strings in incoming collections into local .m4a files in user_recordings/
+  /// and points targetAudioPath / translationAudioPath to the newly saved local files.
+  Future<List<SentenceCollection>> materializeBase64Recordings(
+    List<SentenceCollection> collections,
+  ) async {
+    final docs = await _getDocumentsDir();
+    final recordingsDir = Directory(p.join(docs.path, 'user_recordings'));
+
+    final materialized = <SentenceCollection>[];
+    for (final col in collections) {
+      final sentences = <Sentence>[];
+      for (final s in col.sentences) {
+        var updated = s;
+        // Materialize target audio Base64
+        if (s.targetAudioBase64 != null && s.targetAudioBase64!.trim().isNotEmpty) {
+          try {
+            if (!await recordingsDir.exists()) {
+              await recordingsDir.create(recursive: true);
+            }
+            final safeId = s.id.replaceAll(RegExp(r'[^\w\-]'), '_');
+            final file = File(p.join(recordingsDir.path, 'rec_${safeId}_target.m4a'));
+            final bytes = base64Decode(s.targetAudioBase64!.trim());
+            await file.writeAsBytes(bytes, flush: true);
+            updated = updated.copyWith(targetAudioPath: file.path);
+          } catch (e) {
+            debugPrint('Failed to materialize target audio for sentence ${s.id}: $e');
+          }
+        }
+
+        // Materialize translation audio Base64
+        if (s.translationAudioBase64 != null && s.translationAudioBase64!.trim().isNotEmpty) {
+          try {
+            if (!await recordingsDir.exists()) {
+              await recordingsDir.create(recursive: true);
+            }
+            final safeId = s.id.replaceAll(RegExp(r'[^\w\-]'), '_');
+            final file = File(p.join(recordingsDir.path, 'rec_${safeId}_trans.m4a'));
+            final bytes = base64Decode(s.translationAudioBase64!.trim());
+            await file.writeAsBytes(bytes, flush: true);
+            updated = updated.copyWith(translationAudioPath: file.path);
+          } catch (e) {
+            debugPrint('Failed to materialize translation audio for sentence ${s.id}: $e');
+          }
+        }
+        sentences.add(updated);
+      }
+      materialized.add(col.copyWith(sentences: sentences));
+    }
+    return materialized;
+  }
+
+  /// Encodes local audio recording files to Base64 before pushing to remote/Gist.
+  Future<List<SentenceCollection>> _prepareCollectionsForPush(
+    List<SentenceCollection> collections,
+  ) async {
+    final prepared = <SentenceCollection>[];
+    for (final col in collections) {
+      final sentences = <Sentence>[];
+      for (final s in col.sentences) {
+        var updated = s;
+        // Target audio file -> base64
+        if ((updated.targetAudioBase64 == null || updated.targetAudioBase64!.trim().isEmpty) &&
+            updated.targetAudioPath != null &&
+            updated.targetAudioPath!.isNotEmpty) {
+          try {
+            final f = File(updated.targetAudioPath!);
+            if (await f.exists()) {
+              final bytes = await f.readAsBytes();
+              updated = updated.copyWith(targetAudioBase64: base64Encode(bytes));
+            }
+          } catch (e) {
+            debugPrint('Error encoding targetAudioPath for ${s.id}: $e');
+          }
+        }
+        // Translation audio file -> base64
+        if ((updated.translationAudioBase64 == null || updated.translationAudioBase64!.trim().isEmpty) &&
+            updated.translationAudioPath != null &&
+            updated.translationAudioPath!.isNotEmpty) {
+          try {
+            final f = File(updated.translationAudioPath!);
+            if (await f.exists()) {
+              final bytes = await f.readAsBytes();
+              updated = updated.copyWith(translationAudioBase64: base64Encode(bytes));
+            }
+          } catch (e) {
+            debugPrint('Error encoding translationAudioPath for ${s.id}: $e');
+          }
+        }
+        sentences.add(updated);
+      }
+      prepared.add(col.copyWith(sentences: sentences));
+    }
+    return prepared;
   }
 
   void dispose() {

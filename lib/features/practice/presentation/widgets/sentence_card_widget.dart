@@ -54,6 +54,7 @@ class SentenceCardWidget extends StatefulWidget {
     required this.onRate,
     this.onSaveNotes,
     this.onEdit,
+    this.onRecordVoice,
     this.activeAudioChannel = ActiveAudioChannel.none,
     this.targetLanguageCode,
   });
@@ -68,6 +69,7 @@ class SentenceCardWidget extends StatefulWidget {
   final ValueChanged<int> onRate;
   final ValueChanged<String>? onSaveNotes;
   final VoidCallback? onEdit;
+  final VoidCallback? onRecordVoice;
   final ActiveAudioChannel activeAudioChannel;
   final String? targetLanguageCode;
 
@@ -83,9 +85,9 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
   Timer? _debounceTimer;
 
   int get _displayScore => switch (widget.currentMode) {
-        PracticeMode.shadowing => widget.sentence.comprehensionScore,
-        PracticeMode.recall => widget.sentence.speakingScore,
-      };
+    PracticeMode.shadowing => widget.sentence.comprehensionScore,
+    PracticeMode.recall => widget.sentence.speakingScore,
+  };
 
   @override
   void initState() {
@@ -178,7 +180,9 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: widget.isActive ? AppTheme.sakuraAccent : AppTheme.surfaceBorder,
+          color: widget.isActive
+              ? AppTheme.sakuraAccent
+              : AppTheme.surfaceBorder,
           width: widget.isActive ? 2.0 : 1.0,
         ),
       ),
@@ -186,8 +190,9 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: AnimatedCrossFade(
           duration: const Duration(milliseconds: 220),
-          crossFadeState:
-              _isFlipped ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          crossFadeState: _isFlipped
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
           firstChild: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
@@ -196,6 +201,7 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
                 index: widget.displayIndex,
                 score: _displayScore,
                 hasNotes: widget.sentence.hasNotes,
+                hasCustomVoice: widget.sentence.hasCustomTargetAudio,
                 onPlayAudio: widget.onPlayAudio,
                 onRate: widget.onRate,
                 onCopyAll: () => _copyToClipboard(
@@ -204,6 +210,8 @@ class _SentenceCardWidgetState extends State<SentenceCardWidget> {
                   'Skopiowano całą kartę',
                 ),
                 onEdit: widget.onEdit,
+                onRecordVoice: widget.onRecordVoice,
+                targetLanguageCode: widget.targetLanguageCode,
                 onFlip: _toggleFlip,
               ),
               const SizedBox(height: 12),
@@ -276,24 +284,33 @@ class _ToolbarRow extends StatelessWidget {
     required this.index,
     required this.score,
     required this.hasNotes,
+    this.hasCustomVoice = false,
     required this.onPlayAudio,
     required this.onRate,
     required this.onCopyAll,
     this.onEdit,
+    this.onRecordVoice,
+    this.targetLanguageCode,
     required this.onFlip,
   });
 
   final int index;
   final int score;
   final bool hasNotes;
+  final bool hasCustomVoice;
   final VoidCallback onPlayAudio;
   final ValueChanged<int> onRate;
   final VoidCallback onCopyAll;
   final VoidCallback? onEdit;
+  final VoidCallback? onRecordVoice;
+  final String? targetLanguageCode;
   final VoidCallback onFlip;
 
   @override
   Widget build(BuildContext context) {
+    final partnerVoiceLabel =
+        targetLanguageCode == 'ja' ? 'Koharu' : 'Głos native';
+
     return Row(
       children: [
         Text(
@@ -321,6 +338,42 @@ class _ToolbarRow extends StatelessWidget {
             ),
           ),
         ),
+        if (hasCustomVoice) ...[
+          const SizedBox(width: 4),
+          Tooltip(
+            message: 'Nagranie głosu: $partnerVoiceLabel',
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppTheme.sakuraPrimary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: AppTheme.sakuraPrimary.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.mic_rounded,
+                    size: 11,
+                    color: AppTheme.sakuraPrimary,
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    partnerVoiceLabel,
+                    style: const TextStyle(
+                      color: AppTheme.sakuraPrimary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(width: 4),
         Material(
           color: Colors.transparent,
           child: InkWell(
@@ -338,6 +391,34 @@ class _ToolbarRow extends StatelessWidget {
         ),
         const Spacer(),
         _StarRatingRow(score: score, onRate: onRate),
+        if (onRecordVoice != null) ...[
+          const SizedBox(width: 4),
+          Tooltip(
+            message: hasCustomVoice
+                ? 'Nagraj ponownie lub zmień nagranie'
+                : 'Nagraj własny głos dla tej fiszki',
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                key: const ValueKey('sentence_card_mic_button'),
+                onTap: onRecordVoice,
+                borderRadius: BorderRadius.circular(6),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    hasCustomVoice
+                        ? Icons.mic_rounded
+                        : Icons.mic_none_rounded,
+                    size: 18,
+                    color: hasCustomVoice
+                        ? AppTheme.greenMatcha
+                        : AppTheme.sakuraPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
         if (onEdit != null) ...[
           const SizedBox(width: 6),
           Tooltip(
@@ -438,7 +519,9 @@ class _BackToolbarRow extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(4),
                 child: Icon(
-                  isLocked ? Icons.lock_outline_rounded : Icons.lock_open_rounded,
+                  isLocked
+                      ? Icons.lock_outline_rounded
+                      : Icons.lock_open_rounded,
                   size: 19,
                   color: isLocked ? AppTheme.textMuted : AppTheme.yellowPrompt,
                 ),
@@ -623,8 +706,7 @@ class _BackNotesArea extends StatelessWidget {
         decoration: const InputDecoration(
           border: InputBorder.none,
           contentPadding: EdgeInsets.all(12),
-          hintText:
-              'Wpisz wyjaśnienia gramatyczne, teorię lub notatki dla tego zdania...',
+          hintText: 'Wpisz wyjaśnienia gramatyczne, teorię lub notatki dla tego zdania...',
           hintStyle: TextStyle(
             color: AppTheme.textMuted,
             fontSize: 13,
@@ -660,10 +742,7 @@ class _EmojiVisualCuesBadge extends StatelessWidget {
           children: [
             for (var i = 0; i < emojis.length; i++) ...[
               if (i > 0) const SizedBox(width: 4),
-              Text(
-                emojis[i],
-                style: const TextStyle(fontSize: 20),
-              ),
+              Text(emojis[i], style: const TextStyle(fontSize: 20)),
             ],
           ],
         ),
@@ -693,7 +772,7 @@ class _StarRatingRow extends StatelessWidget {
             onTap: () => onRate(starIndex),
             borderRadius: BorderRadius.circular(6),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 1.5, vertical: 4),
               child: Icon(
                 Icons.star_rounded,
                 size: 28,
@@ -859,15 +938,11 @@ class JapaneseReadingColumn extends StatelessWidget {
           fontWeight: FontWeight.w700,
           height: 1.35,
           shadows: isTargetActive
-              ? const [
-                  Shadow(
-                    color: AppTheme.sakuraAccent,
-                    blurRadius: 12,
-                  ),
-                ]
+              ? const [Shadow(color: AppTheme.sakuraAccent, blurRadius: 12)]
               : null,
         ),
-        copyMessage: 'Skopiowano tekst ${targetLangName == 'Japoński' ? 'japoński' : 'docelowy'}',
+        copyMessage:
+            'Skopiowano tekst ${targetLangName == 'Japoński' ? 'japoński' : 'docelowy'}',
       ),
     ];
 
@@ -902,12 +977,7 @@ class JapaneseReadingColumn extends StatelessWidget {
               fontWeight: FontWeight.w600,
               height: 1.35,
               shadows: isTargetActive
-                  ? const [
-                      Shadow(
-                        color: AppTheme.yellowPrompt,
-                        blurRadius: 10,
-                      ),
-                    ]
+                  ? const [Shadow(color: AppTheme.yellowPrompt, blurRadius: 10)]
                   : null,
             ),
             copyMessage: 'Skopiowano zapis fonetyczny',
@@ -945,7 +1015,11 @@ class JapaneseReadingColumn extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  '$targetLangName (Audio docelowe)',
+                  sentence.hasCustomTargetAudio
+                      ? (targetLangName == 'Japoński'
+                          ? '🎙️ Koharu (Głos lektora)'
+                          : '🎙️ Głos native speakera')
+                      : '$targetLangName (Audio docelowe)',
                   style: const TextStyle(
                     color: AppTheme.sakuraPrimary,
                     fontSize: 11,
@@ -988,16 +1062,18 @@ class JapaneseReadingColumn extends StatelessWidget {
           if (isTranslationActive) ...[
             Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(
+              children: [
+                const Icon(
                   Icons.volume_up_rounded,
                   size: 16,
                   color: AppTheme.yellowPrompt,
                 ),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Text(
-                  'Tłumaczenie (Lektor PL)',
-                  style: TextStyle(
+                  sentence.hasCustomTranslationAudio
+                      ? '🎙️ Jakub (Głos lektora)'
+                      : 'Tłumaczenie (Lektor PL)',
+                  style: const TextStyle(
                     color: AppTheme.yellowPrompt,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -1099,9 +1175,11 @@ class _RevealBar extends StatelessWidget {
                         color: AppTheme.yellowPrompt,
                       ),
                       const SizedBox(width: 6),
-                      const Text(
-                        'Tłumaczenie (Lektor PL): ',
-                        style: TextStyle(
+                      Text(
+                        sentence.hasCustomTranslationAudio
+                            ? '🎙️ Jakub (Głos lektora): '
+                            : 'Tłumaczenie (Lektor PL): ',
+                        style: const TextStyle(
                           color: AppTheme.yellowPrompt,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,

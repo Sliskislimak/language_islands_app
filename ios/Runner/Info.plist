@@ -11,6 +11,8 @@
 		<string>audio</string>
 		<string>voip</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Aplikacja potrzebuje dostępu do mikrofonu, aby nagrywać wymowę zdań dla Twojej kolekcji i dzielić się nią z partnerem.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Language Islands App</string>
 	<key>CFBundleExecutable</key>

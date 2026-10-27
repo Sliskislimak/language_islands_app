@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,9 +131,7 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
             speed: current.playbackSpeed,
           );
           await _logListeningTime(duration);
-          state = state?.copyWith(
-            activeAudioChannel: ActiveAudioChannel.none,
-          );
+          state = state?.copyWith(activeAudioChannel: ActiveAudioChannel.none);
           await Future<void>.delayed(current.pauseBetweenLanguages);
         } else {
           debugPrint(
@@ -194,7 +193,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     await _logSentenceRating(
       sentence: sentence,
       stars: clamped,
-      mode: current.mode == PracticeMode.shadowing ? 'Shadowing' : 'Active Recall',
+      mode: current.mode == PracticeMode.shadowing
+          ? 'Shadowing'
+          : 'Active Recall',
     );
 
     var practiced = Set<String>.from(current.sessionPracticedSentenceIds);
@@ -280,7 +281,8 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final refreshed =
         await repo.getById(current.collection.id) ?? current.collection;
 
-    final nextActive = refreshed.sentences.any((s) => s.id == current.activeSentenceId)
+    final nextActive =
+        refreshed.sentences.any((s) => s.id == current.activeSentenceId)
         ? current.activeSentenceId
         : refreshed.sentences.firstOrNull?.id;
 
@@ -616,8 +618,10 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final sentences = current.visibleSentences;
     if (sentences.isEmpty) return;
 
-    final currentIndex =
-        _sentenceIndexForId(sentences, current.activeSentenceId);
+    final currentIndex = _sentenceIndexForId(
+      sentences,
+      current.activeSentenceId,
+    );
     final nextIndex = (currentIndex + 1) % sentences.length;
     final nextSentence = sentences[nextIndex];
 
@@ -639,8 +643,10 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final sentences = current.visibleSentences;
     if (sentences.isEmpty) return;
 
-    final currentIndex =
-        _sentenceIndexForId(sentences, current.activeSentenceId);
+    final currentIndex = _sentenceIndexForId(
+      sentences,
+      current.activeSentenceId,
+    );
     final prevIndex = (currentIndex - 1 + sentences.length) % sentences.length;
     final prevSentence = sentences[prevIndex];
 
@@ -853,7 +859,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
               targetPath,
               speed: state!.playbackSpeed,
             );
-            state = state!.copyWith(activeAudioChannel: ActiveAudioChannel.none);
+            state = state!.copyWith(
+              activeAudioChannel: ActiveAudioChannel.none,
+            );
             if (!_shouldContinueLoop(token)) return;
 
             await _logListeningTime(duration);
@@ -881,7 +889,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
               speed: state!.playbackSpeed,
             );
             await _logListeningTime(tDuration);
-            state = state!.copyWith(activeAudioChannel: ActiveAudioChannel.none);
+            state = state!.copyWith(
+              activeAudioChannel: ActiveAudioChannel.none,
+            );
             if (!_shouldContinueLoop(token)) return;
 
             // b. Odczekaj pauseBetweenLanguagesMs
@@ -904,7 +914,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
               targetPath,
               speed: state!.playbackSpeed,
             );
-            state = state!.copyWith(activeAudioChannel: ActiveAudioChannel.none);
+            state = state!.copyWith(
+              activeAudioChannel: ActiveAudioChannel.none,
+            );
             if (!_shouldContinueLoop(token)) return;
 
             await _logListeningTime(duration);
@@ -942,7 +954,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
               targetPath,
               speed: state!.playbackSpeed,
             );
-            state = state!.copyWith(activeAudioChannel: ActiveAudioChannel.none);
+            state = state!.copyWith(
+              activeAudioChannel: ActiveAudioChannel.none,
+            );
             if (!_shouldContinueLoop(token)) return;
 
             await _logListeningTime(duration);
@@ -982,10 +996,18 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final current = state;
     if (current == null) return null;
 
+    if (sentence.hasCustomTargetAudio && sentence.targetAudioPath != null) {
+      final file = File(sentence.targetAudioPath!);
+      if (await file.exists()) {
+        return file.path;
+      }
+    }
+
     final tts = ref.read(azureTtsServiceProvider);
     final repo = ref.read(collectionRepositoryProvider);
 
-    final lang = AppLanguage.fromCode(current.targetLanguage) ??
+    final lang =
+        AppLanguage.fromCode(current.targetLanguage) ??
         AppLanguage.fromCode('ja') ??
         AppLanguage.defaultLanguage;
 
@@ -1012,10 +1034,19 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final current = state;
     if (current == null) return null;
 
+    if (sentence.hasCustomTranslationAudio &&
+        sentence.translationAudioPath != null) {
+      final file = File(sentence.translationAudioPath!);
+      if (await file.exists()) {
+        return file.path;
+      }
+    }
+
     final tts = ref.read(azureTtsServiceProvider);
     final repo = ref.read(collectionRepositoryProvider);
 
-    final lang = AppLanguage.fromCode(current.translationLanguage) ??
+    final lang =
+        AppLanguage.fromCode(current.translationLanguage) ??
         AppLanguage.defaultLanguage;
 
     final path = await tts.ensureTranslationAudio(
@@ -1065,7 +1096,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
       sentenceId,
       targetText: sentence.targetText,
       sourceText: sentence.sourceText,
-      mode: current.mode == PracticeMode.shadowing ? 'Shadowing' : 'Active Recall',
+      mode: current.mode == PracticeMode.shadowing
+          ? 'Shadowing'
+          : 'Active Recall',
     );
     ref.invalidate(collectionsControllerProvider);
     ref.invalidate(metricsControllerProvider);
@@ -1097,7 +1130,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     String? mode,
   }) async {
     try {
-      await ref.read(userMetricsRepositoryProvider).logRepetition(
+      await ref
+          .read(userMetricsRepositoryProvider)
+          .logRepetition(
             count: 1,
             sentenceId: sentenceId,
             targetText: targetText,
@@ -1116,7 +1151,9 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     required String mode,
   }) async {
     try {
-      await ref.read(userMetricsRepositoryProvider).logSentenceRating(
+      await ref
+          .read(userMetricsRepositoryProvider)
+          .logSentenceRating(
             sentenceId: sentence.id,
             targetText: sentence.targetText,
             sourceText: sentence.sourceText,
