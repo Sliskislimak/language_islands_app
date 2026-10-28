@@ -29,14 +29,14 @@ void main() {
       expect(await recordingService.hasPermission(), isFalse);
     });
 
-    test('startRecording throws SocketException when hasPermission is false', () async {
+    test('startRecording throws AudioRecordingPermissionException when hasPermission is false', () async {
       recordingService.hasPermissionResult = false;
       expect(
         () => recordingService.startRecording(
           sentenceId: 's_perm',
           isTargetLanguage: true,
         ),
-        throwsA(isA<SocketException>()),
+        throwsA(isA<AudioRecordingPermissionException>()),
       );
     });
 

@@ -420,7 +420,7 @@ class _ToolbarRow extends StatelessWidget {
           ),
         ],
         if (onEdit != null) ...[
-          const SizedBox(width: 6),
+          const SizedBox(width: 4),
           Tooltip(
             message: 'Edytuj treść i tłumaczenie fiszki',
             child: Material(
@@ -441,7 +441,7 @@ class _ToolbarRow extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(width: 8),
+        const SizedBox(width: 4),
         Tooltip(
           message: hasNotes
               ? 'Odwróć fiszkę (zawiera notatki)'
@@ -772,7 +772,7 @@ class _StarRatingRow extends StatelessWidget {
             onTap: () => onRate(starIndex),
             borderRadius: BorderRadius.circular(6),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1.5, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 0.5, vertical: 4),
               child: Icon(
                 Icons.star_rounded,
                 size: 28,

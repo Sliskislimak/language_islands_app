@@ -81,7 +81,7 @@ class RecordAudioRecordingService implements AudioRecordingService {
   }) async {
     final hasPerm = await hasPermission();
     if (!hasPerm) {
-      throw const SocketException('Brak uprawnień do korzystania z mikrofonu.');
+      throw const AudioRecordingPermissionException('Brak uprawnień do korzystania z mikrofonu.');
     }
 
     if (await isRecording()) {
@@ -200,6 +200,14 @@ class FileNotFoundException implements Exception {
 
   @override
   String toString() => 'FileNotFoundException: $message';
+}
+
+class AudioRecordingPermissionException implements Exception {
+  const AudioRecordingPermissionException([this.message = 'Brak uprawnień do korzystania z mikrofonu.']);
+  final String message;
+
+  @override
+  String toString() => 'AudioRecordingPermissionException: $message';
 }
 
 final audioRecordingServiceProvider =

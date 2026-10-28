@@ -484,7 +484,11 @@ class _LandscapeExerciseViewState extends ConsumerState<LandscapeExerciseView> {
                     : null,
               ),
               isHighlighted: isTargetActive,
-              badgeText: isTargetActive ? 'Audio docelowe' : null,
+              badgeText: isTargetActive
+                  ? (sentence.hasCustomTargetAudio
+                      ? '🎙️ Głos docelowy'
+                      : 'Audio docelowe')
+                  : null,
               badgeColor: AppTheme.sakuraPrimary,
               onTap: () => _handleRevealOrPlay(sentence, mode, isRevealed),
             ),

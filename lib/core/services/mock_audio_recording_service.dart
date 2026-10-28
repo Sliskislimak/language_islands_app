@@ -31,8 +31,8 @@ class MockAudioRecordingService implements AudioRecordingService {
     final suffix = isTargetLanguage ? 'target' : 'trans';
     final safeSentenceId = sentenceId.replaceAll(RegExp(r'[^\w\-]'), '_');
     final dir = Directory(p.join(baseDir, 'user_recordings'));
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
+    if (!dir.existsSync()) {
+      dir.createSync(recursive: true);
     }
     return p.join(dir.path, 'rec_${safeSentenceId}_$suffix.m4a');
   }
@@ -43,7 +43,7 @@ class MockAudioRecordingService implements AudioRecordingService {
     required bool isTargetLanguage,
   }) async {
     if (!hasPermissionResult) {
-      throw const SocketException('Permission denied');
+      throw const AudioRecordingPermissionException('Permission denied');
     }
     isRecordingState = true;
     currentSentenceId = sentenceId;
@@ -63,9 +63,10 @@ class MockAudioRecordingService implements AudioRecordingService {
     final path = lastRecordedPath;
     if (path != null) {
       final f = File(path);
-      await f.parent.create(recursive: true);
-      // Write mock audio bytes (fake AAC header or dummy bytes)
-      await f.writeAsBytes(utf8.encode('MOCK_AUDIO_DATA_FOR_$currentSentenceId'));
+      if (!f.parent.existsSync()) {
+        f.parent.createSync(recursive: true);
+      }
+      f.writeAsBytesSync(utf8.encode('MOCK_AUDIO_DATA_FOR_$currentSentenceId'));
       inMemoryAudioFiles[path] = 'MOCK_BASE64_DATA';
     }
     return path;
@@ -76,8 +77,8 @@ class MockAudioRecordingService implements AudioRecordingService {
     isRecordingState = false;
     if (lastRecordedPath != null) {
       final f = File(lastRecordedPath!);
-      if (await f.exists()) {
-        await f.delete();
+      if (f.existsSync()) {
+        f.deleteSync();
       }
     }
     lastRecordedPath = null;
@@ -86,13 +87,13 @@ class MockAudioRecordingService implements AudioRecordingService {
   @override
   Future<String> convertAudioFileToBase64(String filePath) async {
     final file = File(filePath);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       if (inMemoryAudioFiles.containsKey(filePath)) {
         return inMemoryAudioFiles[filePath]!;
       }
       throw FileNotFoundException('Plik nagrania nie istnieje: $filePath');
     }
-    final bytes = await file.readAsBytes();
+    final bytes = file.readAsBytesSync();
     return base64Encode(bytes);
   }
 
@@ -107,9 +108,11 @@ class MockAudioRecordingService implements AudioRecordingService {
       isTargetLanguage: isTargetLanguage,
     );
     final file = File(targetPath);
-    await file.parent.create(recursive: true);
+    if (!file.parent.existsSync()) {
+      file.parent.createSync(recursive: true);
+    }
     final bytes = base64Decode(base64Data.trim());
-    await file.writeAsBytes(bytes, flush: true);
+    file.writeAsBytesSync(bytes, flush: true);
     inMemoryAudioFiles[targetPath] = base64Data;
     return targetPath;
   }
@@ -124,8 +127,8 @@ class MockAudioRecordingService implements AudioRecordingService {
       isTargetLanguage: isTargetLanguage,
     );
     final file = File(targetPath);
-    if (await file.exists()) {
-      await file.delete();
+    if (file.existsSync()) {
+      file.deleteSync();
     }
     inMemoryAudioFiles.remove(targetPath);
   }

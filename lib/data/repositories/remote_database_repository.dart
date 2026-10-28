@@ -838,6 +838,9 @@ class RemoteDatabaseRepository {
   }
 
   /// Encodes local audio recording files to Base64 before pushing to remote/Gist.
+  /// Note: Only user-recorded audio (in user_recordings/ or marked with custom audio)
+  /// is serialized to Base64. Synthesized Edge TTS audio files (in audio_cache/)
+  /// are strictly excluded to avoid bloating Gist and misclassifying TTS as human voices.
   Future<List<SentenceCollection>> _prepareCollectionsForPush(
     List<SentenceCollection> collections,
   ) async {
@@ -846,8 +849,13 @@ class RemoteDatabaseRepository {
       final sentences = <Sentence>[];
       for (final s in col.sentences) {
         var updated = s;
-        // Target audio file -> base64
-        if ((updated.targetAudioBase64 == null || updated.targetAudioBase64!.trim().isEmpty) &&
+        // Target audio file -> base64 (ONLY for user recordings, not TTS cache)
+        final isTargetUserRec = updated.hasCustomTargetAudio ||
+            (updated.targetAudioPath != null &&
+                (updated.targetAudioPath!.contains('user_recordings') ||
+                    p.basename(updated.targetAudioPath!).startsWith('rec_')));
+        if (isTargetUserRec &&
+            (updated.targetAudioBase64 == null || updated.targetAudioBase64!.trim().isEmpty) &&
             updated.targetAudioPath != null &&
             updated.targetAudioPath!.isNotEmpty) {
           try {
@@ -860,8 +868,13 @@ class RemoteDatabaseRepository {
             debugPrint('Error encoding targetAudioPath for ${s.id}: $e');
           }
         }
-        // Translation audio file -> base64
-        if ((updated.translationAudioBase64 == null || updated.translationAudioBase64!.trim().isEmpty) &&
+        // Translation audio file -> base64 (ONLY for user recordings, not TTS cache)
+        final isTransUserRec = updated.hasCustomTranslationAudio ||
+            (updated.translationAudioPath != null &&
+                (updated.translationAudioPath!.contains('user_recordings') ||
+                    p.basename(updated.translationAudioPath!).startsWith('rec_')));
+        if (isTransUserRec &&
+            (updated.translationAudioBase64 == null || updated.translationAudioBase64!.trim().isEmpty) &&
             updated.translationAudioPath != null &&
             updated.translationAudioPath!.isNotEmpty) {
           try {

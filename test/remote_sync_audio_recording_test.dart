@@ -273,5 +273,68 @@ void main() {
       expect(merged.speakingScore, 5);
       expect(merged.totalReps, 10);
     });
+
+    test('pushCollectionsToRemote strictly excludes Edge TTS cache files from Base64 encoding', () async {
+      final ttsCacheDir = Directory(p.join(tempDir.path, 'audio_cache'));
+      await ttsCacheDir.create(recursive: true);
+
+      final ttsAudioFile = File(p.join(ttsCacheDir.path, 'jp_tts_dummy.mp3'));
+      await ttsAudioFile.writeAsBytes(utf8.encode('EDGE_TTS_SYNTHESIZED_AUDIO_DATA'));
+
+      final col = SentenceCollection(
+        id: 'col_tts_test',
+        title: 'TTS Collection',
+        cefrLevel: 'A1',
+        tags: const ['test'],
+        isCustomIsland: true,
+        sentences: [
+          Sentence(
+            id: 's_tts_1',
+            targetText: 'おはよう',
+            sourceText: 'Dzień dobry',
+            targetAudioPath: ttsAudioFile.path, // points to audio_cache!
+          ),
+        ],
+      );
+
+      String? capturedRequestBody;
+      final mockClient = MockClient((request) async {
+        if (request.method == 'PATCH') {
+          capturedRequestBody = request.body;
+          return http.Response(
+            jsonEncode({
+              'id': '1234567890abcdef1234567890abcdef',
+              'files': {
+                'sentences.json': {'content': '{}'},
+              },
+            }),
+            200,
+          );
+        }
+        return http.Response('Not found', 404);
+      });
+
+      final repo = RemoteDatabaseRepository(
+        client: mockClient,
+        documentsDirectoryProvider: () async => tempDir,
+        configFileProvider: () async => configFile,
+        initialConfig: const RemoteDatabaseConfig(
+          url: 'https://gist.github.com/user/1234567890abcdef1234567890abcdef',
+          apiKey: 'ghp_mock_token_123',
+        ),
+      );
+
+      final result = await repo.pushCollectionsToRemote(collections: [col]);
+      expect(result.success, isTrue);
+
+      final decodedGistBody = jsonDecode(capturedRequestBody!) as Map<String, dynamic>;
+      final files = decodedGistBody['files'] as Map<String, dynamic>;
+      final sentencesJsonStr = files['sentences.json']['content'] as String;
+      final list = jsonDecode(sentencesJsonStr) as List<dynamic>;
+
+      final sMap = list.first['sentences'][0] as Map<String, dynamic>;
+      // targetAudioBase64 MUST BE NULL because it's only a TTS cache, NOT a human recording!
+      expect(sMap['targetAudioBase64'], isNull);
+    });
   });
 }

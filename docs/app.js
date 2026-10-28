@@ -184,7 +184,7 @@ const translations = {
     resVpnTitle: "LocalDevVPN (iOS)",
     resVpnDesc: "App Store公式のSideStore用VPNアプリ（設定ファイル不要）",
     resAppTitle: "Language Islands IPA",
-    resAppDesc: "最新のRunner.ipaアプリ本体",
+    resAppDesc: "最新のRunner.ipaアプリ本体 (v1.2.0 - 録音機能付き)",
     resIloaderWin: "iloader (Windows)",
     resIloaderWinDesc: "iTunes/iCloud不要の最新インストーラー (.msi)",
     resIloaderMac: "iloader (macOS)",
@@ -237,7 +237,7 @@ const translations = {
     relBetaDate: "2026年10月10日 • アーカイブ",
     relBetaDesc: "Edge-TTS音声エンジンと基本カードUIの初期検証ビルド",
     relBetaBtn: "v1.0.0-beta IPA をダウンロード ↓",
-    relUpcomingTitle: "🚧 次期バージョン予定: v1.1.0",
+    relUpcomingTitle: "🚧 次期バージョン予定: v1.3.0",
     relUpcomingDesc: "オフライン音声キャッシュ、学習ストリーク（連続日数）ウィジェットを準備中です。",
 
     // Footer
@@ -415,7 +415,7 @@ const translations = {
     resVpnTitle: "LocalDevVPN (iOS)",
     resVpnDesc: "Official App Store VPN for SideStore (no config file needed)",
     resAppTitle: "Language Islands IPA",
-    resAppDesc: "Latest Runner.ipa application file",
+    resAppDesc: "Latest Runner.ipa application file (v1.2.0 with voice recording)",
     resIloaderWin: "iloader (Windows)",
     resIloaderWinDesc: "Modern installer for Windows (.msi) - No iTunes/iCloud",
     resIloaderMac: "iloader (macOS)",
@@ -468,7 +468,7 @@ const translations = {
     relBetaDate: "Oct 10, 2026 • Archived",
     relBetaDesc: "Initial verification prototype for Edge-TTS and flashcard UI",
     relBetaBtn: "Download v1.0.0-beta IPA ↓",
-    relUpcomingTitle: "🚧 Upcoming: v1.1.0",
+    relUpcomingTitle: "🚧 Upcoming: v1.3.0",
     relUpcomingDesc: "Offline voice caching and daily study streak tracker currently in development.",
 
     footerNote: "Custom language exchange app for Jakub & Koharu",
@@ -645,7 +645,7 @@ const translations = {
     resVpnTitle: "LocalDevVPN (iOS)",
     resVpnDesc: "Oficjalny klient VPN z App Store (bez plików konfiguracyjnych)",
     resAppTitle: "Language Islands IPA",
-    resAppDesc: "Plik instalacyjny Runner.ipa",
+    resAppDesc: "Plik instalacyjny Runner.ipa (v1.2.0 z nagrywaniem głosu)",
     resIloaderWin: "iloader (Windows)",
     resIloaderWinDesc: "Nowoczesny instalator (.msi) – brak potrzeby iTunes/iCloud",
     resIloaderMac: "iloader (macOS)",
@@ -698,7 +698,7 @@ const translations = {
     relBetaDate: "10 października 2026 • Zarchiwizowana",
     relBetaDesc: "Wczesny prototyp silnika Edge-TTS i interfejsu fiszek",
     relBetaBtn: "Pobierz v1.0.0-beta IPA ↓",
-    relUpcomingTitle: "🚧 Nadchodzące wydanie: v1.1.0",
+    relUpcomingTitle: "🚧 Nadchodzące wydanie: v1.3.0",
     relUpcomingDesc: "Prace nad buforowaniem dźwięku offline i licznikiem codziennej nauki (streak).",
 
     footerNote: "Aplikacja do wspólnej nauki języków dla Jakuba i Koharu",

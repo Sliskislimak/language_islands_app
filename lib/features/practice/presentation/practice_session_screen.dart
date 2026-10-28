@@ -550,6 +550,32 @@ class _SessionContentColumn extends ConsumerWidget {
                             );
                           }
                         },
+                        onRecordVoice: () async {
+                          final currentSession =
+                              ref.read(practiceSessionProvider);
+                          if (currentSession == null) return;
+                          final updated = await showSentenceEditDialog(
+                            context,
+                            collectionId: currentSession.collection.id,
+                            sentence: sentence,
+                            targetLanguageCode: currentSession.targetLanguage,
+                            onSave: (saved) async {
+                              await ref
+                                  .read(practiceSessionProvider.notifier)
+                                  .updateSentence(saved);
+                            },
+                          );
+                          if (updated != null && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Zaktualizowano fiszkę: "${updated.targetText}"',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
                         activeAudioChannel: session?.activeAudioChannel ??
                             ActiveAudioChannel.none,
                         targetLanguageCode: session?.targetLanguage,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:language_islands_app/core/models/app_language.dart';
@@ -207,7 +208,6 @@ class _SentenceEditDialogState extends State<SentenceEditDialog> {
   }
 
   Future<void> _playTargetRecording() async {
-    if (_targetAudioPath == null) return;
     if (_isPlayingTarget) {
       _playbackService.stop();
       setState(() => _isPlayingTarget = false);
@@ -216,7 +216,23 @@ class _SentenceEditDialogState extends State<SentenceEditDialog> {
 
     setState(() => _isPlayingTarget = true);
     try {
-      await _playbackService.playFileUntilComplete(_targetAudioPath!);
+      var path = _targetAudioPath;
+      if ((path == null || !await File(path).exists()) &&
+          _targetAudioBase64 != null &&
+          _targetAudioBase64!.trim().isNotEmpty) {
+        path = await _recordingService.saveBase64ToAudioFile(
+          base64Data: _targetAudioBase64!,
+          sentenceId: _sentenceId,
+          isTargetLanguage: true,
+        );
+        _targetAudioPath = path;
+      }
+
+      if (path != null && await File(path).exists()) {
+        await _playbackService.playFileUntilComplete(path);
+      } else {
+        setState(() => _errorMessage = 'Brak pliku nagrania do odsłuchania.');
+      }
     } catch (e) {
       setState(() => _errorMessage = 'Błąd odtwarzania nagrania: $e');
     } finally {
@@ -296,7 +312,6 @@ class _SentenceEditDialogState extends State<SentenceEditDialog> {
   }
 
   Future<void> _playTranslationRecording() async {
-    if (_translationAudioPath == null) return;
     if (_isPlayingTranslation) {
       _playbackService.stop();
       setState(() => _isPlayingTranslation = false);
@@ -305,7 +320,23 @@ class _SentenceEditDialogState extends State<SentenceEditDialog> {
 
     setState(() => _isPlayingTranslation = true);
     try {
-      await _playbackService.playFileUntilComplete(_translationAudioPath!);
+      var path = _translationAudioPath;
+      if ((path == null || !await File(path).exists()) &&
+          _translationAudioBase64 != null &&
+          _translationAudioBase64!.trim().isNotEmpty) {
+        path = await _recordingService.saveBase64ToAudioFile(
+          base64Data: _translationAudioBase64!,
+          sentenceId: _sentenceId,
+          isTargetLanguage: false,
+        );
+        _translationAudioPath = path;
+      }
+
+      if (path != null && await File(path).exists()) {
+        await _playbackService.playFileUntilComplete(path);
+      } else {
+        setState(() => _errorMessage = 'Brak pliku nagrania do odsłuchania.');
+      }
     } catch (e) {
       setState(() => _errorMessage = 'Błąd odtwarzania nagrania: $e');
     } finally {
@@ -472,7 +503,11 @@ class _SentenceEditDialogState extends State<SentenceEditDialog> {
           ),
           const SizedBox(height: 8),
           if (isRecording) ...[
-            Row(
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 Container(
                   padding:
@@ -501,30 +536,38 @@ class _SentenceEditDialogState extends State<SentenceEditDialog> {
                     ],
                   ),
                 ),
-                const Spacer(),
-                TextButton(
-                  onPressed: onCancelRecord,
-                  child: const Text(
-                    'Anuluj',
-                    style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                FilledButton.icon(
-                  onPressed: onStopRecord,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
-                  ),
-                  icon: const Icon(Icons.stop_rounded, size: 16),
-                  label: const Text('Zakończ'),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton(
+                      onPressed: onCancelRecord,
+                      child: const Text(
+                        'Anuluj',
+                        style:
+                            TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    FilledButton.icon(
+                      onPressed: onStopRecord,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                      ),
+                      icon: const Icon(Icons.stop_rounded, size: 16),
+                      label: const Text('Zakończ'),
+                    ),
+                  ],
                 ),
               ],
             ),
           ] else if (hasAudio) ...[
-            Row(
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 FilledButton.tonalIcon(
                   onPressed: onPlay,
@@ -541,7 +584,6 @@ class _SentenceEditDialogState extends State<SentenceEditDialog> {
                   ),
                   label: Text(isPlaying ? 'Zatrzymaj' : 'Odsłuchaj'),
                 ),
-                const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: onStartRecord,
                   style: OutlinedButton.styleFrom(
@@ -554,7 +596,6 @@ class _SentenceEditDialogState extends State<SentenceEditDialog> {
                   label: const Text('Nagraj ponownie',
                       style: TextStyle(fontSize: 12)),
                 ),
-                const Spacer(),
                 IconButton(
                   tooltip: 'Usuń nagranie',
                   icon: const Icon(

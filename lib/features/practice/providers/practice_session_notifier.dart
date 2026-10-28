@@ -9,6 +9,7 @@ import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/providers/app_providers.dart';
 import 'package:language_islands_app/core/services/audio_playback_service.dart';
+import 'package:language_islands_app/core/services/audio_recording_service.dart';
 import 'package:language_islands_app/core/services/audio_session_bootstrap.dart';
 import 'package:language_islands_app/core/services/pip_service.dart';
 import 'package:language_islands_app/features/collections/providers/collections_controller.dart';
@@ -996,10 +997,37 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final current = state;
     if (current == null) return null;
 
-    if (sentence.hasCustomTargetAudio && sentence.targetAudioPath != null) {
-      final file = File(sentence.targetAudioPath!);
-      if (await file.exists()) {
-        return file.path;
+    if (sentence.hasCustomTargetAudio) {
+      if (sentence.targetAudioPath != null) {
+        final file = File(sentence.targetAudioPath!);
+        if (await file.exists()) {
+          return file.path;
+        }
+      }
+      // If path was missing or points to a non-existent file, materialize from base64
+      if (sentence.targetAudioBase64 != null &&
+          sentence.targetAudioBase64!.trim().isNotEmpty) {
+        try {
+          final recordingService = ref.read(audioRecordingServiceProvider);
+          final materializedPath = await recordingService.saveBase64ToAudioFile(
+            base64Data: sentence.targetAudioBase64!,
+            sentenceId: sentence.id,
+            isTargetLanguage: true,
+          );
+          if (await File(materializedPath).exists()) {
+            final repo = ref.read(collectionRepositoryProvider);
+            final withPath = sentence.copyWith(targetAudioPath: materializedPath);
+            await repo.updateSentence(current.collection.id, withPath);
+
+            final refreshed =
+                await repo.getById(current.collection.id) ?? current.collection;
+            state = state?.copyWith(collection: refreshed);
+            ref.invalidate(collectionsControllerProvider);
+            return materializedPath;
+          }
+        } catch (e) {
+          debugPrint('Błąd materializacji target audio z base64: $e');
+        }
       }
     }
 
@@ -1034,11 +1062,38 @@ class PracticeSessionNotifier extends Notifier<PracticeSessionState?> {
     final current = state;
     if (current == null) return null;
 
-    if (sentence.hasCustomTranslationAudio &&
-        sentence.translationAudioPath != null) {
-      final file = File(sentence.translationAudioPath!);
-      if (await file.exists()) {
-        return file.path;
+    if (sentence.hasCustomTranslationAudio) {
+      if (sentence.translationAudioPath != null) {
+        final file = File(sentence.translationAudioPath!);
+        if (await file.exists()) {
+          return file.path;
+        }
+      }
+      // If path was missing or points to a non-existent file, materialize from base64
+      if (sentence.translationAudioBase64 != null &&
+          sentence.translationAudioBase64!.trim().isNotEmpty) {
+        try {
+          final recordingService = ref.read(audioRecordingServiceProvider);
+          final materializedPath = await recordingService.saveBase64ToAudioFile(
+            base64Data: sentence.translationAudioBase64!,
+            sentenceId: sentence.id,
+            isTargetLanguage: false,
+          );
+          if (await File(materializedPath).exists()) {
+            final repo = ref.read(collectionRepositoryProvider);
+            final withPath =
+                sentence.copyWith(translationAudioPath: materializedPath);
+            await repo.updateSentence(current.collection.id, withPath);
+
+            final refreshed =
+                await repo.getById(current.collection.id) ?? current.collection;
+            state = state?.copyWith(collection: refreshed);
+            ref.invalidate(collectionsControllerProvider);
+            return materializedPath;
+          }
+        } catch (e) {
+          debugPrint('Błąd materializacji translation audio z base64: $e');
+        }
       }
     }
 

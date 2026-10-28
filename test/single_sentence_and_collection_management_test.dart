@@ -5,6 +5,7 @@ import 'package:language_islands_app/core/models/practice_mode.dart';
 import 'package:language_islands_app/core/models/sentence.dart';
 import 'package:language_islands_app/core/models/sentence_collection.dart';
 import 'package:language_islands_app/core/providers/app_providers.dart';
+import 'package:language_islands_app/core/services/mock_audio_recording_service.dart';
 import 'package:language_islands_app/data/repositories/collection_repository.dart';
 import 'package:language_islands_app/features/collections/presentation/manage_collection_screen.dart';
 import 'package:language_islands_app/features/collections/presentation/sentence_edit_dialog.dart';
@@ -307,7 +308,7 @@ void main() {
     });
   });
 
-  group('SentenceCardWidget Edit Button Test', () {
+  group('SentenceCardWidget Edit and Mic Button Tests', () {
     testWidgets('SentenceCardWidget displays edit button and triggers callback',
         (tester) async {
       bool editTapped = false;
@@ -346,6 +347,115 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(editTapped, isTrue);
+    });
+
+    testWidgets('SentenceCardWidget displays mic button and triggers onRecordVoice',
+        (tester) async {
+      bool recordTapped = false;
+      const sentence = Sentence(
+        id: 's_card_mic',
+        targetText: '日本語の練習',
+        sourceText: 'Ćwiczenie japońskiego',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SentenceCardWidget(
+              sentence: sentence,
+              displayIndex: 1,
+              isActive: true,
+              isRevealed: true,
+              currentMode: PracticeMode.shadowing,
+              onPlayAudio: () {},
+              onToggleReveal: () {},
+              onRate: (_) {},
+              onRecordVoice: () {
+                recordTapped = true;
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final micButton =
+          find.byKey(const ValueKey('sentence_card_mic_button'));
+      expect(micButton, findsOneWidget);
+
+      await tester.tap(micButton);
+      await tester.pumpAndSettle();
+
+      expect(recordTapped, isTrue);
+    });
+
+    testWidgets('SentenceEditDialog records voice and saves Base64 data',
+        (tester) async {
+      Sentence? savedResult;
+      final mockRecordingService = MockAudioRecordingService();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () {
+                  showSentenceEditDialog(
+                    context,
+                    collectionId: 'col_rec_test',
+                    targetLanguageCode: 'ja',
+                    recordingService: mockRecordingService,
+                    onSave: (s) async {
+                      savedResult = s;
+                    },
+                  );
+                },
+                child: const Text('Open Dialog'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Dialog'));
+      await tester.pumpAndSettle();
+
+      final textFields = find.byType(TextFormField);
+      await tester.enterText(textFields.at(0), '桜が咲いた');
+      await tester.enterText(textFields.at(1), 'Kwitną wiśnie');
+      await tester.pumpAndSettle();
+
+      // Find and tap the target record button
+      final recordButton = find.text('🎙️ Nagraj japońską wymowę (Koharu)');
+      expect(recordButton, findsOneWidget);
+      await tester.ensureVisible(recordButton);
+      await tester.tap(recordButton);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // Now it's recording: "Zakończ" should be visible
+      expect(find.text('Zakończ'), findsOneWidget);
+      expect(mockRecordingService.isRecordingState, isTrue);
+
+      // Tap "Zakończ"
+      await tester.tap(find.text('Zakończ'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(mockRecordingService.isRecordingState, isFalse);
+      expect(find.text('Nagrano ✓'), findsOneWidget);
+      expect(find.text('Odsłuchaj'), findsOneWidget);
+      expect(find.text('Nagraj ponownie'), findsOneWidget);
+
+      // Submit
+      await tester.tap(find.text('Dodaj fiszkę'));
+      await tester.pumpAndSettle();
+
+      expect(savedResult, isNotNull);
+      expect(savedResult!.targetText, '桜が咲いた');
+      expect(savedResult!.hasCustomTargetAudio, isTrue);
+      expect(savedResult!.targetAudioBase64, isNotNull);
+      expect(savedResult!.targetAudioPath, contains('rec_'));
     });
   });
 }
