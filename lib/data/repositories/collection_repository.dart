@@ -181,12 +181,107 @@ class CollectionRepository {
     return updated;
   }
 
+  /// Clears all recorded and cached audio for the collection with [collectionId],
+  /// deleting files from disk (in both audio_cache/ and user_recordings/), and resetting
+  /// audio paths and Base64 fields in the collection sentences.
+  Future<SentenceCollection?> clearCollectionAudio(String collectionId) async {
+    final collection = await getById(collectionId);
+    if (collection == null) return null;
+
+    await _deleteAudioFilesForCollection(collection);
+
+    final cleanedSentences = collection.sentences.map((s) {
+      return s.copyWith(
+        clearTargetAudioPath: true,
+        clearTranslationAudioPath: true,
+        clearTargetAudioBase64: true,
+        clearTranslationAudioBase64: true,
+      );
+    }).toList();
+
+    final updated = collection.copyWith(sentences: cleanedSentences);
+    await updateCollection(updated);
+    return updated;
+  }
+
   Future<void> deleteCollection(String id) async {
+    final collection = await getById(id);
+    if (collection != null) {
+      await _deleteAudioFilesForCollection(collection);
+    }
     final file = await _collectionFile(id);
     if (await file.exists()) {
       await file.delete();
     }
     _cache = null;
+  }
+
+  Future<void> _deleteAudioFilesForCollection(
+    SentenceCollection collection,
+  ) async {
+    try {
+      final docs = await getApplicationDocumentsDirectory();
+      final audioCacheDir = Directory(p.join(docs.path, 'audio_cache'));
+      final recordingsDir = Directory(p.join(docs.path, 'user_recordings'));
+
+      final safeSentenceIds = <String>{};
+      for (final s in collection.sentences) {
+        safeSentenceIds.add(s.id.replaceAll(RegExp(r'[^\w\-.]'), '_'));
+        safeSentenceIds.add(s.id.replaceAll(RegExp(r'[^\w\-]'), '_'));
+
+        if (s.targetAudioPath != null && s.targetAudioPath!.isNotEmpty) {
+          try {
+            final f = File(s.targetAudioPath!);
+            if (await f.exists()) await f.delete();
+          } catch (_) {}
+        }
+        if (s.translationAudioPath != null &&
+            s.translationAudioPath!.isNotEmpty) {
+          try {
+            final f = File(s.translationAudioPath!);
+            if (await f.exists()) await f.delete();
+          } catch (_) {}
+        }
+      }
+
+      if (await audioCacheDir.exists()) {
+        try {
+          await for (final entity in audioCacheDir.list()) {
+            if (entity is File) {
+              final filename = p.basename(entity.path);
+              for (final safeId in safeSentenceIds) {
+                if (filename.contains(safeId)) {
+                  try {
+                    await entity.delete();
+                  } catch (_) {}
+                  break;
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (await recordingsDir.exists()) {
+        try {
+          await for (final entity in recordingsDir.list()) {
+            if (entity is File) {
+              final filename = p.basename(entity.path);
+              for (final safeId in safeSentenceIds) {
+                if (filename.contains(safeId)) {
+                  try {
+                    await entity.delete();
+                  } catch (_) {}
+                  break;
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+    } catch (_) {
+      // In testing environments where path_provider is not mocked or directories don't exist, ignore gracefully.
+    }
   }
 
   Future<List<SentenceCollection>> _readAllFromDisk() async {

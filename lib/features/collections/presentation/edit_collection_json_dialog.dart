@@ -80,6 +80,298 @@ class _EditCollectionJsonDialogState
     }
   }
 
+  void _stripAudioFromJsonController() {
+    final raw = _jsonController.text.trim();
+    if (raw.isEmpty) return;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map) {
+        final map = Map<String, dynamic>.from(decoded);
+        if (map['sentences'] is List) {
+          final list = map['sentences'] as List;
+          final cleanedList = <Map<String, dynamic>>[];
+          for (final item in list) {
+            if (item is Map) {
+              final sMap = Map<String, dynamic>.from(item);
+              sMap.remove('targetAudioPath');
+              sMap.remove('translationAudioPath');
+              sMap.remove('sourceAudioPath');
+              sMap.remove('targetAudio');
+              sMap.remove('translationAudio');
+              sMap.remove('sourceAudio');
+              sMap.remove('targetAudioBase64');
+              sMap.remove('target_audio_base64');
+              sMap.remove('translationAudioBase64');
+              sMap.remove('translation_audio_base64');
+              sMap.remove('sourceAudioBase64');
+              sMap.remove('source_audio_base64');
+              cleanedList.add(sMap);
+            }
+          }
+          map['sentences'] = cleanedList;
+        }
+        setState(() {
+          _jsonController.text =
+              const JsonEncoder.withIndent('  ').convert(map);
+          _errorMessage = null;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _showDeleteDialog() async {
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.redAccent,
+              size: 24,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Czy chcesz usunąć?',
+              style: TextStyle(
+                color: AppTheme.textLight,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 480,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Wyspa: ${widget.collection.title}',
+                style: const TextStyle(
+                  color: AppTheme.sakuraPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Wybierz co chcesz usunąć:',
+                style: TextStyle(color: AppTheme.textLight, fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => Navigator.of(ctx).pop('delete_list'),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.redAccent.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.delete_forever_rounded,
+                          color: Colors.redAccent,
+                          size: 28,
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Usuń całą listę',
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              SizedBox(height: 3),
+                              Text(
+                                'Całkowicie usuwa tę listę fiszek i wszystkie powiązane nagrania z aplikacji.',
+                                style: TextStyle(
+                                  color: AppTheme.textMuted,
+                                  fontSize: 11.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => Navigator.of(ctx).pop('delete_audio'),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.yellowPrompt.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppTheme.yellowPrompt.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.music_off_rounded,
+                          color: AppTheme.yellowPrompt,
+                          size: 28,
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Usuń audio zapisane w pamięci',
+                                style: TextStyle(
+                                  color: AppTheme.yellowPrompt,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              SizedBox(height: 3),
+                              Text(
+                                'Kasuje nagrania i pliki cache z pamięci oraz usuwa ścieżki audio w JSON (naprawia problem przesuniętych nagrań).',
+                                style: TextStyle(
+                                  color: AppTheme.textMuted,
+                                  fontSize: 11.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: const Text(
+              'Anuluj',
+              style: TextStyle(color: AppTheme.textMuted),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (choice == null || !mounted) return;
+
+    if (choice == 'delete_list') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (c) => AlertDialog(
+          backgroundColor: AppTheme.surface,
+          title: const Text(
+            'Potwierdź usunięcie listy',
+            style: TextStyle(color: AppTheme.textLight, fontSize: 16),
+          ),
+          content: Text(
+            'Czy na pewno chcesz bezpowrotnie usunąć listę "${widget.collection.title}" wraz ze wszystkimi fiszkami i nagraniami audio?\n\nTej operacji nie można cofnąć.',
+            style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(c).pop(false),
+              child: const Text('Anuluj', style: TextStyle(color: AppTheme.textMuted)),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.of(c).pop(true),
+              child: const Text('Usuń bezpowrotnie'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true || !mounted) return;
+
+      setState(() => _isSaving = true);
+      try {
+        await ref
+            .read(collectionsControllerProvider.notifier)
+            .deleteCollection(widget.collection.id);
+        if (mounted) {
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Pomyślnie usunięto listę "${widget.collection.title}".',
+              ),
+              backgroundColor: AppTheme.surfaceElevated,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isSaving = false;
+            _errorMessage = 'Błąd podczas usuwania listy: $e';
+          });
+        }
+      }
+    } else if (choice == 'delete_audio') {
+      setState(() => _isSaving = true);
+      try {
+        await ref
+            .read(collectionsControllerProvider.notifier)
+            .clearCollectionAudio(widget.collection.id);
+        _stripAudioFromJsonController();
+
+        if (mounted) {
+          setState(() {
+            _isSaving = false;
+            _errorMessage = null;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Pomyślnie usunięto pliki audio z pamięci dla wyspy "${widget.collection.title}". Ścieżki audio zostały wyczyszczone.',
+              ),
+              backgroundColor: AppTheme.surfaceElevated,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isSaving = false;
+            _errorMessage = 'Błąd podczas usuwania audio: $e';
+          });
+        }
+      }
+    }
+  }
+
   void _showToast(String message) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -245,6 +537,25 @@ class _EditCollectionJsonDialogState
                     style: TextStyle(fontSize: 12),
                   ),
                 ),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                    side: BorderSide(
+                      color: Colors.redAccent.withValues(alpha: 0.5),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: _isSaving ? null : _showDeleteDialog,
+                  icon: const Icon(Icons.delete_outline_rounded, size: 15),
+                  label: const Text(
+                    'Usuń...',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 10),
@@ -320,8 +631,22 @@ class _EditCollectionJsonDialogState
         ),
       ),
       actions: [
+        TextButton.icon(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.redAccent,
+          ),
+          onPressed: _isSaving ? null : _showDeleteDialog,
+          icon: const Icon(Icons.delete_outline_rounded, size: 18),
+          label: const Text(
+            'Usuń...',
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
         TextButton(
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+          onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
           child: const Text(
             'Anuluj',
             style: TextStyle(color: AppTheme.textMuted),

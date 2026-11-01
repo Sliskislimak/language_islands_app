@@ -231,7 +231,7 @@ class CollectionsScreen extends ConsumerWidget {
     WidgetRef ref,
     SentenceCollection collection,
   ) async {
-    await showDialog<void>(
+    await showDialog<bool>(
       context: context,
       builder: (context) => EditCollectionJsonDialog(collection: collection),
     );
@@ -567,6 +567,8 @@ class _CollectionTile extends ConsumerWidget {
                               onEditJson();
                             case _CollectionTileAction.copyJson:
                               _copyCollectionJson(context);
+                            case _CollectionTileAction.deleteCollection:
+                              onEditJson();
                           }
                         },
                         itemBuilder: (context) => [
@@ -619,6 +621,15 @@ class _CollectionTile extends ConsumerWidget {
                             child: _PopupMenuRow(
                               icon: Icons.copy_rounded,
                               label: 'Kopiuj JSON wyspy',
+                            ),
+                          ),
+                          const PopupMenuDivider(),
+                          const PopupMenuItem(
+                            value: _CollectionTileAction.deleteCollection,
+                            child: _PopupMenuRow(
+                              icon: Icons.delete_forever_rounded,
+                              label: 'Usuń listę lub audio...',
+                              color: Colors.redAccent,
                             ),
                           ),
                         ],
@@ -808,25 +819,34 @@ enum _CollectionTileAction {
   setRemoteUrl,
   editJson,
   copyJson,
+  deleteCollection,
 }
 
 class _PopupMenuRow extends StatelessWidget {
-  const _PopupMenuRow({required this.icon, required this.label});
+  const _PopupMenuRow({
+    required this.icon,
+    required this.label,
+    this.color,
+  });
 
   final IconData icon;
   final String label;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 20, color: AppTheme.textMuted),
+        Icon(icon, size: 20, color: color ?? AppTheme.textMuted),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(color: AppTheme.textLight, fontSize: 14),
+            style: TextStyle(
+              color: color ?? AppTheme.textLight,
+              fontSize: 14,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),

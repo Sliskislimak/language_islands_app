@@ -80,6 +80,13 @@ class CollectionsController extends AsyncNotifier<List<SentenceCollection>> {
     ref.invalidateSelf();
   }
 
+  Future<SentenceCollection?> clearCollectionAudio(String id) async {
+    final repo = ref.read(collectionRepositoryProvider);
+    final updated = await repo.clearCollectionAudio(id);
+    ref.invalidateSelf();
+    return updated;
+  }
+
   Future<void> setTranslationLanguageForCollection(
     String collectionId,
     String langCode,

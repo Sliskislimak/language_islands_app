@@ -312,11 +312,23 @@ class _ManageCollectionScreenState
               if (value == 'add') {
                 _openAddSentenceDialog(collection);
               } else if (value == 'editJson') {
-                showDialog<void>(
+                final deleted = await showDialog<bool>(
                   context: context,
                   builder: (context) =>
                       EditCollectionJsonDialog(collection: collection),
                 );
+                if (deleted == true && context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              } else if (value == 'deleteList') {
+                final deleted = await showDialog<bool>(
+                  context: context,
+                  builder: (context) =>
+                      EditCollectionJsonDialog(collection: collection),
+                );
+                if (deleted == true && context.mounted) {
+                  Navigator.of(context).pop();
+                }
               } else if (value == 'copyJson') {
                 Clipboard.setData(
                   ClipboardData(text: collection.toJsonString(pretty: true)),
@@ -369,6 +381,24 @@ class _ManageCollectionScreenState
                     ),
                     SizedBox(width: 10),
                     Text('Edytuj surowy JSON'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'deleteList',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.delete_forever_rounded,
+                      size: 20,
+                      color: Colors.redAccent,
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      'Usuń listę lub audio...',
+                      style: TextStyle(color: Colors.redAccent),
+                    ),
                   ],
                 ),
               ),

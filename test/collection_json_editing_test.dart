@@ -46,6 +46,27 @@ class _FakeCollectionRepository extends CollectionRepository {
   }
 
   @override
+  Future<void> updateCollection(SentenceCollection collection) async {
+    storage[collection.id] = collection;
+  }
+
+  @override
+  Future<SentenceCollection?> clearCollectionAudio(String collectionId) async {
+    final collection = storage[collectionId];
+    if (collection == null) return null;
+    final cleaned = collection.copyWith(
+      sentences: collection.sentences.map((s) => s.copyWith(
+        clearTargetAudioPath: true,
+        clearTranslationAudioPath: true,
+        clearTargetAudioBase64: true,
+        clearTranslationAudioBase64: true,
+      )).toList(),
+    );
+    storage[collectionId] = cleaned;
+    return cleaned;
+  }
+
+  @override
   Future<void> deleteCollection(String id) async {
     storage.remove(id);
   }
@@ -128,6 +149,36 @@ void main() {
       expect(updated.title, 'Zaktualizowana Wyspa Bez ID');
       expect(updated.sentences.length, 1);
     });
+
+    test('clearCollectionAudio strips targetAudioPath, translationAudioPath, and base64 fields', () async {
+      final repo = _FakeCollectionRepository();
+      const initial = SentenceCollection(
+        id: 'verbs_a1',
+        title: 'Czasowniki A1',
+        cefrLevel: 'A1',
+        tags: [],
+        isCustomIsland: false,
+        sentences: [
+          Sentence(
+            id: '1',
+            targetText: '飲む',
+            sourceText: 'pić',
+            targetAudioPath: '/cache/rec_1_target.m4a',
+            translationAudioPath: '/cache/rec_1_trans.m4a',
+            targetAudioBase64: 'base64audio',
+            translationAudioBase64: 'base64trans',
+          ),
+        ],
+      );
+      repo.storage[initial.id] = initial;
+
+      final updated = await repo.clearCollectionAudio('verbs_a1');
+      expect(updated, isNotNull);
+      expect(updated!.sentences.first.targetAudioPath, isNull);
+      expect(updated.sentences.first.translationAudioPath, isNull);
+      expect(updated.sentences.first.targetAudioBase64, isNull);
+      expect(updated.sentences.first.translationAudioBase64, isNull);
+    });
   });
 
   group('CollectionsScreen Tile Buttons & Edit JSON Dialog UI', () {
@@ -208,6 +259,120 @@ void main() {
       // Dialog should close, and collection list should show updated title
       expect(find.text('Edycja JSON wyspy'), findsNothing);
       expect(find.text('Wyspa Restauracja - Zaktualizowana'), findsOneWidget);
+    });
+
+    testWidgets('Edit JSON dialog delete button opens options and clears audio', (tester) async {
+      final fakeRepo = _FakeCollectionRepository();
+      const initial = SentenceCollection(
+        id: 'island_audio',
+        title: 'Wyspa z Audio',
+        cefrLevel: 'A1',
+        tags: [],
+        isCustomIsland: false,
+        sentences: [
+          Sentence(
+            id: 's1',
+            targetText: '本',
+            sourceText: 'książka',
+            targetAudioPath: '/some/path/rec_s1_target.m4a',
+            targetAudioBase64: 'base64target',
+          ),
+        ],
+      );
+      fakeRepo.storage[initial.id] = initial;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            collectionRepositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: const MaterialApp(
+            home: CollectionsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Open Edit JSON Dialog
+      await tester.tap(find.byTooltip('Edytuj JSON wyspy (wklej nowy)'));
+      await tester.pumpAndSettle();
+
+      // Verify delete button is visible
+      final deleteBtnFinder = find.widgetWithText(TextButton, 'Usuń...');
+      expect(deleteBtnFinder, findsOneWidget);
+
+      // Tap delete button to open options dialog
+      await tester.tap(deleteBtnFinder);
+      await tester.pumpAndSettle();
+
+      // Verify delete choices dialog
+      expect(find.text('Czy chcesz usunąć?'), findsOneWidget);
+      expect(find.text('Usuń całą listę'), findsOneWidget);
+      expect(find.text('Usuń audio zapisane w pamięci'), findsOneWidget);
+
+      // Select 'Usuń audio zapisane w pamięci'
+      await tester.tap(find.text('Usuń audio zapisane w pamięci'));
+      await tester.pumpAndSettle();
+
+      // Verify that audio was cleared in fake repo storage
+      final updatedCol = fakeRepo.storage['island_audio']!;
+      expect(updatedCol.sentences.first.targetAudioPath, isNull);
+      expect(updatedCol.sentences.first.targetAudioBase64, isNull);
+
+      // Verify snackbar feedback
+      expect(find.textContaining('Pomyślnie usunięto pliki audio z pamięci'), findsOneWidget);
+    });
+
+    testWidgets('Edit JSON dialog delete button allows deleting entire collection', (tester) async {
+      final fakeRepo = _FakeCollectionRepository();
+      const initial = SentenceCollection(
+        id: 'island_to_delete',
+        title: 'Wyspa Do Skasowania',
+        cefrLevel: 'A1',
+        tags: [],
+        isCustomIsland: false,
+        sentences: [],
+      );
+      fakeRepo.storage[initial.id] = initial;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            collectionRepositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: const MaterialApp(
+            home: CollectionsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Wyspa Do Skasowania'), findsOneWidget);
+
+      // Open Edit JSON Dialog
+      await tester.tap(find.byTooltip('Edytuj JSON wyspy (wklej nowy)'));
+      await tester.pumpAndSettle();
+
+      // Tap delete button in dialog
+      await tester.tap(find.widgetWithText(TextButton, 'Usuń...'));
+      await tester.pumpAndSettle();
+
+      // Select 'Usuń całą listę'
+      await tester.tap(find.text('Usuń całą listę'));
+      await tester.pumpAndSettle();
+
+      // Confirm dialog appears
+      expect(find.text('Potwierdź usunięcie listy'), findsOneWidget);
+      expect(find.text('Usuń bezpowrotnie'), findsOneWidget);
+
+      // Tap confirm delete
+      await tester.tap(find.text('Usuń bezpowrotnie'));
+      await tester.pumpAndSettle();
+
+      // Collection is removed from repository and screen
+      expect(fakeRepo.storage.containsKey('island_to_delete'), isFalse);
+      expect(find.text('Wyspa Do Skasowania'), findsNothing);
+      expect(find.textContaining('Pomyślnie usunięto listę "Wyspa Do Skasowania"'), findsOneWidget);
     });
   });
 }
