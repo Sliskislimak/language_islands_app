@@ -50,20 +50,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/friend-guide-website' || github.ref == 'refs/heads/feat/friend-shared-list-sync'
         with:
-          tag_name: v1.3.0
-          name: "Language Islands v1.3.0 (Release)"
+          tag_name: v1.4.0
+          name: "Language Islands v1.4.0 (Release)"
           draft: false
           prerelease: false
           body: |
-            ## 🌸 Language Islands v1.3.0 (iOS IPA)
+            ## 🌸 Language Islands v1.4.0 (iOS IPA)
 
             Dedicated language exchange app for **Koharu & Jakub**.
 
-            ### 🗑️ Highlights (v1.3.0 - Usuwanie list & Czyszczenie pamięci audio)
-            - 🗑️ **Bezpieczne usuwanie list**: Opcja usuwania niepotrzebnych lub błędnie utworzonych list fiszek z podwójnym potwierdzeniem
-            - 🧹 **Czyszczenie pamięci audio i naprawa przesunięć JSON**: Dedykowana funkcja usuwania plików audio z pamięci podręcznej i nagrań z dysku oraz wyczyszczenia ścieżek audio po edycji JSON
+            ### 🇷🇺 Highlights (v1.4.0 - Język rosyjski & Interaktywna tablica cyrylicy)
+            - 🇷🇺 **Obsługa języka rosyjskiego (`ru`)**: Rosyjski lektor Microsoft Edge Neural TTS (`ru-RU-SvetlanaNeural`) dostępny w wyborze języka docelowego i tłumaczeń
+            - 🔤 **Interaktywna tablica cyrylicy (Cyrylica · Азбука)**: Nowa zakładka na dolnym pasku z pełnym zestawem 33 liter alfabetu rosyjskiego (10 samogłosek, 21 spółgłosek, 2 znaki specjalne), polską wymową, wskazówkami oraz odsłuchem wymowy litery i przykładowego słowa
+            - 🗑️ **Wszystkie funkcje v1.3.0**: Bezpieczne usuwanie list i czyszczenie pamięci audio / naprawa przesunięć JSON
             - 🎙️ **Wszystkie funkcje v1.2.0**: Dwujęzyczne nagrywanie głosu (Koharu & Jakub), synchronizacja Gist Base64, priorytet żywego głosu
-            - ➕ **Wszystkie funkcje v1.1.0**: Zarządzanie pojedynczymi fiszkami, tryb japoński i polski, SideStore support
 
             ### 📱 How to Install via SideStore
             1. Download `Runner.ipa` on your iPhone in Safari.

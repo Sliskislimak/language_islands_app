@@ -741,6 +741,7 @@ class _TargetLanguageSelector extends StatelessWidget {
       AppLanguage.japanese,
       AppLanguage.polish,
       AppLanguage.english,
+      AppLanguage.russian,
     ];
 
     return Wrap(

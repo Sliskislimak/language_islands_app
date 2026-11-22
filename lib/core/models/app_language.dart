@@ -95,6 +95,15 @@ class AppLanguage {
       voiceDisplayName: 'Polina',
     ),
     AppLanguage(
+      code: 'ru',
+      name: 'Rosyjski',
+      nativeName: 'Русский',
+      flagEmoji: '🇷🇺',
+      voiceName: 'ru-RU-SvetlanaNeural',
+      locale: 'ru-RU',
+      voiceDisplayName: 'Svetlana',
+    ),
+    AppLanguage(
       code: 'zh',
       name: 'Chiński',
       nativeName: '中文',
@@ -114,7 +123,7 @@ class AppLanguage {
     ),
   ];
 
-  static const List<String> defaultUnlockedCodes = ['en', 'pl', 'ja'];
+  static const List<String> defaultUnlockedCodes = ['en', 'pl', 'ja', 'ru'];
 
   static AppLanguage? fromCode(String? code) {
     if (code == null || code.trim().isEmpty) return null;
@@ -133,6 +142,7 @@ class AppLanguage {
   static AppLanguage get polish => fromCode('pl')!;
   static AppLanguage get japanese => fromCode('ja')!;
   static AppLanguage get english => fromCode('en')!;
+  static AppLanguage get russian => fromCode('ru')!;
 
   @override
   bool operator ==(Object other) =>

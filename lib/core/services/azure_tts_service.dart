@@ -70,10 +70,37 @@ class AzureTtsService {
 
   /// Synthesizes standalone Japanese text (e.g. Kana character, Kanji compound word)
   /// using free Edge Neural TTS and caches to disk.
-  Future<String?> synthesizeJapaneseText(String text, {String? key}) async {
+  Future<String?> synthesizeJapaneseText(String text, {String? key}) {
+    return synthesizeText(
+      text,
+      voiceName: ApiConstants.japaneseVoiceName,
+      cachePrefix: 'jp',
+      key: key,
+    );
+  }
+
+  /// Synthesizes standalone Russian text (e.g. Cyrillic letter, example word)
+  /// using free Edge Neural TTS and caches to disk.
+  Future<String?> synthesizeRussianText(String text, {String? key}) {
+    return synthesizeText(
+      text,
+      voiceName: AppLanguage.russian.voiceName,
+      cachePrefix: 'ru',
+      key: key,
+    );
+  }
+
+  /// Synthesizes standalone text using the given Edge Neural [voiceName] and caches to disk.
+  Future<String?> synthesizeText(
+    String text, {
+    required String voiceName,
+    String cachePrefix = 'tts',
+    String? key,
+  }) async {
     final safeKey = (key ?? text).replaceAll(RegExp(r'[^\w\-.]'), '_');
     final docs = await getApplicationDocumentsDirectory();
-    final cacheFile = File(p.join(docs.path, 'audio_cache', 'jp_$safeKey.mp3'));
+    final cacheFile =
+        File(p.join(docs.path, 'audio_cache', '${cachePrefix}_$safeKey.mp3'));
     if (await cacheFile.exists()) {
       return cacheFile.path;
     }
@@ -81,7 +108,7 @@ class AzureTtsService {
     try {
       final bytes = await EdgeTtsClient.synthesize(
         text: text,
-        voice: ApiConstants.japaneseVoiceName,
+        voice: voiceName,
       );
       if (bytes.isNotEmpty) {
         await cacheFile.parent.create(recursive: true);
@@ -89,7 +116,7 @@ class AzureTtsService {
         return cacheFile.path;
       }
     } catch (e) {
-      debugPrint('synthesizeJapaneseText failed for "$text": $e');
+      debugPrint('synthesizeText failed for "$text" ($voiceName): $e');
     }
     return null;
   }

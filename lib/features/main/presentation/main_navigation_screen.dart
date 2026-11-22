@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:language_islands_app/core/theme/app_theme.dart';
 import 'package:language_islands_app/features/collections/presentation/collections_screen.dart';
+import 'package:language_islands_app/features/cyrillic/presentation/screens/cyrillic_screen.dart';
 import 'package:language_islands_app/features/hiragana/presentation/screens/hiragana_screen.dart';
 import 'package:language_islands_app/features/kanji/presentation/screens/kanji_screen.dart';
 
@@ -29,7 +30,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       body: switch (_currentIndex) {
         0 => const CollectionsScreen(),
         1 => const HiraganaScreen(),
-        2 => const KanjiScreen(),
+        2 => const CyrillicScreen(),
+        3 => const KanjiScreen(),
         _ => const CollectionsScreen(),
       },
       bottomNavigationBar: Container(
@@ -58,6 +60,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               icon: Icon(Icons.translate_rounded, color: AppTheme.textMuted),
               selectedIcon: Icon(Icons.translate_rounded, color: AppTheme.sakuraPrimary),
               label: 'Hiragana',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.abc_rounded, color: AppTheme.textMuted),
+              selectedIcon: Icon(Icons.abc_rounded, color: AppTheme.sakuraPrimary),
+              label: 'Cyrylica',
             ),
             NavigationDestination(
               icon: Icon(Icons.auto_stories_rounded, color: AppTheme.textMuted),
